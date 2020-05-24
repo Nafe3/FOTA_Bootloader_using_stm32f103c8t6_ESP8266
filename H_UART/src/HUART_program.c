@@ -8,9 +8,9 @@
 
 #include "HUART_interface.h"
 #include "UART_interface.h"
-#include "GPIO_interface.h"
-#include "RCC_interface.h"
-#include "NVIC_interface.h"
+#include "GPIO.h"
+#include "RCC.h"
+#include "NVIC.h"
 
 // Sample pragmas to cope with warnings. Please note the related line at
 // the end of this function, used to pop the compiler diagnostics status.
@@ -43,44 +43,77 @@ u8 HUART_u8Init(u32 Copy_u32PeripheralNumber, u32 Copy_u32Baudrate, u32 Copy_u32
 
 
 		/*Enable Interrupt of UART peripheral from NVIC Driver*/
-		NVIC_u8EnableInterrupt(37);
+		NVIC_u8EnableEXTI(37);
 
 		/*Enable Clock on UART Peripheral and on Port from RCC Driver*/
-		RCC_voidEnablePeripheralClock(RCC_PERIPHERALS_PORTA);
-		RCC_voidEnablePeripheralClock(RCC_PERIPHERALS_USART1);
-
-
+		RCC_voidEnablePeripheral(APB2,RCC_APB2ENR_IOPAEN,ON);
+		RCC_voidEnablePeripheral(APB2,RCC_APB2ENR_USART1EN,ON);
 
 		/*Create object for TX and RX pins and initialize them from GPIO Driver*/
-		GPIO_t TX = {GPIO_PORT_A, GPIO_PIN9, GPIO_MODE_OUTPUT_AF_PUSHPULL, GPIO_SPEED_OUTPUT_2};
-		GPIO_t RX = {GPIO_PORT_A, GPIO_PIN10,GPIO_MODE_INPUT_PULL , GPIO_SPEED_OUTPUT_2};
+		//GPIO_t TX = {GPIO_PORT_A, GPIO_PIN9, GPIO_MODE_OUTPUT_AF_PUSHPULL, GPIO_SPEED_OUTPUT_2};
+		//GPIO_t RX = {GPIO_PORT_A, GPIO_PIN10,GPIO_MODE_INPUT_PULL , GPIO_SPEED_OUTPUT_2};
+		GPIO_Pin_t TX ;
+		TX.port = PORTA;
+		TX.pin  = GPIO_PIN_9;
+		TX.mode = GPIO_MODE_OUTPUT_ALTERNATE_FUNCTION_PUSH_PULL;
+		TX.speed= GPIO_OUTPUT_SPEED_10MHz;
 
-		GPIO_voidConfigurePin(&RX);
-		GPIO_voidConfigurePin(&TX);
+		GPIO_Pin_t RX ;
+		RX.port = PORTA;
+		RX.pin  = GPIO_PIN_10;
+		RX.mode = GPIO_MODE_INPUT_PULLUP_PULLDOWN;
+		RX.speed= GPIO_OUTPUT_SPEED_10MHz;
+
+		GPIO_Init(&TX);
+		GPIO_Init(&RX);
+		// GPIO_voidConfigurePin(&RX);
+		// GPIO_voidConfigurePin(&TX);
 	}
 	else if (Copy_u32PeripheralNumber == UART_USART2)
 	{
 		/*Enable Clock on UART Peripheral and on Port*/
-		RCC_voidEnablePeripheralClock(RCC_PERIPHERALS_PORTA);
-		RCC_voidEnablePeripheralClock(RCC_PERIPHERALS_USART2);
-		/*Create object for TX and RX pins and initialize them*/
-		GPIO_t TX = {GPIO_PORT_A, GPIO_PIN2, GPIO_MODE_INPUT_PULL, GPIO_SPEED_OUTPUT_10};
-		GPIO_t RX = {GPIO_PORT_A, GPIO_PIN3, GPIO_MODE_OUTPUT_AF_PUSHPULL, GPIO_SPEED_OUTPUT_10};
+		RCC_voidEnablePeripheral(APB2,RCC_APB2ENR_IOPAEN,ON);
+		RCC_voidEnablePeripheral(APB1,RCC_APB1ENR_USART2EN,ON);
 
-		GPIO_voidConfigurePin(&RX);
-		GPIO_voidConfigurePin(&TX);
+		/*Create object for TX and RX pins and initialize them*/
+		//GPIO_t TX = {GPIO_PORT_A, GPIO_PIN2, GPIO_MODE_INPUT_PULL, GPIO_SPEED_OUTPUT_10};
+		//GPIO_t RX = {GPIO_PORT_A, GPIO_PIN3, GPIO_MODE_OUTPUT_AF_PUSHPULL, GPIO_SPEED_OUTPUT_10};
+		GPIO_Pin_t TX ;
+		TX.port = PORTA;
+		TX.pin  = GPIO_PIN_2;
+		TX.mode = GPIO_MODE_OUTPUT_ALTERNATE_FUNCTION_PUSH_PULL;
+		TX.speed= GPIO_OUTPUT_SPEED_10MHz;
+
+		GPIO_Pin_t RX ;
+		RX.port = PORTA;
+		RX.pin  = GPIO_PIN_3;
+		RX.mode = GPIO_MODE_INPUT_PULLUP_PULLDOWN;
+		RX.speed= GPIO_OUTPUT_SPEED_10MHz;
+
+		GPIO_Init(&RX);
+		GPIO_Init(&TX);
 	}
 	else if (Copy_u32PeripheralNumber == UART_USART3)
 	{
 		/*Enable Clock on UART Peripheral and on Port*/
-		RCC_voidEnablePeripheralClock(RCC_PERIPHERALS_PORTB);
-		RCC_voidEnablePeripheralClock(RCC_PERIPHERALS_USART3);
-		/*Create object for TX and RX pins and initialize them*/
-		GPIO_t TX = {GPIO_PORT_B, GPIO_PIN10, GPIO_MODE_INPUT_PULL, GPIO_SPEED_OUTPUT_10};
-		GPIO_t RX = {GPIO_PORT_B, GPIO_PIN11, GPIO_MODE_OUTPUT_AF_PUSHPULL, GPIO_SPEED_OUTPUT_10};
+		RCC_voidEnablePeripheral(APB2,RCC_APB2ENR_IOPBEN,ON);
+		RCC_voidEnablePeripheral(APB1,RCC_APB1ENR_USART3EN,ON);
 
-		GPIO_voidConfigurePin(&RX);
-		GPIO_voidConfigurePin(&TX);
+		/*Create object for TX and RX pins and initialize them*/
+		GPIO_Pin_t TX ;
+		TX.port = PORTB;
+		TX.pin  = GPIO_PIN_10;
+		TX.mode = GPIO_MODE_OUTPUT_ALTERNATE_FUNCTION_PUSH_PULL;
+		TX.speed= GPIO_OUTPUT_SPEED_10MHz;
+
+		GPIO_Pin_t RX ;
+		RX.port = PORTB;
+		RX.pin  = GPIO_PIN_11;
+		RX.mode = GPIO_MODE_INPUT_PULLUP_PULLDOWN;
+		RX.speed= GPIO_OUTPUT_SPEED_10MHz;
+
+		GPIO_Init(&RX);
+		GPIO_Init(&TX);
 	}
 
 	/*Check user passed configuration parameters, if any of them is not equal to the one provided, use the default configurations which are
