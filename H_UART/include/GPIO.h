@@ -11,8 +11,7 @@
 
 
 //Standard error
-#define STATUS_OK 	0U
-#define STATUS_NOK	1U
+
 typedef struct{
 	u8 error_status;
 }std_err;
