@@ -5,7 +5,7 @@
 #define NVIC_BASE_ADDRESS 		0xE000E100
 #define NVIC_PTR				(void*)NVIC_BASE_ADDRESS
 
-#define  SCB_BASE_ADDRESS       0xE000E008
+#define  SCB_BASE_ADDRESS       0xE000ED00
 #define  SCB_AIRCR              *((volatile u32*)(SCB_BASE_ADDRESS+0x0C))
 #define  SCB_AIRCR_VECTKEY		0x05FA0000	/*SCB_AIRCR Password*/
 #define  SCB_CCR				*((volatile u32*)(SCB_BASE_ADDRESS+0x14))

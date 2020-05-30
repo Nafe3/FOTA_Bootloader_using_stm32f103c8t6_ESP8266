@@ -6,6 +6,7 @@
  */
 
 
+/*Boot-loader application functions*/
 extern void bootloader_voidUARTReadData (void);
 extern void bootloader_voidJumpToUserApp(void);
 

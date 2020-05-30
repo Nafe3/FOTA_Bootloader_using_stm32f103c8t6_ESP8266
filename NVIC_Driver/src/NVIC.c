@@ -4,7 +4,7 @@
 #define NVIC_BASE_ADDRESS 		0xE000E100
 #define NVIC_PTR				(void*)NVIC_BASE_ADDRESS
 
-#define  SCB_BASE_ADDRESS       0xE000E008
+#define  SCB_BASE_ADDRESS       0xE000ED00
 #define  SCB_AIRCR              *((volatile u32*)(SCB_BASE_ADDRESS+0x0C))
 #define  SCB_AIRCR_VECTKEY		0x05FA0000	/*SCB_AIRCR Password*/
 #define  SCB_CCR				*((volatile u32*)(SCB_BASE_ADDRESS+0x14))
@@ -171,10 +171,7 @@ u8 NVIC_u8GetPriority(u8 inum)
 STD_ERR NVIC_u8SetGrpBits 		(u32 PRIGROUP_MASK)
 {
 	STD_ERR err_status = STD_TYPES_ERROR_OK;
-	SCB_AIRCR = SCB_AIRCR_VECTKEY; /*Writing the password to enable writing PRIGROUP configurations*/
-
-	SCB_AIRCR = (8 << PRIGROUP_MASK);
-
+	SCB_AIRCR = (SCB_AIRCR_VECTKEY|(PRIGROUP_MASK << 8)); /*Writing the password to enable writing PRIGROUP configurations*/
 	return err_status;
 }
 

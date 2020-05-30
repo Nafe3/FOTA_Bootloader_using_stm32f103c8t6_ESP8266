@@ -50,4 +50,12 @@ void main(void)
 	NVIC_u8EnableEXTI(6) ;
 	NVIC_u8SetPendFlag(6);
 
+	NVIC_u8SetGrpBits(0);
+	NVIC_u8SetGrpBits(1);
+	NVIC_u8SetGrpBits(2);
+	NVIC_u8SetGrpBits(3);
+	NVIC_u8SetGrpBits(4);
+	NVIC_u8SetGrpBits(5);
+	NVIC_u8SetGrpBits(6);
+	NVIC_u8SetGrpBits(7);
 }

@@ -8,6 +8,7 @@
 #include "STD_TYPES.h"
 #include "Trace.h"
 #include "UART_interface.h"
+#include "Delay_interface.h"
 
 // Sample pragmas to cope with warnings. Please note the related line at
 // the end of this function, used to pop the compiler diagnostics status.
@@ -101,15 +102,21 @@ u8 UART_u8Configure (u32 Copy_u32BaseAddress, u32 Copy_u32Baudrate, u32 Copy_u32
 void UART_voidSend(u8 *Copy_u8Buffer, u8 Copy_u8Size)
 {
 
-
+u32 i;
 	/*Save the passed parameters in the txBuffer object*/
 	txBuffer.dataArray = Copy_u8Buffer;
 	txBuffer.size = Copy_u8Size;
 	/*Send the first char of the data array and increment the current position. And the rest will be handled by the interrupt*/
 	/*Clear Current value in register*/
-	*((u32*)(UART_BaseAddress+UART_DR)) = 0x0;
-	*((u32*)(UART_BaseAddress+UART_DR)) = txBuffer.dataArray[0];
+	//*((u32*)(UART_BaseAddress+UART_DR)) = 0x0;
+	//*((u32*)(UART_BaseAddress+UART_DR)) = txBuffer.dataArray[0];
 
+	for(i=0;i<txBuffer.size;i++)
+		{
+			*((u32*)(UART_BaseAddress+UART_DR)) = 0x0;
+			*((u32*)(UART_BaseAddress+UART_DR)) = txBuffer.dataArray[i];
+			delay_ms(10);
+		}
 			//txBuffer.dataArray[0];
 
 	txBuffer.currentPosition++;

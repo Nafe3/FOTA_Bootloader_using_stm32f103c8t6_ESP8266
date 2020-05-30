@@ -11,7 +11,29 @@
 #include "CRC.h"
 
 
-static CRC_TypeDef* CRC;
+#define CRC_BASE_ADDRESS 					0x40023400
+#define CRC_CR								*((volatile u32*)(CRC_BASE_ADDRESS+0x08))
+#define CRC									((CRC_TypeDef*)(CRC_BASE_ADDRESS))
+
+/******************************************************************************/
+/*                                                                            */
+/*                          CRC calculation unit                              */
+/*                                                                            */
+/******************************************************************************/
+
+/*******************  Bit definition for CRC_DR register  *********************/
+#define  CRC_DR_DR                           ((u32)0xFFFFFFFF) /*!< Data register bits */
+
+
+/*******************  Bit definition for CRC_IDR register  ********************/
+#define  CRC_IDR_IDR                         ((u8)0xFF)        /*!< General-purpose 8-bit data register bits */
+
+
+/********************  Bit definition for CRC_CR register  ********************/
+#define  CRC_CR_RESET                        ((u8)0x01)        /*!< RESET bit */
+
+
+
 /**
   * @brief  Resets the CRC Data register (DR).
   * @param  None
@@ -20,7 +42,8 @@ static CRC_TypeDef* CRC;
 void CRC_ResetDR(void)
 {
   /* Reset CRC generator */
-  CRC->CR = CRC_CR_RESET;
+  //CRC->CR = CRC_CR_RESET;
+  CRC_CR = CRC_CR_RESET;
 }
 
 /**
@@ -28,7 +51,7 @@ void CRC_ResetDR(void)
   * @param  Data: data word(32-bit) to compute its CRC
   * @retval 32-bit CRC
   */
-uint32_t CRC_CalcCRC(uint32_t Data)
+u32 CRC_CalcCRC(u32 Data)
 {
   CRC->DR = Data;
 
@@ -41,9 +64,9 @@ uint32_t CRC_CalcCRC(uint32_t Data)
   * @param  BufferLength: length of the buffer to be computed
   * @retval 32-bit CRC
   */
-uint32_t CRC_CalcBlockCRC(uint32_t pBuffer[], uint32_t BufferLength)
+u32 CRC_CalcBlockCRC(u32 pBuffer[], u32 BufferLength)
 {
-  uint32_t index = 0;
+  u32 index = 0;
 
   for(index = 0; index < BufferLength; index++)
   {
@@ -57,7 +80,7 @@ uint32_t CRC_CalcBlockCRC(uint32_t pBuffer[], uint32_t BufferLength)
   * @param  None
   * @retval 32-bit CRC
   */
-uint32_t CRC_GetCRC(void)
+u32 CRC_GetCRC(void)
 {
   return (CRC->DR);
 }
@@ -67,7 +90,7 @@ uint32_t CRC_GetCRC(void)
   * @param  IDValue: 8-bit value to be stored in the ID register
   * @retval None
   */
-void CRC_SetIDRegister(uint8_t IDValue)
+void CRC_SetIDRegister(u8 IDValue)
 {
   CRC->IDR = IDValue;
 }
@@ -77,7 +100,7 @@ void CRC_SetIDRegister(uint8_t IDValue)
   * @param  None
   * @retval 8-bit value of the ID register
   */
-uint8_t CRC_GetIDRegister(void)
+u8 CRC_GetIDRegister(void)
 {
   return (CRC->IDR);
 }

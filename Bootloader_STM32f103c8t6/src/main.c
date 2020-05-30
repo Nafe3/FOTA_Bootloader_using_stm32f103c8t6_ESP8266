@@ -1,33 +1,33 @@
-#include "RCC.h"
+#include "STD_TYPES.h"
 #include "GPIO.h"
-#include "Bootloader.h"
+#include "RCC_interface.h"
+
 #include "HUART_interface.h"
+#include "Bootloader.h"
+#include "Debug.h"
 
-void func(void)
+/*RX Callback Function*/
+void rxDone(void)
 {
-
+	trace_printf("Receiving Done");
 }
-void func2(void)
-{
-
-}
-
 
 int main(void)
 {
 	u8 Bootloader_Request_button_State;
 
+	RCC_f32GetPLLMultiplierValue();
+	RCC_voidSetClockStatus(RCC_ENABLE_HSE);
+	RCC_voidSWSelectClock(RCC_SW_HSE);
+	RCC_voidEnablePeripheralClock(RCC_PERIPHERALS_PORTB); //Activate clock for button port
+	RCC_voidEnablePeripheralClock(RCC_PERIPHERALS_CRC);   //Activate clock for CRC peripheral
+	RCC_voidEnablePeripheralClock(RCC_PERIPHERALS_FLITF); //Activate clock for Flash driver
 
-	RCC_voidClkControl(HSE,ON);
+	HUART_u8Init(HUART_USART1, 115200, UART_STOP_BIT1, UART_PARITY_DISABLED);
+	HUART_u8Init(HUART_USART2, 115200, UART_STOP_BIT1, UART_PARITY_DISABLED);
 
-	HUART_u8Init(UART_USART1,UART_BAUDRATE_115200,UART_STOP_BIT1,UART_PARITY_DISABLED);
-	HUART_u8SetTXCallBack(func);
-	HUART_u8SetRXCallBack(func2);
-	HUART_u8EnableInterrupt(UART_INTERRUPT_TX_COMPLETE, UART_INTERRUPT_ENABLE);
-
-
-	RCC_voidEnablePeripheral(APB2,RCC_APB2ENR_IOPBEN,ON);
-
+	HUART_u8EnableInterrupt(HUART_USART2,UART_INTERRUPT_RX_NOT_EMPTY,UART_INTERRUPT_ENABLE);
+	HUART_u8SetRXCallBack(rxDone);
 	GPIO_Pin_t Bootloader_Request_button;
 	Bootloader_Request_button.port = PORTB;
 	Bootloader_Request_button.mode = GPIO_MODE_INPUT_PULLUP_PULLDOWN;
@@ -35,7 +35,7 @@ int main(void)
 	Bootloader_Request_button.speed= GPIO_INPUT_MODE_RESET_STATE;
 
 	GPIO_Init(&Bootloader_Request_button);
-	GPIO_Pin_Write(&Bootloader_Request_button,ON);
+	GPIO_Pin_Write(&Bootloader_Request_button,HIGH);
 
 	GPIO_Pin_Read(&Bootloader_Request_button,&Bootloader_Request_button_State);
 
