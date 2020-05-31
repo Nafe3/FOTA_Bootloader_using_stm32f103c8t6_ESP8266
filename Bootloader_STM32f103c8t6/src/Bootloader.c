@@ -24,7 +24,7 @@
 #define  FLASH_USR_APP_BASE_ADDRESS		0x08008000
 
 #define BL_RX_LEN 						200
-u8      bl_rx_buffer[BL_RX_LEN]={0};
+u8    bl_rx_buffer[BL_RX_LEN]={'0'};
 
 /*Boot-loader supported commands*/
 #define BL_GET_VER						0X51	/*This command is used to read the boot-loader version from the MCU*/
@@ -92,16 +92,28 @@ u8   supported_commands[] = {
 
 /******************* Implementation of Boot-loader application functions **********************/
 u8 i=0;
+
+/*This iterator will be used for initializing the data array*/
+u16 iterator=0;
 /*Reads the command packet which comes from the host application*/
 extern void bootloader_voidUARTReadData (void)
 {
-	u8 rcv_len = 0;
+
+	u8 rcv_len = '0';
+	/*This variable will be used to prevent from continuing until it receives all data*/
+	u8 receiveFlag='0';
 
 	//u8 var= 0x05;
 	printmsg1("BL_DEBUG_MSG: Button is pressed .. going to BL mode\r\n");
 	while(1)
 	{
-
+//		/*Reinitialize the rcv_len Value to zero at every start, this is to work well with the while loop inside*/
+//		rcv_len = '0';
+//		/*Reinitialize data buffer to zeros again*/
+//		for (iterator=0; iterator<BL_RX_LEN ; i++)
+//		{
+//			bl_rx_buffer[iterator]='0';
+//		}
         //memset(bl_rx_buffer,0,200);
 		/*here we will read and and decode the commands coming from host
 		 * Frist read only one byte from the host, which is the "length" field of the command packet*/
@@ -112,8 +124,26 @@ extern void bootloader_voidUARTReadData (void)
 		//HUART_u8ReceiveSync(HUART_USART2,&bl_rx_buffer[1],rcv_len);
 
 		HUART_u8ReceiveAsync(HUART_USART2,bl_rx_buffer,1);
-		rcv_len = bl_rx_buffer[0];
-        HUART_u8ReceiveAsync(HUART_USART2,&bl_rx_buffer[1],rcv_len);
+		/*If we dont make this while loop, the system will never add the bl_rx_buffer value to rcv_len*/
+		while (rcv_len =='0')
+		{
+			rcv_len = bl_rx_buffer[0];
+		}
+		printmsg1("rcv_len = %d\r\n", rcv_len);
+
+        HUART_u8ReceiveAsync(HUART_USART2,&bl_rx_buffer[0],rcv_len+1);
+        /*Wait until the last character has been received through a while loop*/
+        /*We use this while loop to make sure we have received all of the data till the last byte, and to prevent the code from advancing
+         * before finishing*/
+        while (receiveFlag=='0')
+        {
+        	printmsg1("We are waiting\r\n");
+        	/*We made this if condition because for some reason, the check didn't work inside while loop condition*/
+        	if (bl_rx_buffer[rcv_len]!=0)
+        	{
+        		receiveFlag=1;
+        	}
+        }
 
 		/*****************************FOR DEBUGGING*****************************/
 		//Array that should be received from BL_GET_VER

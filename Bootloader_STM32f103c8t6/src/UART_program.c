@@ -25,6 +25,7 @@ static u32 UART_BaseAddress = NULL;
 #define STATUS_BUSY				(u8)2
 #define STATUS_IDLE				(u8)3
 
+extern receiveFlag;
 /*This struct will be used to create objects that will hold the data buffer and its status to be handled by the IRQ
  * The IRQ will contain a for loop that will keep looping on the array till the current position matches the size */
 typedef struct{
@@ -137,12 +138,12 @@ u8 UART_u8ReceiveAsync(u32 Copy_u32UARTAddress, u8 *Copy_u8Buffer, u8 Copy_u8Siz
 			if (((*((u32*)(Copy_u32UARTAddress+UART_CR1)))&UART_PARITY_EVEN_MASK) || ((*((u32*)(Copy_u32UARTAddress+UART_CR1)))&UART_PARITY_EVEN_MASK))
 			{
 				rxBuffer.dataArray[0] = (*((u32*)(Copy_u32UARTAddress+UART_DR)) & UART_PARITY_CANCELLATION_MASK);
-				trace_printf("%d\n", rxBuffer.dataArray[0]);
+				//trace_printf("%c\n", rxBuffer.dataArray[0]);
 			}
 			else
 			{
 				rxBuffer.dataArray[0] = (*((u32*)(Copy_u32UARTAddress+UART_DR)));
-				trace_printf("%d\n", rxBuffer.dataArray[0]);
+				//trace_printf("%c\n", rxBuffer.dataArray[0]);
 			}
 			/*Increment position*/
 			rxBuffer.currentPosition++;
@@ -150,6 +151,7 @@ u8 UART_u8ReceiveAsync(u32 Copy_u32UARTAddress, u8 *Copy_u8Buffer, u8 Copy_u8Siz
 		/*Change flag status to busy so that any new receive request is halted till the end*/
 		rxBuffer.bufferState = STATUS_BUSY;
 		Local_u8Status = STATUS_OK;
+		receiveFlag = 1;
 	}
 
 	/*Put current UART address in static variable so that it can be used by interrupt*/
@@ -213,12 +215,12 @@ u8 UART_u8ReceiveSync(u32 Copy_u32UARTAddress, u8 *Copy_u8Buffer, u8 Copy_u8Size
 		if (((*((u32*)(Copy_u32UARTAddress+UART_CR1)))&UART_PARITY_EVEN_MASK) || ((*((u32*)(Copy_u32UARTAddress+UART_CR1)))&UART_PARITY_EVEN_MASK))
 		{
 			rxBuffer.dataArray[rxBuffer.currentPosition] = (*((u32*)(Copy_u32UARTAddress+UART_DR)) & UART_PARITY_CANCELLATION_MASK);
-			//trace_printf("%d\n", rxBuffer.dataArray[rxBuffer.currentPosition]);
+			//trace_printf("%c\n", rxBuffer.dataArray[rxBuffer.currentPosition]);
 		}
 		else
 		{
 			rxBuffer.dataArray[rxBuffer.currentPosition] = (*((u32*)(Copy_u32UARTAddress+UART_DR)));
-			//trace_printf("%d\n", rxBuffer.dataArray[rxBuffer.currentPosition]);
+			//trace_printf("%c\n", rxBuffer.dataArray[rxBuffer.currentPosition]);
 		}
 		/*Increment position*/
 		rxBuffer.currentPosition++;
@@ -295,7 +297,7 @@ void USART1_IRQHandler(void) {
 				if (Local_u8DRValue != 0)
 				{
 					rxBuffer.dataArray[rxBuffer.currentPosition] = Local_u8DRValue;
-					trace_printf("%d\n", rxBuffer.dataArray[rxBuffer.currentPosition]);
+					//trace_printf("%d\n", rxBuffer.dataArray[rxBuffer.currentPosition]);
 					/*Increment position we are currently pointing to in the array*/
 					rxBuffer.currentPosition++;
 				}
