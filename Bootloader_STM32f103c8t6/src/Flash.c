@@ -18,15 +18,36 @@
 #define FLASH_AR                            *((volatile u32*)(FLASH_INTERFACE_BASE_ADDRESS+0x014))/**/
 #define FLASH_OBR                           *((volatile u32*)(FLASH_INTERFACE_BASE_ADDRESS+0x01C))/**/
 #define FLASH_WRPR                          *((volatile u32*)(FLASH_INTERFACE_BASE_ADDRESS+0x020))/**/
+/*Option bytes addresses*/
+#define OPT_1_RDP_USR						*((volatile u32*)0x1FFFF800)
+#define OPT_2_DAT0_DAT1                     *((volatile u32*)0x1FFFF804)
+#define OPT_3_WRP0_WRP1                     *((volatile u32*)0x1FFFF808)
+#define OPT_4_WRP2_WRP3                     *((volatile u32*)0x1FFFF80C)
 
 
+/*Option bytes masks*/
+#define OPT_RDP								0x000000FF
+#define OPT_nRDP							0x0000FF00
+#define OPT_USR								0x00FF0000
+#define OPT_nUSR							0xFF000000
+#define OPT_DAT0							0x000000FF
+#define OPT_nDAT0                           0x0000FF00
+#define OPT_DAT1                            0x00FF0000
+#define OPT_nDAT1                           0xFF000000
+#define OPT_WRP0							0x000000FF
+#define OPT_nWRP0                           0x0000FF00
+#define OPT_WRP1                            0x00FF0000
+#define OPT_nWRP1                           0xFF000000
+#define OPT_WRP2							0x000000FF
+#define OPT_nWRP2                           0x0000FF00
+#define OPT_WRP3                            0x00FF0000
+#define OPT_nWRP3                           0xFF000000
 /*Bit definitions for flash memory interface registers*/
 /*FLASH_ACR*/
 #define FLASH_ACR_LATENCY					0x00000007
 #define FLASH_ACR_HLFCYA					0x00000008 /*Flash half cycle access enable*/
 #define FLASH_ACR_PRFTBE					0x00000010 /*Prefetch buffer enable*/
 #define FLASH_ACR_PRFTBS					0x00000020 /*Prefetch buffer status*/
-
 
 /*FLASH_SR*/
 #define FLASH_SR_BSY						0x00000001 /*Busy*/
@@ -47,6 +68,7 @@
 #define FLASH_CR_EOPIE						0x00000800 /*End of operation interrupt enable*/
 
 /*Unlock keys*/
+#define RDPRT 0x00A5
 #define KEY1  0x45670123
 #define KEY2  0xCDEF89AB
 
@@ -68,12 +90,12 @@ extern void Flash_voidUnlock      (void)
 /*Writing 32bit (4 bytes) to a selected flash memory address*/
 /*
 The main Flash memory programming sequence in standard mode is as follows:
-● Check that no main Flash memory operation is ongoing by checking the BSY bit in the
+â—� Check that no main Flash memory operation is ongoing by checking the BSY bit in the
   FLASH_SR register.
-● Set the PG bit in the FLASH_CR register.
-● Perform the data write (half-word) at the desired address.
-● Wait for the BSY bit to be reset.
-● Read the programmed value and verify.
+â—� Set the PG bit in the FLASH_CR register.
+â—� Perform the data write (half-word) at the desired address.
+â—� Wait for the BSY bit to be reset.
+â—� Read the programmed value and verify.
 */
 extern void Flash_voidWriteWord   (void* destAddress, u32 data)
 {
@@ -111,13 +133,13 @@ extern void Flash_voidWriteProgram(void* srcAddress, void* destAddress, u8 numbe
 /*Erasing a page (1KB) at flash memory address*/
 /*
 the procedure below should be followed:
-● Check that no Flash memory operation is ongoing by checking the BSY bit in the
+â—� Check that no Flash memory operation is ongoing by checking the BSY bit in the
 FLASH_CR register
-● Set the PER bit in the FLASH_CR register
-● Program the FLASH_AR register to select a page to erase
-● Set the STRT bit in the FLASH_CR register
-● Wait for the BSY bit to be reset
-● Read the erased page and verify
+â—� Set the PER bit in the FLASH_CR register
+â—� Program the FLASH_AR register to select a page to erase
+â—� Set the STRT bit in the FLASH_CR register
+â—� Wait for the BSY bit to be reset
+â—� Read the erased page and verify
 */
 extern void Flash_voidePageErase   (u32 pageAddress)
 {
@@ -132,12 +154,12 @@ extern void Flash_voidePageErase   (u32 pageAddress)
 /*
 The following sequence is
 recommended:
-● Check that no Flash memory operation is ongoing by checking the BSY bit in the
+â—� Check that no Flash memory operation is ongoing by checking the BSY bit in the
 FLASH_SR register
-● Set the MER bit in the FLASH_CR register
-● Set the STRT bit in the FLASH_CR register
-● Wait for the BSY bit to be reset
-● Read all the pages and verify
+â—� Set the MER bit in the FLASH_CR register
+â—� Set the STRT bit in the FLASH_CR register
+â—� Wait for the BSY bit to be reset
+â—� Read all the pages and verify
  */
 extern void Flash_voidMassErase    (void)
 {

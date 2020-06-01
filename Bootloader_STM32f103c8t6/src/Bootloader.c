@@ -107,6 +107,8 @@ extern void bootloader_voidUARTReadData (void)
 	printmsg1("BL_DEBUG_MSG: Button is pressed .. going to BL mode\r\n");
 	while(1)
 	{
+		rcv_len='0';
+//		bl_rx_buffer[0]='0';
 //		/*Reinitialize the rcv_len Value to zero at every start, this is to work well with the while loop inside*/
 //		rcv_len = '0';
 //		/*Reinitialize data buffer to zeros again*/
@@ -114,7 +116,7 @@ extern void bootloader_voidUARTReadData (void)
 //		{
 //			bl_rx_buffer[iterator]='0';
 //		}
-        //memset(bl_rx_buffer,0,200);
+        memset(bl_rx_buffer,'0',200);
 		/*here we will read and and decode the commands coming from host
 		 * Frist read only one byte from the host, which is the "length" field of the command packet*/
 
@@ -124,6 +126,7 @@ extern void bootloader_voidUARTReadData (void)
 		//HUART_u8ReceiveSync(HUART_USART2,&bl_rx_buffer[1],rcv_len);
 
 		HUART_u8ReceiveAsync(HUART_USART2,bl_rx_buffer,1);
+		bl_rx_buffer[0]='0';
 		/*If we dont make this while loop, the system will never add the bl_rx_buffer value to rcv_len*/
 		while (rcv_len =='0')
 		{
@@ -131,7 +134,7 @@ extern void bootloader_voidUARTReadData (void)
 		}
 		printmsg1("rcv_len = %d\r\n", rcv_len);
 
-        HUART_u8ReceiveAsync(HUART_USART2,&bl_rx_buffer[0],rcv_len+1);
+        HUART_u8ReceiveAsync(HUART_USART2,(bl_rx_buffer+1),rcv_len);
         /*Wait until the last character has been received through a while loop*/
         /*We use this while loop to make sure we have received all of the data till the last byte, and to prevent the code from advancing
          * before finishing*/
@@ -139,14 +142,14 @@ extern void bootloader_voidUARTReadData (void)
         {
         	printmsg1("We are waiting\r\n");
         	/*We made this if condition because for some reason, the check didn't work inside while loop condition*/
-        	if (bl_rx_buffer[rcv_len]!=0)
+        	if (bl_rx_buffer[rcv_len]!='0')
         	{
         		receiveFlag=1;
         	}
         }
 
 		/*****************************FOR DEBUGGING*****************************/
-		//Array that should be received from BL_GET_VER
+		// 1) Array that should be received from BL_GET_VER
 		//bl_rx_buffer[0]=	0x05;
 		//bl_rx_buffer[1]=	0x51;
 		//bl_rx_buffer[2]=	0xe7;
@@ -154,7 +157,7 @@ extern void bootloader_voidUARTReadData (void)
 		//bl_rx_buffer[4]=	0xab;
 		//bl_rx_buffer[5]=	0x7c;
 		/************************************************************************/
-		//Array that should be received from BL_GET_HELP
+		// 2) Array that should be received from BL_GET_HELP
 		//bl_rx_buffer[0]=	0x05;
 		//bl_rx_buffer[1]=	0x52;
 		//bl_rx_buffer[2]=	0x3e;
@@ -162,13 +165,92 @@ extern void bootloader_voidUARTReadData (void)
 		//bl_rx_buffer[4]=	0xe8;
 		//bl_rx_buffer[5]=	0x71;
 		/************************************************************************/
-		//Array that should be received from BL_GET_CID
+		// 3) Array that should be received from BL_GET_CID
 		//bl_rx_buffer[0]=	0x05;
 		//bl_rx_buffer[1]=	0x53;
 		//bl_rx_buffer[2]=	0x89;
 		//bl_rx_buffer[3]=	0xd2;
 		//bl_rx_buffer[4]=	0x29;
 		//bl_rx_buffer[5]=	0x75;
+		/************************************************************************/
+		// 4) Array that should be received from BL_GET_RDP_STATUS
+		//bl_rx_buffer[0]=	0x05;
+		//bl_rx_buffer[1]=	0x54;
+		//bl_rx_buffer[2]=	0x8c;
+		//bl_rx_buffer[3]=	0x82;
+		//bl_rx_buffer[4]=	0x6e;
+		//bl_rx_buffer[5]=	0x6b;
+		/************************************************************************/
+		// 5) Array that should be received from BL_GO_TO_ADDR
+		//bl_rx_buffer[0]=	0x09;
+		//bl_rx_buffer[1]=	0x55;
+		//bl_rx_buffer[2]=	0x;
+		//bl_rx_buffer[3]=	0x;
+		//bl_rx_buffer[4]=	0x;
+		//bl_rx_buffer[5]=	0x;
+        //bl_rx_buffer[6]=	0x;
+        //bl_rx_buffer[7]=	0x;
+        //bl_rx_buffer[8]=	0x;
+        //bl_rx_buffer[9]=	0x;
+        /************************************************************************/
+        // 6) Array that should be received from BL_FLASH_ERASE
+        //bl_rx_buffer[0]=	0x07;
+        //bl_rx_buffer[1]=	0x56;
+        //bl_rx_buffer[2]=	0x;
+        //bl_rx_buffer[3]=	0x;
+        //bl_rx_buffer[4]=	0x;
+        //bl_rx_buffer[5]=	0x;
+        //bl_rx_buffer[6]=	0x;
+        //bl_rx_buffer[7]=	0x;
+        /************************************************************************/
+        // 7) Array that should be received from BL_MEM_WRITE
+        //bl_rx_buffer[0]=	0x0A+X; //10+x
+        //bl_rx_buffer[1]=	0x57;
+        //bl_rx_buffer[2]=	0x;
+        //bl_rx_buffer[3]=	0x;
+        //bl_rx_buffer[4]=	0x;
+        //bl_rx_buffer[5]=	0x;
+        //bl_rx_buffer[6]=	0x;
+        //bl_rx_buffer[7]=	0x;
+        /************************************************************************/
+        // 8) Array that should be received from BL_MEM_READ
+        //bl_rx_buffer[0]=	0x0A; //10 following bytes
+        //bl_rx_buffer[1]=	0x59;
+        //bl_rx_buffer[2]=	0x;
+        //bl_rx_buffer[3]=	0x;
+        //bl_rx_buffer[4]=	0x;
+        //bl_rx_buffer[5]=	0x;
+        //bl_rx_buffer[6]=	0x;
+        //bl_rx_buffer[7]=	0x;
+        //bl_rx_buffer[8]=	0x;
+        //bl_rx_buffer[9]=	0x;
+        //bl_rx_buffer[10]=	0x;
+        /************************************************************************/
+        // 9) Array that should be received from BL_READ_SECTOR_STATUS
+        //bl_rx_buffer[0]=	0x05;
+        //bl_rx_buffer[1]=	0x5A;
+        //bl_rx_buffer[2]=	0x;
+        //bl_rx_buffer[3]=	0x;
+        //bl_rx_buffer[4]=	0x;
+        //bl_rx_buffer[5]=	0x;
+        /************************************************************************/
+        // 10) Array that should be received from BL_EN_R_W_PROTECT
+        //bl_rx_buffer[0]=	0x07;
+        //bl_rx_buffer[1]=	0x58;
+        //bl_rx_buffer[2]=	0x;
+        //bl_rx_buffer[3]=	0x;
+        //bl_rx_buffer[4]=	0x;
+        //bl_rx_buffer[5]=	0x;
+        //bl_rx_buffer[6]=	0x;
+        //bl_rx_buffer[7]=	0x;
+        /************************************************************************/
+        // 11) Array that should be received from BL_DIS_R_W_PROTECT
+        //bl_rx_buffer[0]=	0x05;
+        //bl_rx_buffer[1]=	0x5C;
+        //bl_rx_buffer[2]=	0x;
+        //bl_rx_buffer[3]=	0x;
+        //bl_rx_buffer[4]=	0x;
+        //bl_rx_buffer[5]=	0x;
 
 		HUART_u8SendSync(HUART_USART1,bl_rx_buffer,6);
 		for(i=0;i<6;i++){
@@ -359,7 +441,7 @@ void bootloader_handle_getrdp_cmd				(u8* bl_rx_buffer)
 	u32 crc_host;
 	crc_host= *((u32*)(bl_rx_buffer+command_packet-4));          /*Extract the CRC32 sent by host*/
 
-	printmsg1("BL_DEBUG_MSG: bootloader_handle_gethelp_cmd \r\n");
+	printmsg1("BL_DEBUG_MSG: bootloader_handle_getrdp_cmd \r\n");
 	// 1) verify the checksum
 	if(! bootloader_verify_crc(bl_rx_buffer, command_length_without_crc, crc_host))
 	{
@@ -611,6 +693,8 @@ void bootloader_send_ack(u8 follow_len)
 	//reply bytes
 	u8 ack_buffer[2]={BL_ACK,follow_len};
 	HUART_u8SendSync(HUART_USART2,ack_buffer,2);
+	printmsg1("Sending BL_ACK: 0x%x\r\n",ack_buffer[0]);
+	printmsg1("reply length= %d bytes\r\n",ack_buffer[1]);
 }
 void bootloader_send_nack(void)
 {

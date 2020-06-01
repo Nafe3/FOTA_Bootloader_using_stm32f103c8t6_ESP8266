@@ -292,7 +292,17 @@ void USART1_IRQHandler(void) {
 			if (rxBuffer.bufferState == STATUS_BUSY)
 			{
 				/*Save current data in next position in local variable and check whether this is really data or empty value*/
-				Local_u8DRValue = (*((u32*) (UART_BaseAddress + UART_DR ))) & UART_PARITY_CANCELLATION_MASK;
+				/*Start receiving data and increment current position variable*/
+				if (((*((u32*)(UART_BaseAddress+UART_CR1)))&UART_PARITY_EVEN_MASK) || ((*((u32*)(UART_BaseAddress+UART_CR1)))&UART_PARITY_EVEN_MASK))
+				{
+					Local_u8DRValue = (*((u32*) (UART_BaseAddress + UART_DR ))) & UART_PARITY_CANCELLATION_MASK;
+					//trace_printf("%c\n", rxBuffer.dataArray[0]);
+				}
+				else
+				{
+					Local_u8DRValue = (*((u32*) (UART_BaseAddress + UART_DR )));
+					//trace_printf("%c\n", rxBuffer.dataArray[0]);
+				}
 				/*If data in local variable now is not equal to 0 (NULL), then it is really data and put it in the array*/
 				if (Local_u8DRValue != 0)
 				{
@@ -382,7 +392,18 @@ void USART2_IRQHandler(void) {
 			/*Check that if status is busy, if so, then it means we are continuing off of an ongoing receiving operation and we should continue*/
 			if (rxBuffer.bufferState == STATUS_BUSY) {
 				/*Save current data in next position in local variable and check whether this is really data or empty value*/
-				Local_u8DRValue = (*((u32*) (UART_BaseAddress + UART_DR ))) & UART_PARITY_CANCELLATION_MASK;
+				/*Start receiving data and increment current position variable*/
+				if (((*((u32*)(UART_BaseAddress+UART_CR1)))&UART_PARITY_EVEN_MASK) || ((*((u32*)(UART_BaseAddress+UART_CR1)))&UART_PARITY_EVEN_MASK))
+				{
+					Local_u8DRValue = (*((u32*) (UART_BaseAddress + UART_DR ))) & UART_PARITY_CANCELLATION_MASK;
+					//trace_printf("%c\n", rxBuffer.dataArray[0]);
+				}
+				else
+				{
+					Local_u8DRValue = (*((u32*) (UART_BaseAddress + UART_DR )));
+					//trace_printf("%c\n", rxBuffer.dataArray[0]);
+				}
+				/*If data in local variable now is not equal to 0 (NULL), then it is really data and put it in the array*/
 				/*If data in local variable now is not equal to 0 (NULL), then it is really data and put it in the array*/
 				if (Local_u8DRValue != 0)
 				{
@@ -468,7 +489,18 @@ void USART3_IRQHandler(void) {
 			/*Check that if status is busy, if so, then it means we are continuing off of an ongoing receiving operation and we should continue*/
 			if (rxBuffer.bufferState == STATUS_BUSY) {
 				/*Save current data in next position in local variable and check whether this is really data or empty value*/
-				Local_u8DRValue = (*((u32*) (UART_BaseAddress + UART_DR ))) & UART_PARITY_CANCELLATION_MASK;
+				/*Start receiving data and increment current position variable*/
+				if (((*((u32*)(UART_BaseAddress+UART_CR1)))&UART_PARITY_EVEN_MASK) || ((*((u32*)(UART_BaseAddress+UART_CR1)))&UART_PARITY_EVEN_MASK))
+				{
+					Local_u8DRValue = (*((u32*) (UART_BaseAddress + UART_DR ))) & UART_PARITY_CANCELLATION_MASK;
+					//trace_printf("%c\n", rxBuffer.dataArray[0]);
+				}
+				else
+				{
+					Local_u8DRValue = (*((u32*) (UART_BaseAddress + UART_DR )));
+					//trace_printf("%c\n", rxBuffer.dataArray[0]);
+				}
+				/*If data in local variable now is not equal to 0 (NULL), then it is really data and put it in the array*/
 				/*If data in local variable now is not equal to 0 (NULL), then it is really data and put it in the array*/
 				if (Local_u8DRValue != 0)
 				{

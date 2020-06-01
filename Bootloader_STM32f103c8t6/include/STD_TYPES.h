@@ -19,10 +19,10 @@ typedef  long double             f96;
 #define  STD_TYPES_ERROR_OK     (ErrorStatus)1U
 #define  STD_TYPES_ERROR_NOK    (ErrorStatus)2U
 
-#define STATUS_OK			(u8)0
-#define STATUS_NOK			(u8)1
+#define STATUS_OK				(u8)0
+#define STATUS_NOK				(u8)1
 
-#define NULL ((void*)0)
+#define NULL 					((void*)0)
 
 
 #endif

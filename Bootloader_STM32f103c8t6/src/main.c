@@ -5,6 +5,7 @@
 #include "HUART_interface.h"
 #include "Bootloader.h"
 #include "Debug.h"
+#include "Trace.h"
 
 
 u8 receiveFlag=0;
@@ -45,9 +46,8 @@ int main(void)
 
 	GPIO_Pin_Read(&Bootloader_Request_button,&Bootloader_Request_button_State);
 
-//	if(Bootloader_Request_button_State) bootloader_voidJumpToUserApp(); //if the button is not pressed
-	//else
-	bootloader_voidUARTReadData();									//if the button is  pressed
+	if(Bootloader_Request_button_State) bootloader_voidJumpToUserApp(); //if the button is not pressed
+	else bootloader_voidUARTReadData();									//if the button is  pressed
 
 	//HUART_u8ReceiveAsync(HUART_USART1,Local_u8Test , 10);
 	while(1)
