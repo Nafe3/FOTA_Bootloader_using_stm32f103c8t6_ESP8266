@@ -27,7 +27,7 @@ u16 printmsg1(const char* format, ...)
   // Print to the local buffer
   ret = vsnprintf (buf, sizeof(buf), format, ap);
 
-  HUART_u8SendSync(HUART_USART1,buf,strlen(buf));
+  HUART_u8SendSync(HUART_USART1,buf,strlen(buf),1);
   va_end (ap);
   return ret;
 }
@@ -45,7 +45,7 @@ u16 printmsg2(const char* format, ...)
 	  // Print to the local buffer
 	  ret = vsnprintf (buf, sizeof(buf), format, ap);
 
-	  HUART_u8SendSync(HUART_USART2,buf,strlen(buf));
+	  HUART_u8SendSync(HUART_USART2,buf,strlen(buf),10);
 	  va_end (ap);
 	  return ret;
 }
@@ -63,7 +63,7 @@ u16 printmsg3(const char* format, ...)
 	  // Print to the local buffer
 	  ret = vsnprintf (buf, sizeof(buf), format, ap);
 
-	  HUART_u8SendSync(HUART_USART3,buf,strlen(buf));
+	  HUART_u8SendSync(HUART_USART3,buf,strlen(buf),10);
 	  va_end (ap);
 	  return ret;
 }

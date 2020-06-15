@@ -1,15 +1,6 @@
 #ifndef __GPIO_H
 #define __GPIO_H
 
-
-
-
-
-
-
-
-
-
 //Standard error
 #define STATUS_OK 	0U
 #define STATUS_NOK	1U

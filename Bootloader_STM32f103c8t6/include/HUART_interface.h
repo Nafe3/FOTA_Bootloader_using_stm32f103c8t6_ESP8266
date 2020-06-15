@@ -1,12 +1,20 @@
 /*
  * HUART_interface.h
  *
- *  Created on: May 27, 2020
+ *  Created on: June 4, 2020
  *      Author: Mahmoud Hamdy
- *      Version: 1.1
+ *      Version: 2.0
  */
- 
- /*Changelog from version 1.0:
+
+/*Changelog from version 1.1:
+ * 1) Removed Deparcated Macros (related to baudrate)
+ * 2) Changed the flags for the IRQ because there were bugs in it
+ * 3) Changed the way asynchronous Functions work by making it handle enabling interrupts instead of being handled by the user
+ * 4) Changed IRQ implementations
+ * 5) Added options for callback functions for each peripheral
+ * */
+
+/*Changelog from version 1.0:
  * 1) Added functionality to use multiple UART peripherals (and implemented their interrupt handlers)
  * 2) Added new functions to send and receive data sync
  * 3) Fixed a bug where an exception was thrown if there are no callback functions determined
@@ -17,33 +25,8 @@
 
 #include "GPIO.h"
 #include "UART_interface.h"
+
 /*Macros*/
-/*Baud Rate*/
-/*- IntegerDivider = ((Clock on Bus) / (16 * Baud rate))
-  - FractionalDivider = ((IntegerDivider - ((u32) IntegerDivider)) * 16) + 0.5
-
-  PCLK for USART1=72MHz
-  For 9600 Baudrate:
-  Integer Divider = 468.75 --> 468=0x1D4
-  Fraction = 0.75*16=12 --> C
-
-  For 115200 Baudrate:
-  Integer Divider = 39.0625 -->39=0x27
-  Fraction=.0625*16=1 --> 1
-
-  For 4800 Baudrate:
-  Integer Divider = 937.5 --> 3A9
-  Fraction= 0.5 *16=8 -->8
-
-  PCLK for USART1=8MHz
-   For 9600 Baudrate:
-  Integer Divider = 52.08 --> 52=34
-  Fraction = 0.08*16=1.28 --> C=01
-*/
-
-#define UART_BAUDRATE_4800				(u16)(0x3A98)
-#define UART_BAUDRATE_9600				(u16)(0x341)
-#define UART_BAUDRATE_115200			(u16)(0x0271)
 
 /*Stop Bits*/
 #define UART_STOP_BIT1					(u32)~(0x3000)
@@ -56,9 +39,6 @@
 
 /*Interrupt Enable Controls*/
 #define UART_INTERRUPT_PARITY_ERROR		(u32)(0x100)
-#define UART_INTERRUPT_TX_EMPTY			(u32)(0x80)
-#define UART_INTERRUPT_TX_COMPLETE		(u32)(0x40)
-#define UART_INTERRUPT_RX_NOT_EMPTY		(u32)(0x20)
 #define UART_INTERRUPT_IDLE				(u32)(0x10)
 #define UART_INTERRUPT_ENABLE			(u8)1
 #define UART_INTERRUPT_DISABLE			(u8)0
@@ -95,14 +75,14 @@ extern u8 HUART_u8Init(UART_GPIO_t Copy_u32PeripheralNumber, u32 Copy_u32Baudrat
  * Return:Error Status */
 extern u8 HUART_u8EnableInterrupt(UART_GPIO_t Copy_u32PeripheralNumber, u32 Copy_u32DesiredInterrupt, u8 Copy_u8DesiredStatus);
 
-/*Description: This API will be used to set callback function for TX
- * Parameters:Pointer to TX CallbackFunction
+/*Description: This API will be used to set callback function for TX to specific peripheral
+ * Parameters:Pointer to TX CallbackFunction, desired UART (u32)
  * Return:Error Status  */
-extern u8 HUART_u8SetTXCallBack(TXCallback_t Copy_TXCallbackFunction);
-/*Description: This API will be used to set callback function for RX
- * Parameters: Pointer to RX CallbackFunction
+extern u8 HUART_u8SetTXCallBack(TXCallback_t Copy_TXCallbackFunction, u32 Copy_u32DesiredUART);
+/*Description: This API will be used to set callback function for RX for specific peripheral
+ * Parameters: Pointer to RX CallbackFunction, Desired UART peripheral (u32)
  * Return:Error Status */
-extern u8 HUART_u8SetRXCallBack(RXCallback_t Copy_RXCallbackFunction);
+extern u8 HUART_u8SetRXCallBack(RXCallback_t Copy_RXCallbackFunction, u32 Copy_u32DesiredUART);
 
 /*Description: This API will be used to pass data buffer for sending using interrupts.
  * Parameters: Desired UART (struct), Pointer to Data Buffer (u8*), size of data buffer (u8)
@@ -114,13 +94,23 @@ extern u8 HUART_u8SendAsync(UART_GPIO_t Copy_u32PeripheralNumber, u8 *Copy_u8Buf
 extern u8 HUART_u8ReceiveAsync(UART_GPIO_t Copy_u32PeripheralNumber, u8 *Copy_u8Buffer, u8 Copy_u8Size);
 
 /*Description: This API will be used to pass data buffer for sending using polling.
- * Parameters: Desired UART (struct), Pointer to Data Buffer (u8*), size of data buffer (u8)
+ * Parameters: Desired UART (struct), Pointer to Data Buffer (u8*), size of data buffer (u8), desired time between frames (u32)
  * Return: Error Status (u8)  */
-extern u8 HUART_u8SendSync(UART_GPIO_t Copy_u32PeripheralNumber, u8 *Copy_u8Buffer, u8 Copy_u8Size);
+extern u8 HUART_u8SendSync(UART_GPIO_t Copy_u32PeripheralNumber, u8 *Copy_u8Buffer, u8 Copy_u8Size, u32 Copy_u32Time);
 /*Description: This API will be used to pass data buffer for receiving using polling.
  * Parameters: Desired UART (struct), Pointer to Data Buffer (u8*), size of data buffer (u8)
  * Return: Error Status (u8)  */
-extern u8 HUART_u8ReceiveSync(UART_GPIO_t Copy_u32PeripheralNumber, u8 *Copy_u8Buffer, u8 Copy_u8Size);
+extern u8 HUART_u8ReceiveSync(UART_GPIO_t Copy_u32PeripheralNumber, u8 *Copy_u8Buffer, u8 Copy_u8Size, u32 Copy_u32Time);
+
+/*Description: This function can be used to terminate async receiving (Warning!: Don't use it unless you know what you are doing)
+ * Parameters: Desired UART Peripheral address (u32)
+ * return: None*/
+extern void HUART_voidTerminateReceiving (u32 Copy_u32DesiredUARTBaseAddress);
+
+/*Description: This function can be used to terminate async sending (Warning!: Don't use it unless you know what you are doing)
+ * Parameters: Desired UART Peripheral address (u32)
+ * return: None*/
+extern void HUART_voidTerminateSending (u32 Copy_u32DesiredUARTBaseAddress);
 
 
 #endif /* HUART_INTERFACE_H_ */

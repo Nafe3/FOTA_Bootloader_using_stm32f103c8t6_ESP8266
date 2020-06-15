@@ -1,11 +1,18 @@
 /*
  * UART_interface.h
  *
- *  Created on: May 27, 2020
+ *  Created on: June 4, 2020
  *      Author: Mahmoud Hamdy
- *      Version: 1.1
+ *      Version: 2.0
  */
- 
+
+/*Changelog from version 1.1:
+ * 1) Removed Deparcated Macros (related to baudrate)
+ * 2) Changed the flags for the IRQ because there were bugs in it
+ * 3) Changed the way asynchronous Functions work by making it handle enabling interrupts instead of being handled by the user
+ * 4) Changed IRQ implementations
+ * 5) Added options for callback functions for each peripheral
+ * */
  /*Changelog from version 1.0:
  * 1) Added functionality to use multiple UART peripherals (and implemented their interrupt handlers)
  * 2) Added new functions to send and receive data sync
@@ -85,34 +92,44 @@ extern u8 UART_u8Configure (u32 Copy_u32BaseAddress, u16 Copy_u16Baudrate, u32 C
 
 /*Description: This function will be used to trigger sending data. It will send only the first bit of the buffer and the rest will be handled by the interrupt request
  * Parameters: Desired UART Peripheral (u32), Pointer to Data Buffer (u8*), size of data buffer (u8)
- * Return: void  */
-extern void UART_voidSendAsync(u32 Copy_u32UARTAddress, u8 *Copy_u8Buffer, u8 Copy_u8Size);
+ * Return: Error Status  */
+extern u8 UART_voidSendAsync(u32 Copy_u32UARTAddress, u8 *Copy_u8Buffer, u8 Copy_u8Size);
 /*Description: This API will be used to receive data using interrupts
  * Parameters:Desired UART Peripheral (u32), Pointer to Data Buffer (u8*), size of data buffer (u8)
  * Return: Error Status */
 extern u8 UART_u8ReceiveAsync(u32 Copy_u32UARTAddress, u8 *Copy_u8Buffer, u8 Copy_u8Size);
 
-/*Description: This function will be used to trigger sending data. It will send only the first bit of the buffer and the rest will be handled by the interrupt request
- * Parameters: Desired UART Peripheral (u32), Pointer to Data Buffer (u8*), size of data buffer (u8)
+/*Description: This function will save the passed callback by the user to the static variable
+ * Parameters: Pointer to TX CallbackFunction, Desired UART Peripheral (u32)
+ * Return:Error Status */
+extern u8 UART_u8SetTXCallBack(TXCallback_t Copy_TXCallbackFunction, u32 Copy_u32DesiredUART);
+/* Description: This function will save the passed callback by the user to the static variable
+ * Parameters: Pointer to RX CallbackFunction, Desired UART Peripheral (u32)
+ * Return:Error Status */
+extern u8 UART_u8SetRXCallBack(RXCallback_t Copy_RXCallbackFunction, u32 Copy_u32DesiredUART);
+
+/*Description: This function will be used to trigger sending data synchronously without using interrupts
+ * Parameters: Desired UART Peripheral (u32), Pointer to Data Buffer (u8*), size of data buffer (u8), required delay in ms (u32)
  * Return: void  */
-extern void UART_voidSendSync(u32 Copy_u32UARTAddress, u8 *Copy_u8Buffer, u8 Copy_u8Size);
-/*Description: This API will be used to receive data using interrupts
- * Parameters:Desired UART Peripheral (u32), Pointer to Data Buffer (u8*), size of data buffer (u8)
+extern void UART_voidSendSync(u32 Copy_u32UARTAddress, u8 *Copy_u8Buffer, u8 Copy_u8Size, u32 Copy_u32Time);
+/*Description: This function will be used to trigger receiving data synchronously without using interrupts
+ * Parameters: Desired UART Peripheral (u32), Pointer to Data Buffer (u8*), size of data buffer (u8), required delay in ms (u32)
  * Return: Error Status */
-extern u8 UART_u8ReceiveSync(u32 Copy_u32UARTAddress, u8 *Copy_u8Buffer, u8 Copy_u8Size);
+extern u8 UART_u8ReceiveSync(u32 Copy_u32UARTAddress, u8 *Copy_u8Buffer, u8 Copy_u8Size, u32 Copy_u32Time);
 
 /*Description: This API will be used to enable or disable desired interrupt
  * Parameters: Desired UART Peripheral(u32), Desired Interrupt (u32), Desired Status (u8)
  * Return:Error Status */
 extern u8 UART_u8EnableInterrupt(u32 Copy_u32UARTAddress, u32 Copy_u32DesiredInterrupt, u8 Copy_u8DesiredStatus);
-/*Description: This function will save the passed callback by the user to the static variable
- * Parameters: Pointer to TX CallbackFunction
- * Return:Error Status */
-extern u8 UART_u8SetTXCallBack(TXCallback_t Copy_TXCallbackFunction);
 
-/*Description: This function will save the passed callback by the user to the static variable
- * Parameters: Pointer to RX CallbackFunction
- * Return:Error Status */
-extern u8 UART_u8SetRXCallBack(RXCallback_t Copy_RXCallbackFunction);
+/*Description: This API can be used to terminate async receiving (Warning!: Don't use it unless you know what you are doing)
+ * Parameters: Desired UART Peripheral address (u32)
+ * return: None*/
+extern void UART_voidTerminateReceiving (u32 Copy_u32DesiredUARTBaseAddress);
+
+/*Description: This function can be used to terminate async receiving (Warning!: Don't use it unless you know what you are doing)
+ * Parameters: Desired UART Peripheral address (u32)
+ * return: None*/
+extern void UART_voidTerminateSending (u32 Copy_u32DesiredUARTBaseAddress);
 
 #endif /* UART_INTERFACE_H_ */

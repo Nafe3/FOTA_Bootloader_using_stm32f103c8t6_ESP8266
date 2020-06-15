@@ -1,11 +1,18 @@
 /*
  * HUART_program.c
  *
- *  Created on: May 27, 2020
- *      Author: Mahmoud
- *      Version: 1.1
+ *  Created on: June 4, 2020
+ *      Author: Mahmoud Hamdy
+ *      Version: 2.0
  */
 
+/*Changelog from version 1.1:
+ * 1) Removed Deparcated Macros (related to baudrate)
+ * 2) Changed the flags for the IRQ because there were bugs in it
+ * 3) Changed the way asynchronous Functions work by making it handle enabling interrupts instead of being handled by the user
+ * 4) Changed IRQ implementations
+ * 5) Added options for callback functions for each peripheral
+ * */
 /*Changelog from version 1.0:
  * 1) Added functionality to use multiple UART peripherals (and implemented their interrupt handlers)
  * 2) Added new functions to send and receive data sync
@@ -22,24 +29,24 @@
 
  const UART_GPIO_t HUART_USART1 = {
 
-		.TX = {PORTA, GPIO_PIN_9,GPIO_OUTPUT_SPEED_50MHz ,GPIO_MODE_OUTPUT_ALTERNATE_FUNCTION_PUSH_PULL },
-		.RX = {PORTA, GPIO_PIN_10,GPIO_INPUT_MODE_RESET_STATE ,GPIO_MODE_INPUT_PULLUP_PULLDOWN },
+		.TX = {GPIOA, GPIO_PIN_9,GPIO_OUTPUT_SPEED_50MHz ,GPIO_MODE_OUTPUT_ALTERNATE_FUNCTION_PUSH_PULL },
+		.RX = {GPIOA, GPIO_PIN_10,GPIO_INPUT_MODE_RESET_STATE ,GPIO_MODE_INPUT_PULLUP_PULLDOWN },
 		.Port = RCC_PERIPHERALS_PORTA,
 		.PeripheralClockName = RCC_PERIPHERALS_USART1,
 		.InterruptPeripheralName = NVIC_USART1,
 		.BaseAddress=UART_USART1_BASE_ADDRESS
 };
  const UART_GPIO_t HUART_USART2 = {
- 		.TX = {PORTA, GPIO_PIN_2, GPIO_OUTPUT_SPEED_50MHz ,GPIO_MODE_OUTPUT_ALTERNATE_FUNCTION_PUSH_PULL},
- 		.RX = {PORTA, GPIO_PIN_3,GPIO_INPUT_MODE_RESET_STATE ,GPIO_MODE_INPUT_PULLUP_PULLDOWN},
+ 		.TX = {GPIOA, GPIO_PIN_2, GPIO_OUTPUT_SPEED_50MHz ,GPIO_MODE_OUTPUT_ALTERNATE_FUNCTION_PUSH_PULL},
+ 		.RX = {GPIOA, GPIO_PIN_3,GPIO_INPUT_MODE_RESET_STATE ,GPIO_MODE_INPUT_PULLUP_PULLDOWN},
  		.Port = RCC_PERIPHERALS_PORTA,
  		.PeripheralClockName = RCC_PERIPHERALS_USART2,
  		.InterruptPeripheralName = NVIC_USART2,
  		.BaseAddress=UART_USART2_BASE_ADDRESS
  };
  const UART_GPIO_t HUART_USART3 = {
- 		.TX = {PORTB, GPIO_PIN_10, GPIO_OUTPUT_SPEED_50MHz ,GPIO_MODE_OUTPUT_ALTERNATE_FUNCTION_PUSH_PULL},
- 		.RX = {PORTB, GPIO_PIN_11,GPIO_INPUT_MODE_RESET_STATE ,GPIO_MODE_INPUT_PULLUP_PULLDOWN},
+ 		.TX = {GPIOB, GPIO_PIN_10, GPIO_OUTPUT_SPEED_50MHz ,GPIO_MODE_OUTPUT_ALTERNATE_FUNCTION_PUSH_PULL},
+ 		.RX = {GPIOB, GPIO_PIN_11,GPIO_INPUT_MODE_RESET_STATE ,GPIO_MODE_INPUT_PULLUP_PULLDOWN},
  		.Port = RCC_PERIPHERALS_PORTB,
  		.PeripheralClockName = RCC_PERIPHERALS_USART3,
  		.InterruptPeripheralName = NVIC_USART3,
@@ -162,37 +169,36 @@ u8 HUART_u8Init(UART_GPIO_t Copy_u32PeripheralNumber, u32 Copy_u32Baudrate, u32 
 
 	/*Call the UART_configure function from interface and save its return inside the status variable*/
 	Local_u8Status = UART_u8Configure(Copy_u32PeripheralNumber.BaseAddress, Local_u16Baudrate, Copy_u32StopBits, Copy_u32ParityBits);
-
 	return Local_u8Status;
 }
 
-/*Description: This API will be used to set callback function for TX
- * Parameters:Pointer to TX CallbackFunction
+/*Description: This API will be used to set callback function for TX to specific peripheral
+ * Parameters:Pointer to TX CallbackFunction, desired UART (u32)
  * Return:Error Status  */
-u8 HUART_u8SetTXCallBack(TXCallback_t Copy_TXCallbackFunction)
+u8 HUART_u8SetTXCallBack(TXCallback_t Copy_TXCallbackFunction, u32 Copy_u32DesiredUART)
 {
 	/*This local variable will hold the function status and will be returned at the end of the function*/
 	u8 Local_u8ErrorStatus=STATUS_NOK;
 	/*If callback Function passed is not pointing to NULL, assign it to the static variable*/
 	if (Copy_TXCallbackFunction)
 	{
-		Local_u8ErrorStatus = UART_u8SetTXCallBack(Copy_TXCallbackFunction);
+		Local_u8ErrorStatus = UART_u8SetTXCallBack(Copy_TXCallbackFunction, Copy_u32DesiredUART);
 
 	}
 	return Local_u8ErrorStatus;
 }/*End of SetTXCallback*/
 
-/*Description: This API will be used to set callback function for RX
- * Parameters: Pointer to RX CallbackFunction
+/*Description: This API will be used to set callback function for RX for specific peripheral
+ * Parameters: Pointer to RX CallbackFunction, Desired UART peripheral (u32)
  * Return:Error Status */
-u8 HUART_u8SetRXCallBack(RXCallback_t Copy_RXCallbackFunction)
+u8 HUART_u8SetRXCallBack(RXCallback_t Copy_RXCallbackFunction, u32 Copy_u32DesiredUART)
 {
 	/*This local variable will hold the function status and will be returned at the end of the function*/
 	u8 Local_u8ErrorStatus=STATUS_NOK;
 	/*If callback Function passed is not pointing to NULL, assign it to the static variable*/
 	if (Copy_RXCallbackFunction)
 	{
-		Local_u8ErrorStatus = UART_u8SetRXCallBack(Copy_RXCallbackFunction);
+		Local_u8ErrorStatus = UART_u8SetRXCallBack(Copy_RXCallbackFunction, Copy_u32DesiredUART);
 	}
 	return Local_u8ErrorStatus;
 }/*End of SetRXCallBack*/
@@ -206,7 +212,7 @@ u8 HUART_u8EnableInterrupt(UART_GPIO_t Copy_u32PeripheralNumber, u32 Copy_u32Des
 	/*This local variable holds status that will be returned at the end*/
 	u8 Local_u8Status = STATUS_NOK;
 	/*Check that user has entered a proper interrupt choice*/
-	if (Copy_u32DesiredInterrupt == UART_INTERRUPT_PARITY_ERROR || Copy_u32DesiredInterrupt == UART_INTERRUPT_IDLE || Copy_u32DesiredInterrupt == UART_INTERRUPT_RX_NOT_EMPTY || Copy_u32DesiredInterrupt == UART_INTERRUPT_TX_COMPLETE || Copy_u32DesiredInterrupt==UART_INTERRUPT_TX_EMPTY)
+	if (Copy_u32DesiredInterrupt == UART_INTERRUPT_PARITY_ERROR || Copy_u32DesiredInterrupt == UART_INTERRUPT_IDLE)
 	{
 		/*Check that user entered a proper status (whether enable or disable)*/
 		if (Copy_u8DesiredStatus == UART_INTERRUPT_ENABLE || Copy_u8DesiredStatus == UART_INTERRUPT_DISABLE)
@@ -215,6 +221,7 @@ u8 HUART_u8EnableInterrupt(UART_GPIO_t Copy_u32PeripheralNumber, u32 Copy_u32Des
 			Local_u8Status =UART_u8EnableInterrupt(Copy_u32PeripheralNumber.BaseAddress, Copy_u32DesiredInterrupt, Copy_u8DesiredStatus);
 		}
 	}
+
 	/*If the entered wrong choice, exit returning that status is not ok*/
 	return Local_u8Status;
 
@@ -256,9 +263,9 @@ u8 HUART_u8SendAsync(UART_GPIO_t Copy_u32PeripheralNumber, u8 *Copy_u8Buffer, u8
 }
 
  /*Description: This API will be used to pass data buffer for sending using polling.
-  * Parameters: Desired UART (struct), Pointer to Data Buffer (u8*), size of data buffer (u8)
+  * Parameters: Desired UART (struct), Pointer to Data Buffer (u8*), size of data buffer (u8), desired time between frames (u32)
   * Return: Error Status (u8)  */
-u8 HUART_u8SendSync(UART_GPIO_t Copy_u32PeripheralNumber, u8 *Copy_u8Buffer, u8 Copy_u8Size)
+u8 HUART_u8SendSync(UART_GPIO_t Copy_u32PeripheralNumber, u8 *Copy_u8Buffer, u8 Copy_u8Size, u32 Copy_u32Time)
 {
 	/*This local variable will hold the status that will be returned at the end*/
 	u8 Local_u8Status = STATUS_NOK;
@@ -266,7 +273,7 @@ u8 HUART_u8SendSync(UART_GPIO_t Copy_u32PeripheralNumber, u8 *Copy_u8Buffer, u8 
 	if (Copy_u8Buffer && Copy_u8Size!=0)
 	{
 		/*Call Send Function*/
-		UART_voidSendSync(Copy_u32PeripheralNumber.BaseAddress, Copy_u8Buffer, Copy_u8Size);
+		UART_voidSendSync(Copy_u32PeripheralNumber.BaseAddress, Copy_u8Buffer, Copy_u8Size, Copy_u32Time);
 		Local_u8Status = STATUS_OK;
 	}
 	return Local_u8Status;
@@ -274,7 +281,7 @@ u8 HUART_u8SendSync(UART_GPIO_t Copy_u32PeripheralNumber, u8 *Copy_u8Buffer, u8 
  /*Description: This API will be used to pass data buffer for receiving using polling.
   * Parameters: Desired UART (struct), Pointer to Data Buffer (u8*), size of data buffer (u8)
   * Return: Error Status (u8)  */
-u8 HUART_u8ReceiveSync(UART_GPIO_t Copy_u32PeripheralNumber, u8 *Copy_u8Buffer, u8 Copy_u8Size)
+u8 HUART_u8ReceiveSync(UART_GPIO_t Copy_u32PeripheralNumber, u8 *Copy_u8Buffer, u8 Copy_u8Size, u32 Copy_u32Time)
 {
 	 /*This local variable will hold the status that will be returned at the end*/
 	 	u8 Local_u8Status = STATUS_NOK;
@@ -282,7 +289,27 @@ u8 HUART_u8ReceiveSync(UART_GPIO_t Copy_u32PeripheralNumber, u8 *Copy_u8Buffer, 
 	 	if (Copy_u8Buffer && Copy_u8Size!=0)
 	 	{
 	 		/*Call Send Function*/
-	 		Local_u8Status = UART_u8ReceiveSync(Copy_u32PeripheralNumber.BaseAddress ,Copy_u8Buffer, Copy_u8Size);
+	 		Local_u8Status = UART_u8ReceiveSync(Copy_u32PeripheralNumber.BaseAddress ,Copy_u8Buffer, Copy_u8Size, Copy_u32Time);
 	 	}
 	 	return Local_u8Status;
 }
+
+/*Description: This function can be used to terminate async receiving (Warning!: Don't use it unless you know what you are doing)
+ * Parameters: Desired UART Peripheral address (u32)
+ * return: None*/
+void HUART_voidTerminateReceiving (u32 Copy_u32DesiredUARTBaseAddress)
+{
+	/*Call Function from driver directly*/
+	UART_voidTerminateReceiving (Copy_u32DesiredUARTBaseAddress);
+}
+
+/*Description: This function can be used to terminate async sending (Warning!: Don't use it unless you know what you are doing)
+ * Parameters: Desired UART Peripheral address (u32)
+ * return: None*/
+void HUART_voidTerminateSending (u32 Copy_u32DesiredUARTBaseAddress)
+{
+	/*Call function from driver directly*/
+	UART_voidTerminateSending (Copy_u32DesiredUARTBaseAddress);
+}
+
+
