@@ -3,7 +3,7 @@
 
 /* this should be called with the current (actual) value of HCLK
  * and NOT SysClk */
-void delay_setCPUclockFactor(u32 clk);
+void delay_setCPUclockFactor(void);
 void delay_ms(u32 time);
 void delay_us(u32 time);
 

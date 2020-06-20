@@ -14,6 +14,7 @@ C_SRCS += \
 ../src/NVIC_program.c \
 ../src/RCC_program.c \
 ../src/UART_program.c \
+../src/WIFI_program.c \
 ../src/main.c 
 
 OBJS += \
@@ -27,6 +28,7 @@ OBJS += \
 ./src/NVIC_program.o \
 ./src/RCC_program.o \
 ./src/UART_program.o \
+./src/WIFI_program.o \
 ./src/main.o 
 
 C_DEPS += \
@@ -40,6 +42,7 @@ C_DEPS += \
 ./src/NVIC_program.d \
 ./src/RCC_program.d \
 ./src/UART_program.d \
+./src/WIFI_program.d \
 ./src/main.d 
 
 

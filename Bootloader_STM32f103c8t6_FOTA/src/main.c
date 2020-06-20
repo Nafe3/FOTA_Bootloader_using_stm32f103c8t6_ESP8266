@@ -6,18 +6,11 @@
 #include "Bootloader.h"
 #include "Debug.h"
 #include "Trace.h"
+#include "WIFI_interface.h"
 
 
 u8 receiveFlag=0;
-/*RX Callback Function*/
-void rxDone(void)
-{
-	trace_printf("Receiving Done");
-	receiveFlag=0;
-}
 
-u8 Local_u8Test[5];
-u8 Local_u8TestSend[]="Hello";
 
 int main(void)
 {
@@ -33,7 +26,11 @@ int main(void)
 	RCC_voidEnablePeripheralClock(RCC_PERIPHERALS_FLITF); //Activate clock for Flash driver
 
 	HUART_u8Init(HUART_USART1, 115200, UART_STOP_BIT1, UART_PARITY_DISABLED);
-	HUART_u8Init(HUART_USART2, 115200, UART_STOP_BIT1, UART_PARITY_DISABLED);
+	//HUART_u8Init(HUART_USART2, 115200, UART_STOP_BIT1, UART_PARITY_DISABLED);
+	/*Initialize UART peripheral on UART 2
+	 * WIFI must be on UART2 because logic levels of UART2 is 3.3 not 5V*/
+	//HUART_u8Init(HUART_USART2, 115200, UART_STOP_BIT1, UART_PARITY_DISABLED);
+	WIFI_u8Init(HUART_USART2);
 
 	//HUART_u8SetRXCallBack(rxDone);
 	GPIO_Pin_t Bootloader_Request_button;
@@ -47,8 +44,9 @@ int main(void)
 
 	GPIO_Pin_Read(&Bootloader_Request_button,&Bootloader_Request_button_State);
 
-	if(Bootloader_Request_button_State) bootloader_voidJumpToUserApp(); //if the button is not pressed
-	else bootloader_voidUARTReadData();									//if the button is  pressed
+	//if(Bootloader_Request_button_State) bootloader_voidJumpToUserApp(); //if the button is not pressed
+	//else
+	bootloader_voidUARTReadData();									//if the button is  pressed
 
 
 	return 0;

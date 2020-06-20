@@ -222,6 +222,11 @@ void UART_voidSendSync(u32 Copy_u32UARTAddress, u8 *Copy_u8Buffer, u8 Copy_u8Siz
 		*((u32*) (Copy_u32UARTAddress + UART_DR )) = Local_txBuffer->dataArray[Local_txBuffer->currentPosition];
 		delay_ms(Copy_u32Time);
 	}
+	/*Reset everything*/
+	Local_txBuffer->dataArray=NULL;
+	Local_txBuffer->size = 0;
+	Local_txBuffer->currentPosition = 0;
+
 }/*End of SendSync*/
 
 /*Description: This function will be used to trigger receiving data synchronously without using interrupts
@@ -272,6 +277,11 @@ u8 UART_u8ReceiveSync(u32 Copy_u32UARTAddress, u8 *Copy_u8Buffer, u8 Copy_u8Size
 		Local_rxBuffer->currentPosition++;
 		delay_ms(Copy_u32Time);
 	}
+
+	/*Reset everything*/
+	Local_rxBuffer->dataArray=NULL;
+	Local_rxBuffer->size = 0;
+	Local_rxBuffer->currentPosition = 0;
 
 	Local_u8Status = STATUS_OK;
 	return Local_u8Status;

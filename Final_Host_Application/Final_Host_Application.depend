@@ -1,0 +1,283 @@
+# depslib dependency file v1.0
+1517470165 source:e:\fastbit\courses\bootloader\code\host\stm32_programmer_v1\blcommands.c
+	"main.h"
+
+1517470025 e:\fastbit\courses\bootloader\code\host\stm32_programmer_v1\main.h
+	<Windows.h>
+	<stdio.h>
+	<string.h>
+	<stdint.h>
+	"WindowsSerialPort.h"
+	"LinuxSerialPort.h"
+	"OSxSerialPort.h"
+
+1517297446 e:\fastbit\courses\bootloader\code\host\stm32_programmer_v1\windowsserialport.h
+
+1517297334 e:\fastbit\courses\bootloader\code\host\stm32_programmer_v1\linuxserialport.h
+
+1517297369 e:\fastbit\courses\bootloader\code\host\stm32_programmer_v1\osxserialport.h
+
+1517470035 source:e:\fastbit\courses\bootloader\code\host\stm32_programmer_v1\blreplyprocessing.c
+	"main.h"
+
+1517298511 source:e:\fastbit\courses\bootloader\code\host\stm32_programmer_v1\fileops.c
+	"main.h"
+
+1517297227 source:e:\fastbit\courses\bootloader\code\host\stm32_programmer_v1\linuxserialport.c
+	"main.h"
+	"LinuxSerialPort.h"
+
+1517470111 source:e:\fastbit\courses\bootloader\code\host\stm32_programmer_v1\main.c
+	"main.h"
+
+1517297200 source:e:\fastbit\courses\bootloader\code\host\stm32_programmer_v1\osxserialport.c
+	"main.h"
+	"OSxSerialPort.h"
+
+1522060862 source:e:\fastbit\courses\bootloader\code\host\stm32_programmer_v1\utilities.c
+	"main.h"
+
+1517470044 source:e:\fastbit\courses\bootloader\code\host\stm32_programmer_v1\windowsserialport.c
+	"main.h"
+
+1590882357 source:c:\users\mahmoud\desktop\bootloaderprojectstm32-master\bootloaderprojectstm32-master\sourcecode\host\c\stm32_programmer_v1\blcommands.c
+	"main.h"
+
+1589437396 c:\users\mahmoud\desktop\bootloaderprojectstm32-master\bootloaderprojectstm32-master\sourcecode\host\c\stm32_programmer_v1\main.h
+	<Windows.h>
+	<stdio.h>
+	<string.h>
+	<stdint.h>
+	"WindowsSerialPort.h"
+	"LinuxSerialPort.h"
+	"OSxSerialPort.h"
+
+1589437396 c:\users\mahmoud\desktop\bootloaderprojectstm32-master\bootloaderprojectstm32-master\sourcecode\host\c\stm32_programmer_v1\windowsserialport.h
+
+1589437396 c:\users\mahmoud\desktop\bootloaderprojectstm32-master\bootloaderprojectstm32-master\sourcecode\host\c\stm32_programmer_v1\linuxserialport.h
+
+1589437396 c:\users\mahmoud\desktop\bootloaderprojectstm32-master\bootloaderprojectstm32-master\sourcecode\host\c\stm32_programmer_v1\osxserialport.h
+
+1589437396 source:c:\users\mahmoud\desktop\bootloaderprojectstm32-master\bootloaderprojectstm32-master\sourcecode\host\c\stm32_programmer_v1\blreplyprocessing.c
+	"main.h"
+
+1589437396 source:c:\users\mahmoud\desktop\bootloaderprojectstm32-master\bootloaderprojectstm32-master\sourcecode\host\c\stm32_programmer_v1\fileops.c
+	"main.h"
+
+1589437396 source:c:\users\mahmoud\desktop\bootloaderprojectstm32-master\bootloaderprojectstm32-master\sourcecode\host\c\stm32_programmer_v1\linuxserialport.c
+	"main.h"
+	"LinuxSerialPort.h"
+
+1590879777 source:c:\users\mahmoud\desktop\bootloaderprojectstm32-master\bootloaderprojectstm32-master\sourcecode\host\c\stm32_programmer_v1\main.c
+	"main.h"
+
+1589437396 source:c:\users\mahmoud\desktop\bootloaderprojectstm32-master\bootloaderprojectstm32-master\sourcecode\host\c\stm32_programmer_v1\osxserialport.c
+	"main.h"
+	"OSxSerialPort.h"
+
+1589437396 source:c:\users\mahmoud\desktop\bootloaderprojectstm32-master\bootloaderprojectstm32-master\sourcecode\host\c\stm32_programmer_v1\utilities.c
+	"main.h"
+
+1590880619 source:c:\users\mahmoud\desktop\bootloaderprojectstm32-master\bootloaderprojectstm32-master\sourcecode\host\c\stm32_programmer_v1\windowsserialport.c
+	"main.h"
+
+1590917318 source:d:\iti\subjects\gp_fota\stm32fx microcontroller custom bootloader development\bootloaderprojectstm32-master\sourcecode\host\c\c\stm32_programmer_v1\blcommands.c
+	"main.h"
+
+1589437396 d:\iti\subjects\gp_fota\stm32fx microcontroller custom bootloader development\bootloaderprojectstm32-master\sourcecode\host\c\c\stm32_programmer_v1\main.h
+	<Windows.h>
+	<stdio.h>
+	<string.h>
+	<stdint.h>
+	"WindowsSerialPort.h"
+	"LinuxSerialPort.h"
+	"OSxSerialPort.h"
+
+1589437396 d:\iti\subjects\gp_fota\stm32fx microcontroller custom bootloader development\bootloaderprojectstm32-master\sourcecode\host\c\c\stm32_programmer_v1\windowsserialport.h
+
+1589437396 d:\iti\subjects\gp_fota\stm32fx microcontroller custom bootloader development\bootloaderprojectstm32-master\sourcecode\host\c\c\stm32_programmer_v1\linuxserialport.h
+
+1589437396 d:\iti\subjects\gp_fota\stm32fx microcontroller custom bootloader development\bootloaderprojectstm32-master\sourcecode\host\c\c\stm32_programmer_v1\osxserialport.h
+
+1589437396 source:d:\iti\subjects\gp_fota\stm32fx microcontroller custom bootloader development\bootloaderprojectstm32-master\sourcecode\host\c\c\stm32_programmer_v1\blreplyprocessing.c
+	"main.h"
+
+1589437396 source:d:\iti\subjects\gp_fota\stm32fx microcontroller custom bootloader development\bootloaderprojectstm32-master\sourcecode\host\c\c\stm32_programmer_v1\fileops.c
+	"main.h"
+
+1589437396 source:d:\iti\subjects\gp_fota\stm32fx microcontroller custom bootloader development\bootloaderprojectstm32-master\sourcecode\host\c\c\stm32_programmer_v1\linuxserialport.c
+	"main.h"
+	"LinuxSerialPort.h"
+
+1590879777 source:d:\iti\subjects\gp_fota\stm32fx microcontroller custom bootloader development\bootloaderprojectstm32-master\sourcecode\host\c\c\stm32_programmer_v1\main.c
+	"main.h"
+
+1589437396 source:d:\iti\subjects\gp_fota\stm32fx microcontroller custom bootloader development\bootloaderprojectstm32-master\sourcecode\host\c\c\stm32_programmer_v1\osxserialport.c
+	"main.h"
+	"OSxSerialPort.h"
+
+1589437396 source:d:\iti\subjects\gp_fota\stm32fx microcontroller custom bootloader development\bootloaderprojectstm32-master\sourcecode\host\c\c\stm32_programmer_v1\utilities.c
+	"main.h"
+
+1590910012 source:d:\iti\subjects\gp_fota\stm32fx microcontroller custom bootloader development\bootloaderprojectstm32-master\sourcecode\host\c\c\stm32_programmer_v1\windowsserialport.c
+	"main.h"
+
+1591053420 source:c:\users\mahmoud\desktop\versio 1june\host\c\c\stm32_programmer_v1\blcommands.c
+	<stdio.h>
+	<time.h>
+	"main.h"
+
+1589437396 c:\users\mahmoud\desktop\versio 1june\host\c\c\stm32_programmer_v1\main.h
+	<Windows.h>
+	<stdio.h>
+	<string.h>
+	<stdint.h>
+	"WindowsSerialPort.h"
+	"LinuxSerialPort.h"
+	"OSxSerialPort.h"
+
+1589437396 c:\users\mahmoud\desktop\versio 1june\host\c\c\stm32_programmer_v1\windowsserialport.h
+
+1589437396 c:\users\mahmoud\desktop\versio 1june\host\c\c\stm32_programmer_v1\linuxserialport.h
+
+1589437396 c:\users\mahmoud\desktop\versio 1june\host\c\c\stm32_programmer_v1\osxserialport.h
+
+1591047610 source:c:\users\mahmoud\desktop\versio 1june\host\c\c\stm32_programmer_v1\blreplyprocessing.c
+	"main.h"
+
+1589437396 source:c:\users\mahmoud\desktop\versio 1june\host\c\c\stm32_programmer_v1\fileops.c
+	"main.h"
+
+1589437396 source:c:\users\mahmoud\desktop\versio 1june\host\c\c\stm32_programmer_v1\linuxserialport.c
+	"main.h"
+	"LinuxSerialPort.h"
+
+1590879777 source:c:\users\mahmoud\desktop\versio 1june\host\c\c\stm32_programmer_v1\main.c
+	"main.h"
+
+1589437396 source:c:\users\mahmoud\desktop\versio 1june\host\c\c\stm32_programmer_v1\osxserialport.c
+	"main.h"
+	"OSxSerialPort.h"
+
+1589437396 source:c:\users\mahmoud\desktop\versio 1june\host\c\c\stm32_programmer_v1\utilities.c
+	"main.h"
+
+1591051299 source:c:\users\mahmoud\desktop\versio 1june\host\c\c\stm32_programmer_v1\windowsserialport.c
+	"main.h"
+
+1592604614 source:d:\iti\others\hamdy\gp\c\stm32_programmer_v1\blcommands.c
+	<stdio.h>
+	<time.h>
+	"main.h"
+
+1592593518 d:\iti\others\hamdy\gp\c\stm32_programmer_v1\main.h
+	<Windows.h>
+	<stdio.h>
+	<string.h>
+	<stdint.h>
+
+1589437396 d:\iti\others\hamdy\gp\c\stm32_programmer_v1\windowsserialport.h
+
+1589437396 d:\iti\others\hamdy\gp\c\stm32_programmer_v1\linuxserialport.h
+
+1589437396 d:\iti\others\hamdy\gp\c\stm32_programmer_v1\osxserialport.h
+
+1592591036 source:d:\iti\others\hamdy\gp\c\stm32_programmer_v1\blreplyprocessing.c
+	"main.h"
+	"WindowsSerialPort.h"
+
+1592103670 source:d:\iti\others\hamdy\gp\c\stm32_programmer_v1\fileops.c
+	"main.h"
+
+1589437396 source:d:\iti\others\hamdy\gp\c\stm32_programmer_v1\linuxserialport.c
+	"main.h"
+	"LinuxSerialPort.h"
+
+1592580513 source:d:\iti\others\hamdy\gp\c\stm32_programmer_v1\main.c
+	"main.h"
+
+1589437396 source:d:\iti\others\hamdy\gp\c\stm32_programmer_v1\osxserialport.c
+	"main.h"
+	"OSxSerialPort.h"
+
+1589437396 source:d:\iti\others\hamdy\gp\c\stm32_programmer_v1\utilities.c
+	"main.h"
+
+1592527865 source:d:\iti\others\hamdy\gp\c\stm32_programmer_v1\windowsserialport.c
+	"main.h"
+
+1591890384 source:c:\users\mahmoud\desktop\version 12 6\c\stm32_programmer_v1\blreplyprocessing.c
+	"main.h"
+
+1589437396 c:\users\mahmoud\desktop\version 12 6\c\stm32_programmer_v1\main.h
+	<Windows.h>
+	<stdio.h>
+	<string.h>
+	<stdint.h>
+	"WindowsSerialPort.h"
+	"LinuxSerialPort.h"
+	"OSxSerialPort.h"
+
+1589437396 c:\users\mahmoud\desktop\version 12 6\c\stm32_programmer_v1\windowsserialport.h
+
+1589437396 c:\users\mahmoud\desktop\version 12 6\c\stm32_programmer_v1\linuxserialport.h
+
+1589437396 c:\users\mahmoud\desktop\version 12 6\c\stm32_programmer_v1\osxserialport.h
+
+1589437396 source:c:\users\mahmoud\desktop\version 12 6\c\stm32_programmer_v1\fileops.c
+	"main.h"
+
+1589437396 source:c:\users\mahmoud\desktop\version 12 6\c\stm32_programmer_v1\linuxserialport.c
+	"main.h"
+	"LinuxSerialPort.h"
+
+1590879777 source:c:\users\mahmoud\desktop\version 12 6\c\stm32_programmer_v1\main.c
+	"main.h"
+
+1589437396 source:c:\users\mahmoud\desktop\version 12 6\c\stm32_programmer_v1\osxserialport.c
+	"main.h"
+	"OSxSerialPort.h"
+
+1589437396 source:c:\users\mahmoud\desktop\version 12 6\c\stm32_programmer_v1\utilities.c
+	"main.h"
+
+1591971470 source:c:\users\mahmoud\desktop\version 12 6\c\stm32_programmer_v1\windowsserialport.c
+	"main.h"
+
+1592617340 source:c:\users\mahmoud\desktop\version 20 june\stm32_programmer_v1\blreplyprocessing.c
+	"main.h"
+	"WindowsSerialPort.h"
+
+1592617340 c:\users\mahmoud\desktop\version 20 june\stm32_programmer_v1\main.h
+	<Windows.h>
+	<stdio.h>
+	<string.h>
+	<stdint.h>
+
+1589437396 c:\users\mahmoud\desktop\version 20 june\stm32_programmer_v1\windowsserialport.h
+
+1592103670 source:c:\users\mahmoud\desktop\version 20 june\stm32_programmer_v1\fileops.c
+	"main.h"
+
+1592617406 source:c:\users\mahmoud\desktop\version 20 june\stm32_programmer_v1\main.c
+	"main.h"
+
+1589437396 source:c:\users\mahmoud\desktop\version 20 june\stm32_programmer_v1\utilities.c
+	"main.h"
+
+1592527865 source:c:\users\mahmoud\desktop\version 20 june\stm32_programmer_v1\windowsserialport.c
+	"main.h"
+
+1592617713 source:c:\users\mahmoud\desktop\version 20 june\stm32_programmer_v1\blcommands.c
+	<stdio.h>
+	<time.h>
+	"main.h"
+	"HTTP_interface.h"
+
+1592507338 c:\users\mahmoud\desktop\version 20 june\stm32_programmer_v1\http_interface.h
+
+1592508345 source:c:\users\mahmoud\desktop\version 20 june\stm32_programmer_v1\http_program.c
+	<stdio.h>
+	<winsock2.h>
+	"HTTP_interface.h"
+

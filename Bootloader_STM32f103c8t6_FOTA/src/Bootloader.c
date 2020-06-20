@@ -1,8 +1,9 @@
 /*bl
  * Bootloader.c
  *
- *  Created on: May 24, 2020
- *      Author: Mohamed Nafea
+ *  Created on: June 20, 2020
+ *      Authors: Mohamed Nafea
+				 Mahmoud Hamdy
  */
 
 #include "STD_TYPES.h"
@@ -15,6 +16,8 @@
 #include "Flash.h"
 #include "Bootloader.h"
 #include "Delay_interface.h"
+
+#include "WIFI_interface.h"
 
 #ifndef  SCB_BASE_ADDRESS
 #define  SCB_BASE_ADDRESS       		0xE000ED00
@@ -134,8 +137,14 @@ u8 i=0;
 u16 iterator=0;
 GPIO_Pin_t OnBoard_Led;
 
+
+#define BOOTLOADER_RESPONSE_ARRAY_SIZE		(u8)256
+/*This array will be used for holding data that will be sent to webserver*/
+u8 Global_u8ResponseArray[BOOTLOADER_RESPONSE_ARRAY_SIZE]={0};
+
+
 /*Jumps to the user application code if there is no Boot-loader request*/
-extern void bootloader_voidJumpToUserApp(void)
+void bootloader_voidJumpToUserApp(void)
 {
 	printmsg1("BL_DEBUG_MSG: Button is not pressed .. executing user app \r\n");
 
@@ -165,7 +174,7 @@ extern void bootloader_voidJumpToUserApp(void)
 }
 
 /*Reads the command packet which comes from the host application*/
-extern void bootloader_voidUARTReadData (void)
+void bootloader_voidUARTReadData (void)
 {
 
 	OnBoard_Led.port = PORTC;
@@ -175,163 +184,35 @@ extern void bootloader_voidUARTReadData (void)
 
 	GPIO_Init(&OnBoard_Led);
 
-	volatile u8 rcv_len = 0;
-	/*This variable will be used to prevent from continuing until it receives all data*/
-	u8 receiveFlag='0';
+	/*This variable holds the length of the data that will follow the command. It will be used to know how many bytes
+	to convert and save in the receiving buffer*/
+	volatile u8 rcv_len;
 
-	//u8 var= 0x05;
+	/****************Modification by Mahmoud for WIFI**************/
+	/*This local variable will hold the data coming from site so that we can convert them later*/
+	u8 Local_u8Buffer[1100]={0};
+	/*******************End of modification******************/			 											   
+
 	printmsg1("BL_DEBUG_MSG: Button is pressed .. going to BL mode\r\n");
 	while(1)
 	{
 		/*Reinitialize these variables because they will be used as flags, this is to work well with the while loop inside*/
 		rcv_len=0;
-		receiveFlag=0;
 
 		/*Reinitialize data buffer to zeros again*/
         memset(bl_rx_buffer,0,1000);
-		/*here we will read and and decode the commands coming from host
-		 * Frist read only one byte from the host, which is the "length" field of the command packet*/
+		/*here we will read and and decode the commands coming from host*/
 
-		/**********Code that should be executed***************/
-		//HUART_u8ReceiveSync(HUART_USART2,bl_rx_buffer,1); //reading the first byte from host
-		//rcv_len = bl_rx_buffer[0];
-		//HUART_u8ReceiveSync(HUART_USART2,&bl_rx_buffer[1],rcv_len);
-
-		HUART_u8ReceiveAsync(HUART_USART2,bl_rx_buffer,1);
-		//bl_rx_buffer[0]='0';
-		/*If we dont make this while loop, the system will never add the bl_rx_buffer value to rcv_len*/
-		while (rcv_len ==0)
-		{
-			//printmsg1("waiting for length\r\n");
-			rcv_len = bl_rx_buffer[0];
-		}
-		printmsg1("rcv_len = %d\r\n", rcv_len);
-
-
-		//delay_ms(500);
-        HUART_u8ReceiveAsync(HUART_USART2,(bl_rx_buffer+1),rcv_len);
-        /*Wait until the last character has been received through a while loop*/
-        /*We use this while loop to make sure we have received all of the data till the last byte, and to prevent the code from advancing
-         * before finishing*/
-        while (receiveFlag==0)
-        {
-        	//printmsg1("We are waiting\r\n");
-
-        	/*We made this if condition because for some reason, the check didn't work inside while loop condition*/
-        	if (bl_rx_buffer[rcv_len]!= 0)
-        	{
-        		receiveFlag=1;
-        	}
-        }
-
-		/*****************************FOR DEBUGGING*****************************/
-		// 1) Array that should be received from BL_GET_VER
-		//bl_rx_buffer[0]=	0x05;
-		//bl_rx_buffer[1]=	0x51;
-		//bl_rx_buffer[2]=	0xe7;
-		//bl_rx_buffer[3]=	0xe9;
-		//bl_rx_buffer[4]=	0xab;
-		//bl_rx_buffer[5]=	0x7c;
-		/************************************************************************/
-		// 2) Array that should be received from BL_GET_HELP
-		//bl_rx_buffer[0]=	0x05;
-		//bl_rx_buffer[1]=	0x52;
-		//bl_rx_buffer[2]=	0x3e;
-		//bl_rx_buffer[3]=	0xcf;
-		//bl_rx_buffer[4]=	0xe8;
-		//bl_rx_buffer[5]=	0x71;
-		/************************************************************************/
-		// 3) Array that should be received from BL_GET_CID
-		//bl_rx_buffer[0]=	0x05;
-		//bl_rx_buffer[1]=	0x53;
-		//bl_rx_buffer[2]=	0x89;
-		//bl_rx_buffer[3]=	0xd2;
-		//bl_rx_buffer[4]=	0x29;
-		//bl_rx_buffer[5]=	0x75;
-		/************************************************************************/
-		// 4) Array that should be received from BL_GET_RDP_STATUS
-		//bl_rx_buffer[0]=	0x05;
-		//bl_rx_buffer[1]=	0x54;
-		//bl_rx_buffer[2]=	0x8c;
-		//bl_rx_buffer[3]=	0x82;
-		//bl_rx_buffer[4]=	0x6e;
-		//bl_rx_buffer[5]=	0x6b;
-		/************************************************************************/
-		// 5) Array that should be received from BL_GO_TO_ADDR
-		//bl_rx_buffer[0]=	0x09;
-		//bl_rx_buffer[1]=	0x55;
-		//bl_rx_buffer[2]=	0x;
-		//bl_rx_buffer[3]=	0x;
-		//bl_rx_buffer[4]=	0x;
-		//bl_rx_buffer[5]=	0x;
-        //bl_rx_buffer[6]=	0x;
-        //bl_rx_buffer[7]=	0x;
-        //bl_rx_buffer[8]=	0x;
-        //bl_rx_buffer[9]=	0x;
-        /************************************************************************/
-        // 6) Array that should be received from BL_FLASH_ERASE
-        //bl_rx_buffer[0]=	0x07;
-        //bl_rx_buffer[1]=	0x56;
-        //bl_rx_buffer[2]=	0x;
-        //bl_rx_buffer[3]=	0x;
-        //bl_rx_buffer[4]=	0x;
-        //bl_rx_buffer[5]=	0x;
-        //bl_rx_buffer[6]=	0x;
-        //bl_rx_buffer[7]=	0x;
-        /************************************************************************/
-        // 7) Array that should be received from BL_MEM_WRITE
-        //bl_rx_buffer[0]=	0x0A+X; //10+x
-        //bl_rx_buffer[1]=	0x57;
-        //bl_rx_buffer[2]=	0x;
-        //bl_rx_buffer[3]=	0x;
-        //bl_rx_buffer[4]=	0x;
-        //bl_rx_buffer[5]=	0x;
-        //bl_rx_buffer[6]=	0x;
-        //bl_rx_buffer[7]=	0x;
-        /************************************************************************/
-        // 8) Array that should be received from BL_MEM_READ
-        //bl_rx_buffer[0]=	0x0A; //10 following bytes
-        //bl_rx_buffer[1]=	0x59;
-        //bl_rx_buffer[2]=	0x;
-        //bl_rx_buffer[3]=	0x;
-        //bl_rx_buffer[4]=	0x;
-        //bl_rx_buffer[5]=	0x;
-        //bl_rx_buffer[6]=	0x;
-        //bl_rx_buffer[7]=	0x;
-        //bl_rx_buffer[8]=	0x;
-        //bl_rx_buffer[9]=	0x;
-        //bl_rx_buffer[10]=	0x;
-        /************************************************************************/
-        // 9) Array that should be received from BL_READ_SECTOR_STATUS
-        //bl_rx_buffer[0]=	0x05;
-        //bl_rx_buffer[1]=	0x5A;
-        //bl_rx_buffer[2]=	0x;
-        //bl_rx_buffer[3]=	0x;
-        //bl_rx_buffer[4]=	0x;
-        //bl_rx_buffer[5]=	0x;
-        /************************************************************************/
-        // 10) Array that should be received from BL_EN_R_W_PROTECT
-        //bl_rx_buffer[0]=	0x07;
-        //bl_rx_buffer[1]=	0x58;
-        //bl_rx_buffer[2]=	0x;
-        //bl_rx_buffer[3]=	0x;
-        //bl_rx_buffer[4]=	0x;
-        //bl_rx_buffer[5]=	0x;
-        //bl_rx_buffer[6]=	0x;
-        //bl_rx_buffer[7]=	0x;
-        /************************************************************************/
-        // 11) Array that should be received from BL_DIS_R_W_PROTECT
-        //bl_rx_buffer[0]=	0x05;
-        //bl_rx_buffer[1]=	0x5C;
-        //bl_rx_buffer[2]=	0x;
-        //bl_rx_buffer[3]=	0x;
-        //bl_rx_buffer[4]=	0x;
-        //bl_rx_buffer[5]=	0x;
-
-		//HUART_u8SendSync(HUART_USART1,bl_rx_buffer,rcv_len,1);
-		//for(i=0;i<=rcv_len;i++){
-		//printmsg1("0x%x\r\n",bl_rx_buffer[i]);
-		//}
+        /*WIFI modifications by Mahmoud*/
+        /*Start receiving data using WIFI*/
+        WIFI_u8ReceiveCommand(Local_u8Buffer);
+		/*Convert first byte received, which is equivalent to length to follow, and save it inside rcv_len variable*/
+		char2hex(Local_u8Buffer,&rcv_len,1);
+		/*Add rcv_len to first element of buffer (needed in further operations)*/
+		bl_rx_buffer[0] = rcv_len;
+        /*Convert data to proper format (hex) according to the received length, and put them inside buffer starting from 
+		element of index[1] and to length equal to rcv_len*/
+        char2hex(&Local_u8Buffer[2], &bl_rx_buffer[1], rcv_len);
 
 		/***************************************************************************/
 		switch(bl_rx_buffer[1]) //checking for the received command and then executing its code
@@ -408,18 +289,25 @@ void bootloader_handle_getver_cmd				(u8* bl_rx_buffer)
 	u32 crc_host;
 	crc_host= *((u32*)(bl_rx_buffer+command_packet-4));          /*Extract the CRC32 sent by host*/
 
+	/*This local variable will hold the array that will be send over WIFI*/
+	u8 Local_u8FinalResponse[6]={0};																	
 	printmsg1("BL_DEBUG_MSG: bootloader_handle_getver_cmd \r\n");
 	// 1) verify the checksum
 	if(! bootloader_verify_crc(bl_rx_buffer, command_length_without_crc, crc_host))
-	{
-		//checksum is correct
+	{		//checksum is correct
 		printmsg1("BL_DEBUG_MSG: checksum success !! \r\n");
 		//Stating that a reply of one byte is going to be sent
 		bootloader_send_ack(1);
 		//Sending boot-loader version
 		bl_version = BL_VERSION;
 		printmsg1("BL_DEBUG_MSG: BL_VER : 0x%x \r\n",bl_version);
-		HUART_u8SendSync(HUART_USART2,&bl_version,1,10); //sending version to host
+		/******************************Modications by Mahmoud For WIFI***********************/
+		/*Write bootloader version in the next byte*/
+		Global_u8ResponseArray[2]=bl_version;
+		/*Convert array to char to send them over WIFI*/
+		hex2char(Global_u8ResponseArray, Local_u8FinalResponse, 3);
+		/*Send converted Bytes over WIFI*/
+		WIFI_u8SendCommandToServer(Local_u8FinalResponse, 6);	HUART_u8SendSync(HUART_USART2,&bl_version,1,10); //sending version to host
 	}
 	else
 	{
@@ -1024,10 +912,14 @@ void bootloader_send_ack(u8 follow_len)
 {
 	//here we send 2 bytes .. first byte is ack and the second byte is the length of the following
 	//reply bytes
+	/*************Modifications made by Mahmoud for WIFI************/
 	u8 ack_buffer[2]={BL_ACK,follow_len};
-	HUART_u8SendSync(HUART_USART2,ack_buffer,2,10);
+	/*Write ACK Bytes inside the array that will be sent to web server*/
+	Global_u8ResponseArray[0]=ack_buffer[0];
+	Global_u8ResponseArray[1]=ack_buffer[1];
 	printmsg1("Sending BL_ACK: 0x%x\r\n",ack_buffer[0]);
 	printmsg1("reply length= %d bytes\r\n",ack_buffer[1]);
+	/*********************End of Modifications**********************/
 }
 
 void bootloader_send_nack(void)

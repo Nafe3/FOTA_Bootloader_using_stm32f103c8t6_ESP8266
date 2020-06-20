@@ -24,7 +24,6 @@
 #define HUART_INTERFACE_H_
 
 #include "GPIO.h"
-#include "UART_interface.h"
 
 /*Macros*/
 
@@ -43,6 +42,9 @@
 #define UART_INTERRUPT_ENABLE			(u8)1
 #define UART_INTERRUPT_DISABLE			(u8)0
 
+/*Callback functions pointers*/
+typedef void(*TXCallback_t)(void);
+typedef void(*RXCallback_t)(void);
 
 
 
