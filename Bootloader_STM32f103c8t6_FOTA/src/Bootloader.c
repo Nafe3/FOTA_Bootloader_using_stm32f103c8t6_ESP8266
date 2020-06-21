@@ -54,7 +54,8 @@ u8 		FLASH_src_buffer_1K[FLASH_RX_LEN]=  {0};
 #define BL_PROTECTION_STATUS		    0X5A    /*This command is used to read all the sector protection status.*/
 
 #define BL_SYSTEM_RESET					0X5D	/**/
-#define BL_EXISTING_APPS				0x5E	/**/
+#define BL_EXISTING_APPS				0x5E	/*Get app info*/
+#define BL_SAVE_APP_INFO				0x61	/*Set app info*/
 
 
 u8   supported_commands[] = {
@@ -83,22 +84,22 @@ u8   supported_commands[] = {
 #define BL_GET_HELP_REPLY_LEN			((u8)(BL_ACK_LEN+sizeof(supported_commands)))
 #define BL_GET_CID_REPLY_LEN			((u8)(BL_ACK_LEN+4))
 
-#define BL_GO_TO_ADDR_REPLY_LEN
+#define BL_GO_TO_ADDR_REPLY_LEN			((u8)(BL_ACK_LEN+1))
 
-#define BL_FLASH_ERASE_REPLY_LEN
-#define BL_FLASH_MASS_ERASE_REPLY_LEN
+#define BL_FLASH_ERASE_REPLY_LEN		((u8)(BL_ACK_LEN+1))
+#define BL_FLASH_MASS_ERASE_REPLY_LEN	((u8)(BL_ACK_LEN+0))
 
-#define BL_MEM_WRITE_REPLY_LEN
+#define BL_MEM_WRITE_REPLY_LEN			((u8)(BL_ACK_LEN+1))
 #define BL_MEM_READ_REPLY_LEN
 
-#define BL_EN_R_PROTECT_REPLY_LEN
-#define BL_DIS_R_PROTECT_REPLY_LEN
-#define BL_EN_W_PROTECT_REPLY_LEN
-#define BL_DIS_W_PROTECT_REPLY_LEN
-#define BL_GET_RDP_STATUS_REPLY_LEN
-#define BL_PROTECTION_STATUS_REPLY_LEN
+#define BL_EN_R_PROTECT_REPLY_LEN		((u8)(BL_ACK_LEN+0))
+#define BL_DIS_R_PROTECT_REPLY_LEN      ((u8)(BL_ACK_LEN+0))
+#define BL_EN_W_PROTECT_REPLY_LEN       ((u8)(BL_ACK_LEN+0))
+#define BL_DIS_W_PROTECT_REPLY_LEN      ((u8)(BL_ACK_LEN+0))
+#define BL_GET_RDP_STATUS_REPLY_LEN		((u8)(BL_ACK_LEN+1))
+#define BL_PROTECTION_STATUS_REPLY_LEN	((u8)(BL_ACK_LEN+10))
 
-#define BL_SYSTEM_RESET_REPLY_LEN
+#define BL_SYSTEM_RESET_REPLY_LEN		((u8)(BL_ACK_LEN+0))
 #define BL_EXISTING_APPS_REPLY_LEN
 
 
@@ -215,7 +216,7 @@ void bootloader_voidUARTReadData (void)
 
 	/*This variable holds the length of the data that will follow the command. It will be used to know how many bytes
 	to convert and save in the receiving buffer*/
-	volatile u8 rcv_len;
+    u8 rcv_len;
 
 	/****************Modification by Mahmoud for WIFI**************/
 	/*This local variable will hold the data coming from site so that we can convert them later*/
@@ -330,7 +331,7 @@ void bootloader_handle_getver_cmd				(u8* bl_rx_buffer)
 		//Sending boot-loader version
 		bl_version = BL_VERSION;
 		printmsg1("BL_DEBUG_MSG: BL_VER : 0x%x \r\n",bl_version);
-		/******************************Modications by Mahmoud For WIFI***********************/
+		/******************************Modifications by Mahmoud For WIFI***********************/
 		/*Write bootloader version in the next byte*/
 		Global_u8ResponseArray[2]=bl_version;
 		/*Convert array to char to send them over WIFI*/
@@ -370,7 +371,7 @@ void bootloader_handle_gethelp_cmd				(u8* bl_rx_buffer)
 			//Stating that a reply of eight bytes is going to be sent
 			bootloader_send_ack(sizeof(supported_commands));
 			//Sending boot-loader supported commands
-			/******************************Modications by Mahmoud For WIFI***********************/
+			/******************************Modifications by Mahmoud For WIFI***********************/
 			/*Write reply bytes after the first two bytes of ack*/
 			for(index=0;index<sizeof(supported_commands);index++)
 				Global_u8ResponseArray[index+2]=supported_commands[index];
@@ -416,7 +417,7 @@ void bootloader_handle_getcid_cmd				(u8* bl_rx_buffer)
 		//Stating that a reply of four bytes is going to be sent
 		bootloader_send_ack(4);
 		//Sending device ID and Revision ID
-		/******************************Modications by Mahmoud For WIFI***********************/
+		/******************************Modifications by Mahmoud For WIFI***********************/
 		/*Write reply bytes after the first two bytes of ack*/
  		Global_u8ResponseArray[2]=(u8)device_id;
  		Global_u8ResponseArray[3]=(u8)(device_id>>8);
@@ -448,6 +449,8 @@ void bootloader_handle_getcid_cmd				(u8* bl_rx_buffer)
 /*Handle function to handle BL_GO_TO_ADDR command*/
 void bootloader_handle_goto_address_cmd			(u8* bl_rx_buffer)
 {
+	u8  Local_u8FinalReply[BL_GO_TO_ADDR_REPLY_LEN*2]={0};		/*This local variable will hold the array that will be send over WIFI*/
+
 	u32 go_address=0;
 	u8 addr_valid   = ADDR_VALID;
 	u8 addr_invalid = ADDR_INVALID;
@@ -477,7 +480,15 @@ void bootloader_handle_goto_address_cmd			(u8* bl_rx_buffer)
         if( verify_address(go_address) == ADDR_VALID )
         	{
 				//tell host that address is fine
-				HUART_u8SendSync(HUART_USART2,&addr_valid,1,10);
+    			/******************************Modifications by Mahmoud For WIFI***********************/
+        	/*Write reply bytes after the first two bytes of ack*/
+        		Global_u8ResponseArray[2]=	addr_valid;
+        		/*Convert array to char to send them over WIFI*/
+        		hex2char(Global_u8ResponseArray, Local_u8FinalReply, BL_GO_TO_ADDR_REPLY_LEN);
+        		/*Send converted Bytes over WIFI*/
+        		WIFI_u8SendCommandToServer(Local_u8FinalReply, BL_GO_TO_ADDR_REPLY_LEN*2);
+
+        		//HUART_u8SendSync(HUART_USART2,&addr_valid,1,10);
 
 				/*jump to "go" address.
 				we dont care what is being done there.
@@ -501,7 +512,14 @@ void bootloader_handle_goto_address_cmd			(u8* bl_rx_buffer)
 			{
 				printmsg1("BL_DEBUG_MSG:GO addr invalid ! \n");
 				//tell host that address is invalid
-				HUART_u8SendSync(HUART_USART2,&addr_invalid,1,10);
+    			/******************************Modifications by Mahmoud For WIFI***********************/
+				/*Write reply bytes after the first two bytes of ack*/
+        		Global_u8ResponseArray[2]=	addr_invalid;
+        		/*Convert array to char to send them over WIFI*/
+        		hex2char(Global_u8ResponseArray, Local_u8FinalReply, BL_GO_TO_ADDR_REPLY_LEN);
+        		/*Send converted Bytes over WIFI*/
+        		WIFI_u8SendCommandToServer(Local_u8FinalReply, BL_GO_TO_ADDR_REPLY_LEN*2);
+				//HUART_u8SendSync(HUART_USART2,&addr_invalid,1,10);
 			}
 
 	}
@@ -516,6 +534,8 @@ void bootloader_handle_goto_address_cmd			(u8* bl_rx_buffer)
 /*Handle function to handle BL_FLASH_ERASE command*/
 void bootloader_handle_flash_erase_cmd			(u8* bl_rx_buffer)
 {
+	u8  Local_u8FinalReply[BL_FLASH_ERASE_REPLY_LEN*2]={0};		/*This local variable will hold the array that will be send over WIFI*/
+
 	u8  status;
 	u8  Local_u8FinalAddress[4];								/*This local variable will hold the concatenated address  value that should be passed*/
 	u8  Local_u8FinalHostCRC[4];								/*This local variable will hold the concatenated host crc value that should be passed*/
@@ -549,7 +569,14 @@ void bootloader_handle_flash_erase_cmd			(u8* bl_rx_buffer)
 		//Stating that a reply of one byte is going to be sent
 		bootloader_send_ack(1);
 		//Sending status to HOST application
-		HUART_u8SendSync(HUART_USART2,&status,1,10);
+		/******************************Modifications by Mahmoud For WIFI***********************/
+		/*Write reply bytes after the first two bytes of ack*/
+		Global_u8ResponseArray[2]=	status;
+		/*Convert array to char to send them over WIFI*/
+		hex2char(Global_u8ResponseArray, Local_u8FinalReply, BL_FLASH_ERASE_REPLY_LEN);
+		/*Send converted Bytes over WIFI*/
+		WIFI_u8SendCommandToServer(Local_u8FinalReply, BL_FLASH_ERASE_REPLY_LEN*2);
+		//HUART_u8SendSync(HUART_USART2,&status,1,10);
 	}
 	else
 	{
@@ -596,6 +623,8 @@ void bootloader_handle_flash_mass_erase_cmd		(u8* bl_rx_buffer)
 /*Handle function to handle BL_MEM_WRITE command*/
 void bootloader_handle_mem_write_cmd			(u8* bl_rx_buffer)
 {
+	u8  Local_u8FinalReply[BL_MEM_WRITE_REPLY_LEN*2]={0};		/*This local variable will hold the array that will be send over WIFI*/
+
 	GPIO_Pin_Write(&OnBoard_Led,LOW);
 	u32 destination_address = 0 ;
 	u8 addr_valid   = ADDR_VALID;
@@ -637,13 +666,27 @@ void bootloader_handle_mem_write_cmd			(u8* bl_rx_buffer)
 				//Stating that a reply of one byte is going to be sent
 				bootloader_send_ack(1);
 				//tell host that address is fine
-				HUART_u8SendSync(HUART_USART2,&addr_valid,1,10);
+				/******************************Modifications by Mahmoud For WIFI***********************/
+				/*Write reply bytes after the first two bytes of ack*/
+				Global_u8ResponseArray[2]=	addr_valid;
+				/*Convert array to char to send them over WIFI*/
+				hex2char(Global_u8ResponseArray, Local_u8FinalReply, BL_FLASH_ERASE_REPLY_LEN);
+				/*Send converted Bytes over WIFI*/
+				WIFI_u8SendCommandToServer(Local_u8FinalReply, BL_FLASH_ERASE_REPLY_LEN*2);
+				//HUART_u8SendSync(HUART_USART2,&addr_valid,1,10);
 		 }
 		 else
 		{
 			printmsg1("BL_DEBUG_MSG:GO addr invalid ! \n");
 			//tell host that address is invalid
-			HUART_u8SendSync(HUART_USART2,&addr_invalid,1,10);
+			/******************************Modifications by Mahmoud For WIFI***********************/
+			/*Write reply bytes after the first two bytes of ack*/
+    		Global_u8ResponseArray[2]=	addr_invalid;
+    		/*Convert array to char to send them over WIFI*/
+    		hex2char(Global_u8ResponseArray, Local_u8FinalReply, BL_GO_TO_ADDR_REPLY_LEN);
+    		/*Send converted Bytes over WIFI*/
+    		WIFI_u8SendCommandToServer(Local_u8FinalReply, BL_GO_TO_ADDR_REPLY_LEN*2);
+			//HUART_u8SendSync(HUART_USART2,&addr_invalid,1,10);
 		}
 
 	}
@@ -664,7 +707,7 @@ void bootloader_handle_mem_read_cmd				(u8* bl_rx_buffer)
 	u32 crc_host;
 	crc_host= *((u32*)(bl_rx_buffer+command_packet-4));          /*Extract the CRC32 sent by host*/
 
-	printmsg1("BL_DEBUG_MSG: bootloader_handle_gethelp_cmd \r\n");
+	printmsg1("BL_DEBUG_MSG: bootloader_handle_mem_read_cmd \r\n");
 	// 1) verify the checksum
 	if(! bootloader_verify_crc(bl_rx_buffer, command_length_without_crc, crc_host))
 	{
@@ -673,7 +716,7 @@ void bootloader_handle_mem_read_cmd				(u8* bl_rx_buffer)
 		//Stating that a reply of one byte is going to be sent
 		bootloader_send_ack(1);
 		//processing
-		HUART_u8SendSync(HUART_USART2,supported_commands,sizeof(supported_commands),10);
+
 
 	}
 	else
@@ -834,6 +877,8 @@ void bootloader_handle_dis_write_protect_cmd	(u8* bl_rx_buffer)
 /*Handle function to handle BL_GET_RDP_STATUS command*/
 void bootloader_handle_getrdp_cmd				(u8* bl_rx_buffer)
 {
+	u8  Local_u8FinalReply[BL_GET_RDP_STATUS_REPLY_LEN*2]={0};		/*This local variable will hold the array that will be send over WIFI*/
+
 	u8  RDP_status;
 	u8  command_packet = bl_rx_buffer[0]+1;                 /*Total length of command packet*/
 	u32 command_length_without_crc = command_packet-4;      /*Length to be sent to (bl_verify_crc) function*/
@@ -850,7 +895,15 @@ void bootloader_handle_getrdp_cmd				(u8* bl_rx_buffer)
 		bootloader_send_ack(1);
 		//processing
 		RDP_status = FLASH_OPT_GetRDPStatus();
-		HUART_u8SendSync(HUART_USART2,&RDP_status,1,10);
+		/*Write reply bytes after the first two bytes of ack*/
+
+		Global_u8ResponseArray[2]=	RDP_status;
+		/*Convert array to char to send them over WIFI*/
+		hex2char(Global_u8ResponseArray, Local_u8FinalReply, BL_GET_RDP_STATUS_REPLY_LEN);
+		/*Send converted Bytes over WIFI*/
+		WIFI_u8SendCommandToServer(Local_u8FinalReply, BL_GET_RDP_STATUS_REPLY_LEN*2);
+
+		//HUART_u8SendSync(HUART_USART2,&RDP_status,1,10);
 
 	}
 	else
@@ -864,11 +917,13 @@ void bootloader_handle_getrdp_cmd				(u8* bl_rx_buffer)
 /*Handle function to handle BL_READ_SECTOR_STATUS command*/
 void bootloader_handle_read_sectors_status_cmd	(u8* bl_rx_buffer)
 {
+	u8  Local_u8FinalReply[BL_PROTECTION_STATUS_REPLY_LEN*2]={0};		/*This local variable will hold the array that will be send over WIFI*/
+
 	#define REPLY_LEN 10
 	u8  RDP_status;
 	u32 WRP_status;
 	u8  Local_u8FinalHostCRC[4];
-	u8  Local_u8Tx_buffer[REPLY_LEN];//10 bytes of reply
+
 
 	u8  command_packet = bl_rx_buffer[0]+1;                 /*Total length of command packet*/
 	u32 command_length_without_crc = command_packet-8;      /*Length to be sent to (bl_verify_crc) function*/
@@ -888,11 +943,23 @@ void bootloader_handle_read_sectors_status_cmd	(u8* bl_rx_buffer)
 		//processing
 		RDP_status = FLASH_OPT_GetRDPStatus();
 		WRP_status = FLASH_OPT_GetWRPStatus();
-		hex2char(&RDP_status, &Local_u8Tx_buffer[0], 1);
-		hex2char((u8*)&WRP_status, &Local_u8Tx_buffer[2], 4);
+
 		//Stating that a reply of 10 bytes is going to be sent
 		bootloader_send_ack(REPLY_LEN);
-		HUART_u8SendSync(HUART_USART2,Local_u8Tx_buffer,REPLY_LEN,10);
+
+		/******************************Modifications by Mahmoud For WIFI***********************/
+		/*Convert 2 ack bytes to char to send them over WIFI*/
+		hex2char(Global_u8ResponseArray, &Local_u8FinalReply[0], 2);
+		/*Write reply bytes after the first two bytes of ack*/
+		/*Convert RDP byte to char to send them over WIFI*/
+		hex2char(&RDP_status           , &Local_u8FinalReply[2], 1);
+		/*Convert WRP 4 bytes to char to send them over WIFI*/
+		hex2char((u8*)&WRP_status      , &Local_u8FinalReply[4], 4);
+
+		/*Send converted Bytes over WIFI*/
+		WIFI_u8SendCommandToServer(Local_u8FinalReply, BL_PROTECTION_STATUS_REPLY_LEN*2);
+
+		//HUART_u8SendSync(HUART_USART2,Local_u8Tx_buffer,REPLY_LEN,10);
 	}
 	else
 	{
@@ -935,8 +1002,8 @@ void bootloader_handle_system_reset_cmd			(u8* bl_rx_buffer)
 }
 void bootloader_handle_existing_apps_cmd		(u8* bl_rx_buffer)
 {
-	u32 application_info_block_start_address = FLASH_MEMORY_PAGE_20;
-	u8  number_of_apps = *((u8*)FLASH_MEMORY_PAGE_20);
+	u32 application_info_block_start_address = FLASH_MEMORY_PAGE_19;
+	u8  number_of_apps = *((u8*)FLASH_MEMORY_PAGE_19);
 	u8  Local_u8FinalHostCRC[4];
 
 	u8  command_packet = bl_rx_buffer[0]+1;                 /*Total length of command packet*/
