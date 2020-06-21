@@ -6,6 +6,7 @@
 #include "Bootloader.h"
 #include "Debug.h"
 #include "Trace.h"
+#include "Delay_interface.h"
 
 
 u8 receiveFlag=0;
@@ -24,8 +25,9 @@ int main(void)
 	u8 Bootloader_Request_button_State;
 
 	RCC_f32GetPLLMultiplierValue();
-	RCC_voidSetClockStatus(RCC_ENABLE_HSE);
-	RCC_voidSWSelectClock(RCC_SW_HSE);
+	//RCC_voidSetClockStatus(RCC_ENABLE_HSE);
+	//RCC_voidSWSelectClock(RCC_SW_HSE);
+	//RCC_voidChangeBusPrescalar(RCC_APB2_PRESCALAR_8);
 	RCC_voidChangeBusPrescalar(RCC_APB1_PRESCALAR_1);
 	RCC_voidEnablePeripheralClock(RCC_PERIPHERALS_PORTB); //Activate clock for button port
 	RCC_voidEnablePeripheralClock(RCC_PERIPHERALS_PORTC); //Activate clock for on-board led port
@@ -44,7 +46,7 @@ int main(void)
 
 	GPIO_Init(&Bootloader_Request_button);
 	GPIO_Pin_Write(&Bootloader_Request_button,HIGH);
-
+	delay_ms(1000);
 	GPIO_Pin_Read(&Bootloader_Request_button,&Bootloader_Request_button_State);
 
 	if(Bootloader_Request_button_State) bootloader_voidJumpToUserApp(); //if the button is not pressed

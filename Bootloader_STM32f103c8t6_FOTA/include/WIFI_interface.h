@@ -16,6 +16,7 @@
 #define		 WIFI_COMMAND_GET_IP_ADDRESS 					(u8*)"AT+CIFSR\r\n"
 #define		 WIFI_COMMAND_LIST_AP		 					(u8*)"AT+CWLAP\r\n"
 #define		 WIFI_COMMAND_LIST_AP_NAMES_ONLY_CONFIG		 	(u8*)"AT+CWLAPOPT=0,0002\r\n"
+#define 	 WIFI_COMMAND_SET_MODE_STATION					(u8*)"AT+CWMODE_CUR=1\r\n"
 #define		 WIFI_COMMAND_GET_DATA_FROM_SERVER				(u8*)"GET https://api.thingspeak.com/apps/thinghttp/send_request?api_key=Y4JOXUDQZBLGOMHJ\r\nHost:api.thingspeak.com\r\n\r\n\r\n\r\n\r\n"
 #define		 WIFI_COMMAND_GET_COMMAND_FROM_SERVER			(u8*)"GET https://api.thingspeak.com/channels/1082594/fields/1/last.txt?api_key=GL3M7JAK48BR8RRA\r\nHost:api.thingspeak.com\r\n"
 

@@ -107,7 +107,7 @@ void process_COMMAND_BL_GET_VER(uint32_t len, uint8_t* Copy_u8DataBuffer)
 void process_COMMAND_BL_GET_HELP(uint32_t len)
 {
     uint8_t reply[16];
-    read_serial_port(reply,len);
+    //read_serial_port(reply,len);
     printf("\n   Supported Commands :");
     for(uint32_t i =0 ; i < len ; i++)
     printf("0x%x  ",reply[i]);

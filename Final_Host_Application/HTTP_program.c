@@ -29,14 +29,14 @@ u8 HOST_voidConnectToServer(u8* Copy_u8Server)
     u16 iterator=0;
 
     /*Initialise Winsock*/
-    printf("\nInitialising Winsock...");
+    //printf("\nInitialising Winsock...");
     if (WSAStartup(MAKEWORD(2,2),&wsa) != 0)
     {
-        printf("Failed. Error Code : %d",WSAGetLastError());
+        //printf("Failed. Error Code : %d",WSAGetLastError());
         return 1;
     }
 
-    printf("Initialised.\n");
+    //printf("Initialised.\n");
 
 
     /*Create socket*/
@@ -48,7 +48,7 @@ u8 HOST_voidConnectToServer(u8* Copy_u8Server)
     {
         printf("Could not create socket : %d" , WSAGetLastError());
     }
-    printf("Socket created.\n");
+    //printf("Socket created.\n");
 
     /*Get information about server using its domain name*/
     remoteHost=gethostbyname(Copy_u8Server);
@@ -72,7 +72,7 @@ u8 HOST_voidConnectToServer(u8* Copy_u8Server)
     }
     else
     {
-        printf("Connected to http://%s\n", Copy_u8Server);
+        //printf("Connected to http://%s\n", Copy_u8Server);
         Local_u8Status=STATUS_OK;
     }
     return Local_u8Status;
@@ -128,13 +128,13 @@ u8 HOST_voidSendCommand (u8* Copy_u8UserCommand, u16 Copy_u16Size)
             puts("Send failed");
             return 1;
         }
-        puts("Data Sent\n");
+        //puts("Data Sent\n");
 
         if((recv_size = recv(s , server_reply , 2000 , 0)) == SOCKET_ERROR)
         {
             puts("recv failed");
         }
-        puts("Reply received\n");
+        //puts("Reply received\n");
 
         //Add a NULL terminating u8acter to make it a proper string before printing
         server_reply[recv_size] = '\0';
@@ -181,13 +181,13 @@ u8 HOST_voidReceiveCommand (u8* Copy_u8Buffer)
             puts("Send failed");
             return 1;
         }
-        puts("Data Sent\n");
+        //puts("Data Sent\n");
 
         if((recv_size = recv(s , server_reply , 2000 , 0)) == SOCKET_ERROR)
         {
             puts("recv failed");
         }
-        puts("Reply received\n");
+        //puts("Reply received\n");
 
         //Add a NULL terminating character to make it a proper string before printing
         server_reply[recv_size] = '\0';

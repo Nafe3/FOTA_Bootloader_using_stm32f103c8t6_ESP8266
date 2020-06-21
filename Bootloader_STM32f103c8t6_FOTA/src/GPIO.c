@@ -314,7 +314,7 @@ std_err GPIO_Pin_Write    (GPIO_Pin_t* Pin,u8  State){
 
 /////////////////////////////////////////////////////////////
 std_err GPIO_Pin_Read     (GPIO_Pin_t* Pin,u8* ReturnValue){
-	std_err err;
+	volatile std_err err;
 	err.error_status= STATUS_OK;
 	GPIO_t* RegPtr = (GPIO_t*)Pin->port;//casting
 
