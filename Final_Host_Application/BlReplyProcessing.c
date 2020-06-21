@@ -29,15 +29,15 @@ int read_bootloader_reply(uint8_t command_code, uint8_t* Copy_u8DataBuffer)
              process_COMMAND_BL_GET_VER(len_to_follow, Copy_u8DataBuffer);
             break;
         case COMMAND_BL_GET_HELP:
-            process_COMMAND_BL_GET_HELP(len_to_follow);
+            process_COMMAND_BL_GET_HELP(len_to_follow, Copy_u8DataBuffer);
             break;
         case COMMAND_BL_GET_CID:
-            process_COMMAND_BL_GET_CID(len_to_follow);
+            process_COMMAND_BL_GET_CID(len_to_follow, Copy_u8DataBuffer);
             break;
 
 
         case COMMAND_BL_GO_TO_ADDR:
-            process_COMMAND_BL_GO_TO_ADDR(len_to_follow);
+            process_COMMAND_BL_GO_TO_ADDR(len_to_follow, Copy_u8DataBuffer);
             break;
 
 
@@ -104,23 +104,29 @@ void process_COMMAND_BL_GET_VER(uint32_t len, uint8_t* Copy_u8DataBuffer)
     printf("\n   Bootloader Ver. : 0x%x\n",Copy_u8DataBuffer[2]);
 }
 
-void process_COMMAND_BL_GET_HELP(uint32_t len)
+void process_COMMAND_BL_GET_HELP(uint32_t len, uint8_t* Copy_u8Buffer)
 {
-    uint8_t reply[16];
+    //uint8_t reply[16];
     //read_serial_port(reply,len);
     printf("\n   Supported Commands :");
-    for(uint32_t i =0 ; i < len ; i++)
-    printf("0x%x  ",reply[i]);
+    for(uint32_t i =2 ; i < (len+2) ; i++)
+    {
+        printf("0x%x  ",Copy_u8Buffer[i]);
+    }
     printf("\n");
 }
 
-void process_COMMAND_BL_GET_CID(uint32_t len)
+void process_COMMAND_BL_GET_CID(uint32_t len, uint8_t* Copy_u8DataBuffer)
 {
     uint8_t cid[4];
 
     uint16_t ci =0;
     uint16_t rev=0;
-    read_serial_port(cid,len);
+    //read_serial_port(cid,len);
+    cid[0]= Copy_u8DataBuffer[2];
+    cid[1]= Copy_u8DataBuffer[3];
+    cid[2]= Copy_u8DataBuffer[4];
+    cid[3]= Copy_u8DataBuffer[5];
     ci = (uint16_t)(cid[1] << 8 )+ cid[0];
     rev= (uint16_t)(cid[3] << 8 )+ cid[2];
     printf("\n   Chip Id.     : %#x\n",ci);
@@ -130,10 +136,12 @@ void process_COMMAND_BL_GET_CID(uint32_t len)
 
 
 
-void process_COMMAND_BL_GO_TO_ADDR(uint32_t len)
+void process_COMMAND_BL_GO_TO_ADDR(uint32_t len, uint8_t* Copy_u8DataBuffer)
 {
     uint8_t addr_status=0;
-    read_serial_port(&addr_status,len);
+    //read_serial_port(&addr_status,len);
+    /*Address status will be the first byte coming after the length, which is at index 2*/
+    addr_status = Copy_u8DataBuffer[2];
     printf("\n   Address Status : 0x%x\n",addr_status);
     if(addr_status) printf("\n   Address Status : Address Invalid \r\n");
     else            printf("\n   Address Status : Address Valid \r\n");

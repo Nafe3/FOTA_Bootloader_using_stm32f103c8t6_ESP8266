@@ -89,7 +89,7 @@ u8 HOST_voidSendCommand (u8* Copy_u8UserCommand, u16 Copy_u16Size)
     /*This local variable will hold the status of the connect to server function*/
     u8 Local_u8ConnectionStatus=STATUS_NOK;
     /*This Local variable will hold the final string that will be sent*/
-    u8  Local_u8FinalCommand[78]={0};
+    u8  Local_u8FinalCommand[1024]={0};
     /*This variable holds the size of the data that we will receive as a response*/
     u16 recv_size;
     /*This variable will hold the server request*/

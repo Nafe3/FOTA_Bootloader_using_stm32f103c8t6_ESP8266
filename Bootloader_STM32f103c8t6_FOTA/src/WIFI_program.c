@@ -12,6 +12,7 @@
 
 #include "WIFI_interface.h"
 #include <string.h>
+#include <stdio.h>
 #include "Delay_interface.h"
 
 
@@ -228,7 +229,7 @@ u8 WIFI_u8CountData(u32* Copy_u32DataSize)
 	/*If wifi peripheral has been initialized, proceed with the code*/
 	if (Static_UART_PERIPHERAL.BaseAddress!=NULL)
 	{
-		HUART_u8SetRXCallBack(callBackCountingRX, Static_UART_PERIPHERAL.BaseAddress);
+
 		/*Send first part to WIFI peripheral, which specifies the number of connections we will be using (which is 1)*/
 		WIFI_u8SendCommand(Local_u8SendConnectionType);
 		delay_ms(1000);
@@ -244,7 +245,11 @@ u8 WIFI_u8CountData(u32* Copy_u32DataSize)
 		/*Set data to array flag*/
 		static_u8DataToArray=1;
 		/*Send final part to WIFI peripheral, which is the request*/
-		WIFI_u8SendCommand(Local_u8SendRequest);
+		HUART_u8SetRXCallBack(callBackCountingRX, Static_UART_PERIPHERAL.BaseAddress);
+		/*Reset receive flag if it has not been initialized*/
+		static_u8ReceiveFlag=1;
+		/*Send data using static send request*/
+		WIFI_voidHandleRequest(Local_u8SendRequest);
 		/*Set data to array flag*/
 		static_u8DataToArray=0;
 
@@ -460,13 +465,16 @@ u8 WIFI_u8SendCommandToServer (u8* Copy_u8commandNumber, u16 Copy_u16Size)
 	/*This local array will hold the data that will be sent*/
 	u8 Local_u8SendConnectionType[]="AT+CIPMUX=0\r\n";
 	u8 Local_u8SendStartConnection[]="AT+CIPSTART=\"TCP\",\"api.thingspeak.com\",80\r\n";
-	u8 Local_u8SendSize[]="AT+CIPSEND=99\r\n";
+	//u8 Local_u8SendSize[]="AT+CIPSEND=99\r\n";
+	u8 Local_u8SendSize[20]={0};
 	//u8 Local_u8SendSize[]="AT+CIPSEND=118\r\n";
 	/*These local variables will contain the command that we want to send to our server. It is divided as two parts so that we can concatenate command to it*/
-	u8 Local_u8SendRequest[150]="GET https://api.thingspeak.com/update?api_key=1H61N46CEZA65MTJ&field1=";
+	u8 Local_u8SendRequest[512]="GET https://api.thingspeak.com/update?api_key=1H61N46CEZA65MTJ&field1=";
 	u8 Local_u8SendRequest2[]="\r\nHost:api.thingspeak.com\r\n\r\n\r\n\r\n\r\n";
 	/*This Local variable will be used as an iterator for concatenating string, we will use it so that we can avoid garbage better*/
 	u16 Local_u16Iterator=0;
+	/*This Local variable will hold the size of data to be sent*/
+	volatile u16 Local_u16DataSize=0;
 
 
 	/*Concatenate command and strings together*/
@@ -476,6 +484,12 @@ u8 WIFI_u8SendCommandToServer (u8* Copy_u8commandNumber, u16 Copy_u16Size)
 		Local_u8SendRequest[Local_u16Iterator+70]=Copy_u8commandNumber[Local_u16Iterator];
 	}
 	strcat(Local_u8SendRequest,Local_u8SendRequest2);
+
+	Local_u16DataSize = strlen(Local_u8SendRequest);
+	Local_u16DataSize-=2;
+	/*Concatenate size to the string of the size
+	 * we will use sprintf so that int will be concatenated to string*/
+	sprintf(Local_u8SendSize, "AT+CIPSEND=%d\r\n", (int)Local_u16DataSize);
 	//u8 Local_u8SendRequest[]="GET https://api.thingspeak.com/channels/1082594/fields/1/last.txt?api_key=GL3M7JAK48BR8RRA\r\nHost:api.thingspeak.com\r\n\r\n\r\n\r\n\r\n";
 
 	/*If wifi peripheral has been initialized, proceed with the code*/

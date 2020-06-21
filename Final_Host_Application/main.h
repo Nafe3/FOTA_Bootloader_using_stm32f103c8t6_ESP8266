@@ -11,10 +11,10 @@ void decode_menu_command_code(uint32_t command_code);
 
 //BL Reply Process prototypes
 void process_COMMAND_BL_GET_VER					(uint32_t len, uint8_t* Copy_u8DataBuffer);
-void process_COMMAND_BL_GET_HELP				(uint32_t len);
-void process_COMMAND_BL_GET_CID					(uint32_t len);
+void process_COMMAND_BL_GET_HELP				(uint32_t len, uint8_t* Copy_u8DataBuffer);
+void process_COMMAND_BL_GET_CID					(uint32_t len, uint8_t* Copy_u8DataBuffer);
 
-void process_COMMAND_BL_GO_TO_ADDR				(uint32_t len);
+void process_COMMAND_BL_GO_TO_ADDR				(uint32_t len, uint8_t* Copy_u8DataBuffer);
 
 void process_COMMAND_BL_FLASH_ERASE				(uint32_t len);
 void process_COMMAND_BL_FLASH_MASS_ERASE		(uint32_t len);
@@ -75,7 +75,7 @@ uint32_t 	calc_file_len	(void);
 #define COMMAND_BL_GET_HELP_LEN				6
 #define COMMAND_BL_GET_CID_LEN				6
 
-#define COMMAND_BL_GO_TO_ADDR_LEN			14
+#define COMMAND_BL_GO_TO_ADDR_LEN			10
 
 #define COMMAND_BL_FLASH_ERASE_LEN			19       //8
 #define COMMAND_BL_MASS_ERASE_LEN			10       //8

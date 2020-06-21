@@ -168,7 +168,7 @@ u16 iterator=0;
 GPIO_Pin_t OnBoard_Led;
 
 
-#define BOOTLOADER_RESPONSE_ARRAY_SIZE		(u8)256
+#define BOOTLOADER_RESPONSE_ARRAY_SIZE		(u16)256
 /*This array will be used for holding data that will be sent to webserver*/
 u8 Global_u8ResponseArray[BOOTLOADER_RESPONSE_ARRAY_SIZE]={0};
 
@@ -460,7 +460,7 @@ void bootloader_handle_goto_address_cmd			(u8* bl_rx_buffer)
 	u32 crc_host;
 	u8 Local_u8FinalAddress[4];									/*This local variable will hold the final address value that should be passed*/
 
-	crc_host= *((u32*)(bl_rx_buffer+command_packet-4));         /*Extract the CRC32 sent by host*/
+	crc_host= *((u32*)(bl_rx_buffer+command_length_without_crc));         /*Extract the CRC32 sent by host*/
 
 	printmsg1("BL_DEBUG_MSG: bootloader_handle_goto_address_cmd \r\n");
 	// 1) verify the checksum
@@ -1054,7 +1054,8 @@ void bootloader_send_ack(u8 follow_len)
 void bootloader_send_nack(void)
 {
 	//HUART_u8SendSync(HUART_USART2,(u8*)BL_NACK,1,10);
-	WIFI_u8SendCommandToServer((u8*)BL_NACK, 1);
+	hex2char((u8*)BL_NACK, Global_u8ResponseArray, 1);
+	WIFI_u8SendCommandToServer(Global_u8ResponseArray, 2);
 
 }
 
