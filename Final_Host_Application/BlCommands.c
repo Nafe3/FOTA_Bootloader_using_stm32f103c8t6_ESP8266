@@ -262,36 +262,39 @@ void decode_menu_command_code(uint32_t command_code)
         /*Pass hex array to process it as reply of bootloader*/
         ret_value = read_bootloader_reply(COMMAND_BL_GET_VER, replyFromBootloaderHex);
 
-
-//        /*Send length of data to be sent*/
-//        Write_to_serial_port(&data_buf[0],1);
-//        /*Send an empty frame to empty DR and prevent data length being read again by bootloader as data*/
-//        Write_to_serial_port(&emptyFrame,1);
-//        /*Wait for bootloader to be ready to receive data*/
-//        delay(20);
-//        /*Send every byte then follow it by a delay to prevent data corruption that happens when data is sent successively*/
-//        for (iterator=1; iterator<COMMAND_BL_GET_VER_LEN;iterator++)
-//        {
-//            Write_to_serial_port(&data_buf[iterator],1);
-//            //delay (500);
-//        }
-//        /*We will send empty frame now to clear DR*/
-//        Write_to_serial_port(&emptyFrame,1);
-//        /*Get response from bootloader and save it in variable*/
-//        ret_value = read_bootloader_reply(data_buf[1]); //command code
-
         break;
 
-//    case 2:
-//        printf("\n   Command == > BL_GET_HLP");
-//
-//        data_buf[0] = COMMAND_BL_GET_HELP_LEN-1;
-//        data_buf[1] = COMMAND_BL_GET_HELP;
-//        crc32       = get_crc(data_buf,COMMAND_BL_GET_HELP_LEN-4);
-//        data_buf[2] = word_to_byte(crc32,1,1);
-//        data_buf[3] = word_to_byte(crc32,2,1);
-//        data_buf[4] = word_to_byte(crc32,3,1);
-//        data_buf[5] = word_to_byte(crc32,4,1);
+    case 2:
+        printf("\n   Command == > BL_GET_HLP");
+
+        data_buf[0] = COMMAND_BL_GET_HELP_LEN-1;
+        data_buf[1] = COMMAND_BL_GET_HELP;
+        crc32       = get_crc(data_buf,COMMAND_BL_GET_HELP_LEN-4);
+        data_buf[2] = word_to_byte(crc32,1,1);
+        data_buf[3] = word_to_byte(crc32,2,1);
+        data_buf[4] = word_to_byte(crc32,3,1);
+        data_buf[5] = word_to_byte(crc32,4,1);
+
+         /*Convert buffer to char to be sent through WIFI*/
+        hex2char(data_buf,commandPacket_TxBuffer,COMMAND_BL_GET_HELP_LEN);
+        /*Send data to server*/
+        HOST_voidSendCommand(commandPacket_TxBuffer,COMMAND_BL_GET_HELP_LEN*2);
+
+        while (replyFromBootloaderHex[0]!=0xA5 && replyFromBootloaderHex!=0x7f)
+        {
+            /*Get response from bootloader and through WIFI*/
+            HOST_voidReceiveCommand(replyFromBootloaderChar);
+            /*Convert response from char to hex*/
+            char2hex(replyFromBootloaderChar,replyFromBootloaderHex,COMMAND_BL_GET_HELP_LEN);
+            /*If we reached timeout threshold, break from loop, otherwise increase variable*/
+            if(timeout_counter==TIMEOUT)break;
+            timeout_counter++;
+            printf("waiting for response\n");
+        }
+        printf("Done receiving\n");
+        /*Pass hex array to process it as reply of bootloader*/
+        ret_value = read_bootloader_reply(COMMAND_BL_GET_VER, replyFromBootloaderHex);
+
 //
 //        /*Send length of data to be sent*/
 //        Write_to_serial_port(&data_buf[0],1);
@@ -309,9 +312,7 @@ void decode_menu_command_code(uint32_t command_code)
 //        Write_to_serial_port(&emptyFrame,1);
 //        /*Get Response for bootloader*/
 //        ret_value = read_bootloader_reply(data_buf[1]);
-//
-//
-//        break;
+        break;
 //
 //    case 3:
 //        printf("\n   Command == > BL_GET_CID");

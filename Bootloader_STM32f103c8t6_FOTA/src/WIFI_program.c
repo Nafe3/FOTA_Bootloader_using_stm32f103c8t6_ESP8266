@@ -306,7 +306,7 @@ u8 WIFI_u8SendCommand (u8* Copy_u8DesiredCommand)
 	if (Static_UART_PERIPHERAL.BaseAddress!=NULL)
 	{
 		/*Set callback function*/
-		//HUART_u8SetRXCallBack(callBackRX, Static_UART_PERIPHERAL.BaseAddress);
+		HUART_u8SetRXCallBack(callBackRX, Static_UART_PERIPHERAL.BaseAddress);
 		/*Send data using static send request*/
 		WIFI_voidHandleRequest(Copy_u8DesiredCommand);
 		/*Return request as OK because the previous function contained while loop*/

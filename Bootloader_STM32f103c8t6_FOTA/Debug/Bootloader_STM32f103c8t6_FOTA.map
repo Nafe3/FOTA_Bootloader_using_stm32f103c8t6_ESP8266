@@ -1546,8 +1546,6 @@ Discarded input sections
  .bss           0x00000000        0x0 ./src/WIFI_program.o
  .text.callBackCountingRX
                 0x00000000      0x12c ./src/WIFI_program.o
- .text.WIFI_u8SetOutput
-                0x00000000       0x24 ./src/WIFI_program.o
  .text.WIFI_u8CountData
                 0x00000000       0xb0 ./src/WIFI_program.o
  .text.WIFI_u8ReceiveData
@@ -1897,10 +1895,10 @@ END GROUP
 
 .inits          0x08000350       0x28
                 0x08000350                __data_regions_array_start = .
-                0x08000350        0x4 LONG 0x8004b74 LOADADDR (.data)
+                0x08000350        0x4 LONG 0x8004bb0 LOADADDR (.data)
                 0x08000354        0x4 LONG 0x20000000 ADDR (.data)
                 0x08000358        0x4 LONG 0x200000d4 (ADDR (.data) + SIZEOF (.data))
-                0x0800035c        0x4 LONG 0x8004b74 LOADADDR (.data_CCMRAM)
+                0x0800035c        0x4 LONG 0x8004bb0 LOADADDR (.data_CCMRAM)
                 0x08000360        0x4 LONG 0x0 ADDR (.data_CCMRAM)
                 0x08000364        0x4 LONG 0x0 (ADDR (.data_CCMRAM) + SIZEOF (.data_CCMRAM))
                 0x08000368                __data_regions_array_end = .
@@ -1932,7 +1930,7 @@ END GROUP
 .flashtext
  *(.flashtext .flashtext.*)
 
-.text           0x08000378     0x47fb
+.text           0x08000378     0x4837
  *(.text .text.*)
  .text._exit    0x08000378        0x2 ./system/src/newlib/_exit.o
                 0x08000378                _exit
@@ -2195,245 +2193,248 @@ END GROUP
  .text.WIFI_u8Init
                 0x0800275c       0x90 ./src/WIFI_program.o
                 0x0800275c                WIFI_u8Init
- .text.WIFI_u8SendCommand
+ .text.WIFI_u8SetOutput
                 0x080027ec       0x24 ./src/WIFI_program.o
-                0x080027ec                WIFI_u8SendCommand
+                0x080027ec                WIFI_u8SetOutput
+ .text.WIFI_u8SendCommand
+                0x08002810       0x30 ./src/WIFI_program.o
+                0x08002810                WIFI_u8SendCommand
  .text.WIFI_u8ConnectToAccessPoint
-                0x08002810      0x128 ./src/WIFI_program.o
-                0x08002810                WIFI_u8ConnectToAccessPoint
+                0x08002840      0x128 ./src/WIFI_program.o
+                0x08002840                WIFI_u8ConnectToAccessPoint
  .text.WIFI_u8SendCommandToServer
-                0x08002938      0x100 ./src/WIFI_program.o
-                0x08002938                WIFI_u8SendCommandToServer
+                0x08002968      0x100 ./src/WIFI_program.o
+                0x08002968                WIFI_u8SendCommandToServer
  .text.WIFI_u8ReceiveCommand
-                0x08002a38       0xf0 ./src/WIFI_program.o
-                0x08002a38                WIFI_u8ReceiveCommand
- .text.main     0x08002b28      0x10c ./src/main.o
-                0x08002b28                main
- .text          0x08002c34      0x378 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7-m\libgcc.a(_arm_addsubdf3.o)
-                0x08002c34                __aeabi_drsub
-                0x08002c3c                __aeabi_dsub
-                0x08002c3c                __subdf3
-                0x08002c40                __aeabi_dadd
-                0x08002c40                __adddf3
-                0x08002eb8                __floatunsidf
-                0x08002eb8                __aeabi_ui2d
-                0x08002ed8                __floatsidf
-                0x08002ed8                __aeabi_i2d
-                0x08002efc                __aeabi_f2d
-                0x08002efc                __extendsfdf2
-                0x08002f40                __floatundidf
-                0x08002f40                __aeabi_ul2d
-                0x08002f50                __floatdidf
-                0x08002f50                __aeabi_l2d
- .text          0x08002fac      0x424 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7-m\libgcc.a(_arm_muldivdf3.o)
-                0x08002fac                __aeabi_dmul
-                0x08002fac                __muldf3
-                0x08003200                __divdf3
-                0x08003200                __aeabi_ddiv
- .text          0x080033d0       0x40 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7-m\libgcc.a(_arm_fixunsdfsi.o)
-                0x080033d0                __aeabi_d2uiz
-                0x080033d0                __fixunsdfsi
- .text          0x08003410      0x21c d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7-m\libgcc.a(_arm_addsubsf3.o)
-                0x08003410                __aeabi_frsub
-                0x08003418                __subsf3
-                0x08003418                __aeabi_fsub
-                0x0800341c                __aeabi_fadd
-                0x0800341c                __addsf3
-                0x0800357c                __aeabi_ui2f
-                0x0800357c                __floatunsisf
-                0x08003584                __aeabi_i2f
-                0x08003584                __floatsisf
-                0x080035a0                __aeabi_ul2f
-                0x080035a0                __floatundisf
-                0x080035b0                __aeabi_l2f
-                0x080035b0                __floatdisf
- .text          0x0800362c      0x2a0 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7-m\libgcc.a(_arm_muldivsf3.o)
-                0x0800362c                __mulsf3
-                0x0800362c                __aeabi_fmul
-                0x08003794                __aeabi_fdiv
-                0x08003794                __divsf3
- .text          0x080038cc       0x40 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7-m\libgcc.a(_arm_fixunssfsi.o)
-                0x080038cc                __fixunssfsi
-                0x080038cc                __aeabi_f2uiz
- .text.__errno  0x0800390c        0xc d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-errno.o)
-                0x0800390c                __errno
- .text.memcpy   0x08003918       0x16 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-memcpy-stub.o)
-                0x08003918                memcpy
- .text.memset   0x0800392e       0x10 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-memset.o)
-                0x0800392e                memset
- .text.strcat   0x0800393e       0x1e d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-strcat.o)
-                0x0800393e                strcat
- .text          0x0800395c       0x10 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-strlen.o)
-                0x0800395c                strlen
+                0x08002a68       0xf0 ./src/WIFI_program.o
+                0x08002a68                WIFI_u8ReceiveCommand
+ .text.main     0x08002b58      0x11c ./src/main.o
+                0x08002b58                main
+ .text          0x08002c74      0x378 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7-m\libgcc.a(_arm_addsubdf3.o)
+                0x08002c74                __aeabi_drsub
+                0x08002c7c                __aeabi_dsub
+                0x08002c7c                __subdf3
+                0x08002c80                __aeabi_dadd
+                0x08002c80                __adddf3
+                0x08002ef8                __floatunsidf
+                0x08002ef8                __aeabi_ui2d
+                0x08002f18                __floatsidf
+                0x08002f18                __aeabi_i2d
+                0x08002f3c                __aeabi_f2d
+                0x08002f3c                __extendsfdf2
+                0x08002f80                __floatundidf
+                0x08002f80                __aeabi_ul2d
+                0x08002f90                __floatdidf
+                0x08002f90                __aeabi_l2d
+ .text          0x08002fec      0x424 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7-m\libgcc.a(_arm_muldivdf3.o)
+                0x08002fec                __aeabi_dmul
+                0x08002fec                __muldf3
+                0x08003240                __divdf3
+                0x08003240                __aeabi_ddiv
+ .text          0x08003410       0x40 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7-m\libgcc.a(_arm_fixunsdfsi.o)
+                0x08003410                __aeabi_d2uiz
+                0x08003410                __fixunsdfsi
+ .text          0x08003450      0x21c d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7-m\libgcc.a(_arm_addsubsf3.o)
+                0x08003450                __aeabi_frsub
+                0x08003458                __subsf3
+                0x08003458                __aeabi_fsub
+                0x0800345c                __aeabi_fadd
+                0x0800345c                __addsf3
+                0x080035bc                __aeabi_ui2f
+                0x080035bc                __floatunsisf
+                0x080035c4                __aeabi_i2f
+                0x080035c4                __floatsisf
+                0x080035e0                __aeabi_ul2f
+                0x080035e0                __floatundisf
+                0x080035f0                __aeabi_l2f
+                0x080035f0                __floatdisf
+ .text          0x0800366c      0x2a0 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7-m\libgcc.a(_arm_muldivsf3.o)
+                0x0800366c                __mulsf3
+                0x0800366c                __aeabi_fmul
+                0x080037d4                __aeabi_fdiv
+                0x080037d4                __divsf3
+ .text          0x0800390c       0x40 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7-m\libgcc.a(_arm_fixunssfsi.o)
+                0x0800390c                __fixunssfsi
+                0x0800390c                __aeabi_f2uiz
+ .text.__errno  0x0800394c        0xc d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-errno.o)
+                0x0800394c                __errno
+ .text.memcpy   0x08003958       0x16 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-memcpy-stub.o)
+                0x08003958                memcpy
+ .text.memset   0x0800396e       0x10 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-memset.o)
+                0x0800396e                memset
+ .text.strcat   0x0800397e       0x1e d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-strcat.o)
+                0x0800397e                strcat
+ .text          0x0800399c       0x10 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-strlen.o)
+                0x0800399c                strlen
  .text._vsnprintf_r
-                0x0800396c       0x58 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-vsnprintf.o)
-                0x0800396c                _vsniprintf_r
-                0x0800396c                _vsnprintf_r
+                0x080039ac       0x58 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-vsnprintf.o)
+                0x080039ac                _vsniprintf_r
+                0x080039ac                _vsnprintf_r
  .text.vsnprintf
-                0x080039c4       0x1c d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-vsnprintf.o)
-                0x080039c4                vsniprintf
-                0x080039c4                vsnprintf
+                0x08003a04       0x1c d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-vsnprintf.o)
+                0x08003a04                vsniprintf
+                0x08003a04                vsnprintf
  .text.__ssputs_r
-                0x080039e0       0xb4 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-nano-svfprintf.o)
-                0x080039e0                __ssputs_r
+                0x08003a20       0xb4 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-nano-svfprintf.o)
+                0x08003a20                __ssputs_r
  .text._svfprintf_r
-                0x08003a94      0x1ec d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-nano-svfprintf.o)
-                0x08003a94                _svfiprintf_r
-                0x08003a94                _svfprintf_r
+                0x08003ad4      0x1ec d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-nano-svfprintf.o)
+                0x08003ad4                _svfiprintf_r
+                0x08003ad4                _svfprintf_r
  .text._printf_common
-                0x08003c80       0xec d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-nano-vfprintf_i.o)
-                0x08003c80                _printf_common
+                0x08003cc0       0xec d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-nano-vfprintf_i.o)
+                0x08003cc0                _printf_common
  .text._printf_i
-                0x08003d6c      0x224 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-nano-vfprintf_i.o)
-                0x08003d6c                _printf_i
- .text.memchr   0x08003f90       0x1c d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-memchr-stub.o)
-                0x08003f90                memchr
- .text.memmove  0x08003fac       0x32 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-memmove.o)
-                0x08003fac                memmove
- *fill*         0x08003fde        0x2 
- .text._free_r  0x08003fe0       0x98 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-nano-freer.o)
-                0x08003fe0                _free_r
+                0x08003dac      0x224 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-nano-vfprintf_i.o)
+                0x08003dac                _printf_i
+ .text.memchr   0x08003fd0       0x1c d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-memchr-stub.o)
+                0x08003fd0                memchr
+ .text.memmove  0x08003fec       0x32 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-memmove.o)
+                0x08003fec                memmove
+ *fill*         0x0800401e        0x2 
+ .text._free_r  0x08004020       0x98 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-nano-freer.o)
+                0x08004020                _free_r
  .text._malloc_r
-                0x08004078       0xb4 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-nano-mallocr.o)
-                0x08004078                _malloc_r
+                0x080040b8       0xb4 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-nano-mallocr.o)
+                0x080040b8                _malloc_r
  .text._realloc_r
-                0x0800412c       0x4c d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-nano-reallocr.o)
-                0x0800412c                _realloc_r
- .text._sbrk_r  0x08004178       0x20 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-sbrkr.o)
-                0x08004178                _sbrk_r
+                0x0800416c       0x4c d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-nano-reallocr.o)
+                0x0800416c                _realloc_r
+ .text._sbrk_r  0x080041b8       0x20 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-sbrkr.o)
+                0x080041b8                _sbrk_r
  .text.__malloc_lock
-                0x08004198        0x2 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-mlock.o)
-                0x08004198                __malloc_lock
+                0x080041d8        0x2 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-mlock.o)
+                0x080041d8                __malloc_lock
  .text.__malloc_unlock
-                0x0800419a        0x2 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-mlock.o)
-                0x0800419a                __malloc_unlock
+                0x080041da        0x2 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-mlock.o)
+                0x080041da                __malloc_unlock
  .text._malloc_usable_size_r
-                0x0800419c       0x10 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-nano-msizer.o)
-                0x0800419c                _malloc_usable_size_r
+                0x080041dc       0x10 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-nano-msizer.o)
+                0x080041dc                _malloc_usable_size_r
  *(.rodata .rodata.* .constdata .constdata.*)
  .rodata.dumpExceptionStack.str1.4
-                0x080041ac      0x11a ./system/src/cortexm/exception_handlers.o
- *fill*         0x080042c6        0x2 
+                0x080041ec      0x11a ./system/src/cortexm/exception_handlers.o
+ *fill*         0x08004306        0x2 
  .rodata.str1.4
-                0x080042c8       0x2a ./system/src/cortexm/exception_handlers.o
- *fill*         0x080042f2        0x2 
+                0x08004308       0x2a ./system/src/cortexm/exception_handlers.o
+ *fill*         0x08004332        0x2 
  .rodata.bootloader_handle_dis_read_protect_cmd.str1.4
-                0x080042f4       0x38 ./src/Bootloader.o
+                0x08004334       0x38 ./src/Bootloader.o
  .rodata.bootloader_handle_dis_write_protect_cmd.str1.4
-                0x0800432c       0x39 ./src/Bootloader.o
- *fill*         0x08004365        0x3 
+                0x0800436c       0x39 ./src/Bootloader.o
+ *fill*         0x080043a5        0x3 
  .rodata.bootloader_handle_en_read_protect_cmd.str1.4
-                0x08004368       0x37 ./src/Bootloader.o
- *fill*         0x0800439f        0x1 
+                0x080043a8       0x37 ./src/Bootloader.o
+ *fill*         0x080043df        0x1 
  .rodata.bootloader_handle_en_write_protect_cmd.str1.4
-                0x080043a0       0x38 ./src/Bootloader.o
+                0x080043e0       0x38 ./src/Bootloader.o
  .rodata.bootloader_handle_flash_erase_cmd.str1.4
-                0x080043d8       0x33 ./src/Bootloader.o
- *fill*         0x0800440b        0x1 
+                0x08004418       0x33 ./src/Bootloader.o
+ *fill*         0x0800444b        0x1 
  .rodata.bootloader_handle_flash_mass_erase_cmd.str1.4
-                0x0800440c       0x6c ./src/Bootloader.o
+                0x0800444c       0x6c ./src/Bootloader.o
  .rodata.bootloader_handle_getcid_cmd.str1.4
-                0x08004478       0x27 ./src/Bootloader.o
- *fill*         0x0800449f        0x1 
+                0x080044b8       0x27 ./src/Bootloader.o
+ *fill*         0x080044df        0x1 
  .rodata.bootloader_handle_gethelp_cmd.str1.4
-                0x080044a0       0x2f ./src/Bootloader.o
+                0x080044e0       0x2f ./src/Bootloader.o
                                  0x37 (size before relaxing)
- *fill*         0x080044cf        0x1 
+ *fill*         0x0800450f        0x1 
  .rodata.bootloader_handle_getrdp_cmd.str1.4
-                0x080044d0       0x2e ./src/Bootloader.o
- *fill*         0x080044fe        0x2 
+                0x08004510       0x2e ./src/Bootloader.o
+ *fill*         0x0800453e        0x2 
  .rodata.bootloader_handle_getver_cmd.str1.4
-                0x08004500       0x4f ./src/Bootloader.o
- *fill*         0x0800454f        0x1 
+                0x08004540       0x4f ./src/Bootloader.o
+ *fill*         0x0800458f        0x1 
  .rodata.bootloader_handle_goto_address_cmd.str1.4
-                0x08004550       0xa9 ./src/Bootloader.o
- *fill*         0x080045f9        0x3 
+                0x08004590       0xa9 ./src/Bootloader.o
+ *fill*         0x08004639        0x3 
  .rodata.bootloader_handle_mem_read_cmd.str1.4
-                0x080045fc       0x7a ./src/Bootloader.o
- *fill*         0x08004676        0x2 
+                0x0800463c       0x7a ./src/Bootloader.o
+ *fill*         0x080046b6        0x2 
  .rodata.bootloader_handle_mem_write_cmd.str1.4
-                0x08004678       0x9c ./src/Bootloader.o
+                0x080046b8       0x9c ./src/Bootloader.o
  .rodata.bootloader_handle_read_sectors_status_cmd.str1.4
-                0x08004714       0x3b ./src/Bootloader.o
- *fill*         0x0800474f        0x1 
+                0x08004754       0x3b ./src/Bootloader.o
+ *fill*         0x0800478f        0x1 
  .rodata.bootloader_handle_system_reset_cmd.str1.4
-                0x08004750       0x34 ./src/Bootloader.o
+                0x08004790       0x34 ./src/Bootloader.o
  .rodata.bootloader_send_ack.str1.4
-                0x08004784       0x31 ./src/Bootloader.o
- *fill*         0x080047b5        0x3 
+                0x080047c4       0x31 ./src/Bootloader.o
+ *fill*         0x080047f5        0x3 
  .rodata.bootloader_voidJumpToUserApp.str1.4
-                0x080047b8       0x61 ./src/Bootloader.o
- *fill*         0x08004819        0x3 
+                0x080047f8       0x61 ./src/Bootloader.o
+ *fill*         0x08004859        0x3 
  .rodata.bootloader_voidUARTReadData.str1.4
-                0x0800481c       0x72 ./src/Bootloader.o
- *fill*         0x0800488e        0x2 
+                0x0800485c       0x72 ./src/Bootloader.o
+ *fill*         0x080048ce        0x2 
  .rodata.HUART_USART1
-                0x08004890       0x20 ./src/HUART_program.o
-                0x08004890                HUART_USART1
+                0x080048d0       0x20 ./src/HUART_program.o
+                0x080048d0                HUART_USART1
  .rodata.HUART_USART2
-                0x080048b0       0x20 ./src/HUART_program.o
-                0x080048b0                HUART_USART2
- .rodata        0x080048d0       0x96 ./src/WIFI_program.o
- *fill*         0x08004966        0x2 
+                0x080048f0       0x20 ./src/HUART_program.o
+                0x080048f0                HUART_USART2
+ .rodata        0x08004910       0x96 ./src/WIFI_program.o
+ *fill*         0x080049a6        0x2 
  .rodata.WIFI_u8ConnectToAccessPoint.str1.4
-                0x08004968        0xf ./src/WIFI_program.o
- *fill*         0x08004977        0x1 
+                0x080049a8        0xf ./src/WIFI_program.o
+ *fill*         0x080049b7        0x1 
  .rodata.WIFI_u8CountData.str1.4
-                0x08004978       0xc3 ./src/WIFI_program.o
- *fill*         0x08004a3b        0x1 
+                0x080049b8       0xc3 ./src/WIFI_program.o
+ *fill*         0x08004a7b        0x1 
  .rodata.WIFI_u8Init.str1.4
-                0x08004a3c        0x9 ./src/WIFI_program.o
- *fill*         0x08004a45        0x3 
+                0x08004a7c        0x9 ./src/WIFI_program.o
+ *fill*         0x08004a85        0x3 
  .rodata.WIFI_u8ReceiveCommand.str1.4
-                0x08004a48       0x7e ./src/WIFI_program.o
- *fill*         0x08004ac6        0x2 
+                0x08004a88       0x7e ./src/WIFI_program.o
+ *fill*         0x08004b06        0x2 
  .rodata.WIFI_u8SendCommandToServer.str1.4
-                0x08004ac8       0x34 ./src/WIFI_program.o
+                0x08004b08       0x34 ./src/WIFI_program.o
  .rodata.main.str1.4
-                0x08004afc       0x44 ./src/main.o
-                                 0x42 (size before relaxing)
+                0x08004b3c       0x40 ./src/main.o
+                                 0x3e (size before relaxing)
  .rodata._svfprintf_r.str1.1
-                0x08004b40       0x11 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-nano-svfprintf.o)
+                0x08004b7c       0x11 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-nano-svfprintf.o)
  .rodata._printf_i.str1.1
-                0x08004b51       0x22 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-nano-vfprintf_i.o)
+                0x08004b8d       0x22 d:/iti/sdk/assaf/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7-m\libg_nano.a(lib_a-nano-vfprintf_i.o)
  *(vtable)
  *(.eh_frame*)
  *(.glue_7)
- .glue_7        0x08004b73        0x0 linker stubs
+ .glue_7        0x08004baf        0x0 linker stubs
  *(.glue_7t)
- .glue_7t       0x08004b73        0x0 linker stubs
+ .glue_7t       0x08004baf        0x0 linker stubs
 
-.vfp11_veneer   0x08004b74        0x0
- .vfp11_veneer  0x08004b74        0x0 linker stubs
+.vfp11_veneer   0x08004bb0        0x0
+ .vfp11_veneer  0x08004bb0        0x0 linker stubs
 
-.v4_bx          0x08004b74        0x0
- .v4_bx         0x08004b74        0x0 linker stubs
+.v4_bx          0x08004bb0        0x0
+ .v4_bx         0x08004bb0        0x0 linker stubs
 
-.iplt           0x08004b74        0x0
- .iplt          0x08004b74        0x0 ./system/src/newlib/_exit.o
+.iplt           0x08004bb0        0x0
+ .iplt          0x08004bb0        0x0 ./system/src/newlib/_exit.o
 
-.rel.dyn        0x08004b74        0x0
- .rel.iplt      0x08004b74        0x0 ./system/src/newlib/_exit.o
+.rel.dyn        0x08004bb0        0x0
+ .rel.iplt      0x08004bb0        0x0 ./system/src/newlib/_exit.o
 
 .ARM.extab
  *(.ARM.extab* .gnu.linkonce.armextab.*)
-                0x08004b74                . = ALIGN (0x4)
-                0x08004b74                __exidx_start = .
+                0x08004bb0                . = ALIGN (0x4)
+                0x08004bb0                __exidx_start = .
 
 .ARM.exidx
  *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-                0x08004b74                __exidx_end = .
-                0x08004b74                . = ALIGN (0x4)
-                0x08004b74                _etext = .
-                0x08004b74                __etext = .
+                0x08004bb0                __exidx_end = .
+                0x08004bb0                . = ALIGN (0x4)
+                0x08004bb0                _etext = .
+                0x08004bb0                __etext = .
 
-.data_CCMRAM    0x00000000        0x0 load address 0x08004b74
+.data_CCMRAM    0x00000000        0x0 load address 0x08004bb0
  FILL mask 0xff
  *(.data.CCMRAM .data.CCMRAM.*)
                 0x00000000                . = ALIGN (0x4)
-                0x08004b74                _sidata = LOADADDR (.data)
+                0x08004bb0                _sidata = LOADADDR (.data)
 
-.data           0x20000000       0xd4 load address 0x08004b74
+.data           0x20000000       0xd4 load address 0x08004bb0
  FILL mask 0xff
                 0x20000000                _sdata = .
                 0x20000000                __data_start__ = .
@@ -2481,7 +2482,7 @@ END GROUP
                 0x200000d4                _edata = .
                 0x200000d4                __data_end__ = .
 
-.igot.plt       0x200000d4        0x0 load address 0x08004c48
+.igot.plt       0x200000d4        0x0 load address 0x08004c84
  .igot.plt      0x200000d4        0x0 ./system/src/newlib/_exit.o
 
 .bss_CCMRAM     0x00000000        0x0
@@ -2806,7 +2807,7 @@ END GROUP
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x00000000     0xbd0f
+.debug_info     0x00000000     0xbd41
  *(.debug_info .gnu.linkonce.wi.*)
  .debug_info    0x00000000      0x956 ./system/src/newlib/_exit.o
  .debug_info    0x00000956      0x942 ./system/src/newlib/_sbrk.o
@@ -2828,10 +2829,10 @@ END GROUP
  .debug_info    0x00009564      0x37c ./src/NVIC_program.o
  .debug_info    0x000098e0      0x33a ./src/RCC_program.o
  .debug_info    0x00009c1a      0x6ef ./src/UART_program.o
- .debug_info    0x0000a309     0x1598 ./src/WIFI_program.o
- .debug_info    0x0000b8a1      0x46e ./src/main.o
+ .debug_info    0x0000a309     0x15b6 ./src/WIFI_program.o
+ .debug_info    0x0000b8bf      0x482 ./src/main.o
 
-.debug_abbrev   0x00000000     0x26a2
+.debug_abbrev   0x00000000     0x2697
  *(.debug_abbrev)
  .debug_abbrev  0x00000000      0x1f3 ./system/src/newlib/_exit.o
  .debug_abbrev  0x000001f3      0x1fc ./system/src/newlib/_sbrk.o
@@ -2853,10 +2854,10 @@ END GROUP
  .debug_abbrev  0x00001e56       0xfe ./src/NVIC_program.o
  .debug_abbrev  0x00001f54      0x188 ./src/RCC_program.o
  .debug_abbrev  0x000020dc      0x1a2 ./src/UART_program.o
- .debug_abbrev  0x0000227e      0x30f ./src/WIFI_program.o
- .debug_abbrev  0x0000258d      0x115 ./src/main.o
+ .debug_abbrev  0x0000227e      0x304 ./src/WIFI_program.o
+ .debug_abbrev  0x00002582      0x115 ./src/main.o
 
-.debug_line     0x00000000     0x479a
+.debug_line     0x00000000     0x47a0
  *(.debug_line)
  .debug_line    0x00000000      0x32f ./system/src/newlib/_exit.o
  .debug_line    0x0000032f      0x2e3 ./system/src/newlib/_sbrk.o
@@ -2878,8 +2879,8 @@ END GROUP
  .debug_line    0x000038bb      0x21c ./src/NVIC_program.o
  .debug_line    0x00003ad7      0x221 ./src/RCC_program.o
  .debug_line    0x00003cf8      0x283 ./src/UART_program.o
- .debug_line    0x00003f7b      0x4a3 ./src/WIFI_program.o
- .debug_line    0x0000441e      0x37c ./src/main.o
+ .debug_line    0x00003f7b      0x4a8 ./src/WIFI_program.o
+ .debug_line    0x00004423      0x37d ./src/main.o
 
 .debug_frame    0x00000000     0x17c0
  *(.debug_frame)
@@ -2972,9 +2973,9 @@ END GROUP
  .debug_str     0x0005c117      0x449 ./src/WIFI_program.o
                                0x7048 (size before relaxing)
  .debug_str     0x0005c560       0x54 ./src/main.o
-                               0x8c6f (size before relaxing)
+                               0x8c80 (size before relaxing)
 
-.debug_loc      0x00000000     0x33d6
+.debug_loc      0x00000000     0x33ec
  *(.debug_loc)
  .debug_loc     0x00000000       0x85 ./system/src/newlib/_sbrk.o
  .debug_loc     0x00000085      0x1a9 ./system/src/newlib/_startup.o
@@ -2993,7 +2994,7 @@ END GROUP
  .debug_loc     0x00001ff4      0x59d ./src/NVIC_program.o
  .debug_loc     0x00002591      0x3c3 ./src/RCC_program.o
  .debug_loc     0x00002954      0x6ec ./src/UART_program.o
- .debug_loc     0x00003040      0x396 ./src/WIFI_program.o
+ .debug_loc     0x00003040      0x3ac ./src/WIFI_program.o
 
 .debug_macinfo
  *(.debug_macinfo)
