@@ -124,7 +124,7 @@ u8   supported_commands[] = {
 #define ADDR_INVALID  					1U
 #define FLASH_START						0x08000000
 #define FLASH_SIZE                      128*1024 		/*128K*/
-#define FLASH_END                       (FLASH_START+FLASH_SIZE-1)
+#define FLASH_END                       (FLASH_START+(FLASH_SIZE-1))
 #define RAM_START                       0x20000000
 #define RAM_SIZE                        20*1024 		/*20K*/
 #define RAM_END                         (RAM_START+RAM_SIZE-1)
@@ -236,6 +236,9 @@ void bootloader_voidUARTReadData (void)
         /*WIFI modifications by Mahmoud*/
         /*Start receiving data using WIFI*/
         WIFI_u8ReceiveCommand(Local_u8Buffer);
+        //delay_ms(15000);
+        //WIFI_u8SendCommandToServer(" ",1);
+        //delay_ms(15000);
 		/*Convert first byte received, which is equivalent to length to follow, and save it inside rcv_len variable*/
 		char2hex(Local_u8Buffer,&rcv_len,1);
 		/*Add rcv_len to first element of buffer (needed in further operations)*/
@@ -449,6 +452,7 @@ void bootloader_handle_getcid_cmd				(u8* bl_rx_buffer)
 /*Handle function to handle BL_GO_TO_ADDR command*/
 void bootloader_handle_goto_address_cmd			(u8* bl_rx_buffer)
 {
+	u8 index;
 	u8  Local_u8FinalReply[BL_GO_TO_ADDR_REPLY_LEN*2]={0};		/*This local variable will hold the array that will be send over WIFI*/
 
 	u32 go_address=0;
@@ -471,7 +475,9 @@ void bootloader_handle_goto_address_cmd			(u8* bl_rx_buffer)
 		//Stating that a reply of one byte is going to be sent
 		bootloader_send_ack(1);
         //extract the go address
-		char2hex(&bl_rx_buffer[2],Local_u8FinalAddress,4);
+		//char2hex(&bl_rx_buffer[2],Local_u8FinalAddress,4);
+		for(index=0;index<4;index++)
+			Local_u8FinalAddress[index]=bl_rx_buffer[2+index];
 		go_address = *((u32*)Local_u8FinalAddress);
 
         printmsg1("BL_DEBUG_MSG: GO addr: 0x%02x%02x%02x%02x\r\n",Local_u8FinalAddress[3],Local_u8FinalAddress[2],Local_u8FinalAddress[1],Local_u8FinalAddress[0]);
@@ -487,6 +493,7 @@ void bootloader_handle_goto_address_cmd			(u8* bl_rx_buffer)
         		hex2char(Global_u8ResponseArray, Local_u8FinalReply, BL_GO_TO_ADDR_REPLY_LEN);
         		/*Send converted Bytes over WIFI*/
         		WIFI_u8SendCommandToServer(Local_u8FinalReply, BL_GO_TO_ADDR_REPLY_LEN*2);
+
 
         		//HUART_u8SendSync(HUART_USART2,&addr_valid,1,10);
 
@@ -534,22 +541,24 @@ void bootloader_handle_goto_address_cmd			(u8* bl_rx_buffer)
 /*Handle function to handle BL_FLASH_ERASE command*/
 void bootloader_handle_flash_erase_cmd			(u8* bl_rx_buffer)
 {
+	u8  index;
 	u8  Local_u8FinalReply[BL_FLASH_ERASE_REPLY_LEN*2]={0};		/*This local variable will hold the array that will be send over WIFI*/
 
 	u8  status;
 	u8  Local_u8FinalAddress[4];								/*This local variable will hold the concatenated address  value that should be passed*/
-	u8  Local_u8FinalHostCRC[4];								/*This local variable will hold the concatenated host crc value that should be passed*/
+	//u8  Local_u8FinalHostCRC[4];								/*This local variable will hold the concatenated host crc value that should be passed*/
 	u8  number_of_sectors_to_be_erased = 0 ;
 	u32 sector_start_address = 0 ;
 
 
 	u8  command_packet = bl_rx_buffer[0]+1;                 /*Total length of command packet*/
-	u32 command_length_without_crc = command_packet-8;      /*Length to be sent to (bl_verify_crc) function*/
+	u32 command_length_without_crc = command_packet-4;      /*Length to be sent to (bl_verify_crc) function*/
 	u32 crc_host;
 
 
-	char2hex(&bl_rx_buffer[command_length_without_crc], Local_u8FinalHostCRC, 4);
-	crc_host= *((u32*)Local_u8FinalHostCRC);     /*Extract the CRC32 sent by host*/
+	//char2hex(&bl_rx_buffer[command_length_without_crc], Local_u8FinalHostCRC, 4);
+	//crc_host= *((u32*)Local_u8FinalHostCRC);     /*Extract the CRC32 sent by host*/
+	crc_host= *((u32*)(bl_rx_buffer+command_length_without_crc));         /*Extract the CRC32 sent by host*/
 
 	printmsg1("------------------------------------------------\r\n");
 	printmsg1("BL_DEBUG_MSG: bootloader_handle_flash_erase_cmd \r\n");
@@ -559,7 +568,9 @@ void bootloader_handle_flash_erase_cmd			(u8* bl_rx_buffer)
 		//checksum is correct
 		printmsg1("BL_DEBUG_MSG: checksum success !! \r\n");
 		//processing
-		char2hex(&bl_rx_buffer[2],Local_u8FinalAddress,4);
+		//char2hex(&bl_rx_buffer[2],Local_u8FinalAddress,4);
+		for(index=0;index<4;index++)
+			Local_u8FinalAddress[index]=bl_rx_buffer[2+index];
 		sector_start_address = *((u32*)Local_u8FinalAddress);
 
 		number_of_sectors_to_be_erased = bl_rx_buffer[10];
@@ -588,15 +599,17 @@ void bootloader_handle_flash_erase_cmd			(u8* bl_rx_buffer)
 
 void bootloader_handle_flash_mass_erase_cmd		(u8* bl_rx_buffer)
 {
-	u8  Local_u8FinalHostCRC[4];
+	u8  Local_u8FinalReply[BL_FLASH_MASS_ERASE_REPLY_LEN*2]={0};		/*This local variable will hold the array that will be send over WIFI*/
+	//u8  Local_u8FinalHostCRC[4];
 
 	u8  command_packet = bl_rx_buffer[0]+1;                 /*Total length of command packet*/
-	u32 command_length_without_crc = command_packet-8;      /*Length to be sent to (bl_verify_crc) function*/
+	u32 command_length_without_crc = command_packet-4;      /*Length to be sent to (bl_verify_crc) function*/
 	u32 crc_host;
 
 
-	char2hex(&bl_rx_buffer[command_length_without_crc], Local_u8FinalHostCRC, 4);
-	crc_host= *((u32*)Local_u8FinalHostCRC);     /*Extract the CRC32 sent by host*/
+	//char2hex(&bl_rx_buffer[command_length_without_crc], Local_u8FinalHostCRC, 4);
+	//crc_host= *((u32*)Local_u8FinalHostCRC);     /*Extract the CRC32 sent by host*/
+	crc_host= *((u32*)(bl_rx_buffer+command_length_without_crc));         /*Extract the CRC32 sent by host*/
 
 	printmsg1("------------------------------------------------\r\n");
 	printmsg1("BL_DEBUG_MSG: bootloader_handle_flash_mass_erase_cmd \r\n");
@@ -608,6 +621,10 @@ void bootloader_handle_flash_mass_erase_cmd		(u8* bl_rx_buffer)
 		//processing
 		//Stating that a reply of zero bytes is going to be sent
 		bootloader_send_ack(0);
+		/*Convert array to char to send them over WIFI*/
+		hex2char(Global_u8ResponseArray, Local_u8FinalReply, BL_FLASH_MASS_ERASE_REPLY_LEN);
+		/*Send converted Bytes over WIFI*/
+		WIFI_u8SendCommandToServer(Local_u8FinalReply, BL_FLASH_MASS_ERASE_REPLY_LEN*2);
 
 		FLASH_Unlock();
 		FLASH_MassErase();
@@ -623,6 +640,7 @@ void bootloader_handle_flash_mass_erase_cmd		(u8* bl_rx_buffer)
 /*Handle function to handle BL_MEM_WRITE command*/
 void bootloader_handle_mem_write_cmd			(u8* bl_rx_buffer)
 {
+	u8  index;
 	u8  Local_u8FinalReply[BL_MEM_WRITE_REPLY_LEN*2]={0};		/*This local variable will hold the array that will be send over WIFI*/
 
 	GPIO_Pin_Write(&OnBoard_Led,LOW);
@@ -631,14 +649,15 @@ void bootloader_handle_mem_write_cmd			(u8* bl_rx_buffer)
 	u8 addr_invalid = ADDR_INVALID;
 
 	u8  command_packet = bl_rx_buffer[0]+1;                 /*Total length of command packet*/
-	u32 command_length_without_crc = command_packet-8;      /*Length to be sent to (bl_verify_crc) function*/
+	u32 command_length_without_crc = command_packet-4;      /*Length to be sent to (bl_verify_crc) function*/
 	u32 crc_host;
-	u32 len_to_read = bl_rx_buffer[10];
+	//u32 len_to_read = bl_rx_buffer[10];
 	u8 Local_u8FinalAddress[4];								/*This local variable will hold the concatenated address  value that should be passed*/
-	u8 Local_u8FinalHostCRC[4];								/*This local variable will hold the concatenated host crc value that should be passed*/
+	//u8 Local_u8FinalHostCRC[4];								/*This local variable will hold the concatenated host crc value that should be passed*/
 
-	char2hex(&bl_rx_buffer[11+len_to_read], Local_u8FinalHostCRC, 4);
-	crc_host= *((u32*)Local_u8FinalHostCRC);     			/*Extract the CRC32 sent by host*/
+	//char2hex(&bl_rx_buffer[11+len_to_read], Local_u8FinalHostCRC, 4);
+	//crc_host= *((u32*)Local_u8FinalHostCRC);     			/*Extract the CRC32 sent by host*/
+	crc_host= *((u32*)(bl_rx_buffer+command_length_without_crc));         /*Extract the CRC32 sent by host*/
 
 	printmsg1("------------------------------------------------\r\nBL_DEBUG_MSG: bootloader_handle_mem_write_cmd \r\n");
 	// 1) verify the checksum
@@ -650,7 +669,9 @@ void bootloader_handle_mem_write_cmd			(u8* bl_rx_buffer)
 		//processing
 
 		//extracting the destination address
-		char2hex(&bl_rx_buffer[2],Local_u8FinalAddress,4);
+		//char2hex(&bl_rx_buffer[2],Local_u8FinalAddress,4);
+		for(index=0;index<4;index++)
+			Local_u8FinalAddress[index]=bl_rx_buffer[2+index];
 		destination_address = *((u32*)Local_u8FinalAddress);
 
 		printmsg1("BL_DEBUG_MSG: destination address: 0x%02x%02x%02x%02x\r\n",Local_u8FinalAddress[3],Local_u8FinalAddress[2],Local_u8FinalAddress[1],Local_u8FinalAddress[0]);
@@ -658,7 +679,9 @@ void bootloader_handle_mem_write_cmd			(u8* bl_rx_buffer)
 		 {
 
 			 	//FLASH_MultiplePageErase   			(u32 pageAddress, 8); //since the file's size is 7992 bytes and that's about 8KB
-			    char2hex(&bl_rx_buffer[11],FLASH_src_buffer_1K,64);
+				for(index=0;index<64;index++)
+					FLASH_src_buffer_1K[index]=bl_rx_buffer[11+index];
+			 	//char2hex(&bl_rx_buffer[11],FLASH_src_buffer_1K,64);
 
 			    FLASH_Unlock();
 			   // FLASH_PageErase((u32)0x08008000);
@@ -729,14 +752,16 @@ void bootloader_handle_mem_read_cmd				(u8* bl_rx_buffer)
 
 void bootloader_handle_en_read_protect_cmd		(u8* bl_rx_buffer)
 {
-	u8  Local_u8FinalHostCRC[4];
+	u8  Local_u8FinalReply[BL_EN_R_PROTECT_REPLY_LEN*2]={0};		/*This local variable will hold the array that will be send over WIFI*/
+	//u8  Local_u8FinalHostCRC[4];
 
 	u8  command_packet = bl_rx_buffer[0]+1;                 /*Total length of command packet*/
-	u32 command_length_without_crc = command_packet-8;      /*Length to be sent to (bl_verify_crc) function*/
+	u32 command_length_without_crc = command_packet-4;      /*Length to be sent to (bl_verify_crc) function*/
 	u32 crc_host;
 
-	char2hex(&bl_rx_buffer[command_length_without_crc], Local_u8FinalHostCRC, 4);
-	crc_host= *((u32*)Local_u8FinalHostCRC);     /*Extract the CRC32 sent by host*/
+	//char2hex(&bl_rx_buffer[command_length_without_crc], Local_u8FinalHostCRC, 4);
+	//crc_host= *((u32*)Local_u8FinalHostCRC);     /*Extract the CRC32 sent by host*/
+	crc_host= *((u32*)(bl_rx_buffer+command_length_without_crc));         /*Extract the CRC32 sent by host*/
 
 	printmsg1("------------------------------------------------\r\n");
 	printmsg1("BL_DEBUG_MSG: bootloader_handle_en_read_protect_cmd \r\n");
@@ -748,6 +773,10 @@ void bootloader_handle_en_read_protect_cmd		(u8* bl_rx_buffer)
 		//processing
 		//Stating that a reply of zero bytes is going to be sent
 		bootloader_send_ack(0);
+		/*Convert array to char to send them over WIFI*/
+		hex2char(Global_u8ResponseArray, Local_u8FinalReply, BL_EN_R_PROTECT_REPLY_LEN);
+		/*Send converted Bytes over WIFI*/
+		WIFI_u8SendCommandToServer(Local_u8FinalReply, BL_EN_R_PROTECT_REPLY_LEN*2);
 
 		FLASH_OPT_Unlock();
 		FLASH_OPT_ReadProtection_Enable();
@@ -762,15 +791,17 @@ void bootloader_handle_en_read_protect_cmd		(u8* bl_rx_buffer)
 
 void bootloader_handle_dis_read_protect_cmd		(u8* bl_rx_buffer)
 {
-	u8  Local_u8FinalHostCRC[4];
+	u8  Local_u8FinalReply[BL_DIS_R_PROTECT_REPLY_LEN*2]={0};		/*This local variable will hold the array that will be send over WIFI*/
+	//u8  Local_u8FinalHostCRC[4];
 
 	u8  command_packet = bl_rx_buffer[0]+1;                 /*Total length of command packet*/
-	u32 command_length_without_crc = command_packet-8;      /*Length to be sent to (bl_verify_crc) function*/
+	u32 command_length_without_crc = command_packet-4;      /*Length to be sent to (bl_verify_crc) function*/
 	u32 crc_host;
 
 
-	char2hex(&bl_rx_buffer[command_length_without_crc], Local_u8FinalHostCRC, 4);
-	crc_host= *((u32*)Local_u8FinalHostCRC);     /*Extract the CRC32 sent by host*/
+	//char2hex(&bl_rx_buffer[command_length_without_crc], Local_u8FinalHostCRC, 4);
+	//crc_host= *((u32*)Local_u8FinalHostCRC);     /*Extract the CRC32 sent by host*/
+	crc_host= *((u32*)(bl_rx_buffer+command_length_without_crc));         /*Extract the CRC32 sent by host*/
 
 	printmsg1("------------------------------------------------\r\n");
 	printmsg1("BL_DEBUG_MSG: bootloader_handle_dis_read_protect_cmd \r\n");
@@ -782,6 +813,10 @@ void bootloader_handle_dis_read_protect_cmd		(u8* bl_rx_buffer)
 		//processing
 		//Stating that a reply of zero bytes is going to be sent
 		bootloader_send_ack(0);
+		/*Convert array to char to send them over WIFI*/
+		hex2char(Global_u8ResponseArray, Local_u8FinalReply, BL_DIS_R_PROTECT_REPLY_LEN);
+		/*Send converted Bytes over WIFI*/
+		WIFI_u8SendCommandToServer(Local_u8FinalReply, BL_DIS_R_PROTECT_REPLY_LEN*2);
 
 		FLASH_OPT_Unlock();
 		FLASH_OPT_ReadProtection_Disable();
@@ -796,17 +831,20 @@ void bootloader_handle_dis_read_protect_cmd		(u8* bl_rx_buffer)
 
 void bootloader_handle_en_write_protect_cmd		(u8* bl_rx_buffer)
 {
-	u8  Local_u8FinalHostCRC[4];
+	u8  index;
+	u8  Local_u8FinalReply[BL_EN_W_PROTECT_REPLY_LEN*2]={0};		/*This local variable will hold the array that will be send over WIFI*/
+	//u8  Local_u8FinalHostCRC[4];
 	u8  Local_u8FinalWRProt_mask[4];
 	u32 WRProt_mask = 0;
 
 	u8  command_packet = bl_rx_buffer[0]+1;                 /*Total length of command packet*/
-	u32 command_length_without_crc = command_packet-8;      /*Length to be sent to (bl_verify_crc) function*/
+	u32 command_length_without_crc = command_packet-4;      /*Length to be sent to (bl_verify_crc) function*/
 	u32 crc_host;
 
 
-	char2hex(&bl_rx_buffer[command_length_without_crc], Local_u8FinalHostCRC, 4);
-	crc_host= *((u32*)Local_u8FinalHostCRC);     /*Extract the CRC32 sent by host*/
+	//char2hex(&bl_rx_buffer[command_length_without_crc], Local_u8FinalHostCRC, 4);
+	//crc_host= *((u32*)Local_u8FinalHostCRC);     /*Extract the CRC32 sent by host*/
+	crc_host= *((u32*)(bl_rx_buffer+command_length_without_crc));         /*Extract the CRC32 sent by host*/
 
 	printmsg1("------------------------------------------------\r\n");
 	printmsg1("BL_DEBUG_MSG: bootloader_handle_en_write_protect_cmd \r\n");
@@ -816,7 +854,9 @@ void bootloader_handle_en_write_protect_cmd		(u8* bl_rx_buffer)
 		//checksum is correct
 		printmsg1("BL_DEBUG_MSG: checksum success !! \r\n");
 		//processing
-		char2hex(&bl_rx_buffer[2], Local_u8FinalWRProt_mask, 4);
+		//char2hex(&bl_rx_buffer[2], Local_u8FinalWRProt_mask, 4);
+		for(index=0;index<4;index++)
+			Local_u8FinalWRProt_mask[index]=bl_rx_buffer[2+index];
 		WRProt_mask= *((u32*)Local_u8FinalWRProt_mask);     /*Extract the WRProt_mask sent by host*/
 
 		FLASH_OPT_Unlock();
@@ -824,6 +864,10 @@ void bootloader_handle_en_write_protect_cmd		(u8* bl_rx_buffer)
 
 		//Stating that a reply of zero bytes is going to be sent
 		bootloader_send_ack(0);
+		/*Convert array to char to send them over WIFI*/
+		hex2char(Global_u8ResponseArray, Local_u8FinalReply, BL_EN_W_PROTECT_REPLY_LEN);
+		/*Send converted Bytes over WIFI*/
+		WIFI_u8SendCommandToServer(Local_u8FinalReply, BL_EN_W_PROTECT_REPLY_LEN*2);
 
 	}
 	else
@@ -836,17 +880,20 @@ void bootloader_handle_en_write_protect_cmd		(u8* bl_rx_buffer)
 
 void bootloader_handle_dis_write_protect_cmd	(u8* bl_rx_buffer)
 {
-	u8  Local_u8FinalHostCRC[4];
+	u8  index;
+	u8  Local_u8FinalReply[BL_DIS_W_PROTECT_REPLY_LEN*2]={0};		/*This local variable will hold the array that will be send over WIFI*/
+	//u8  Local_u8FinalHostCRC[4];
 	u8  Local_u8FinalWRProt_mask[4];
 	u32 WRProt_mask = 0;
 
 	u8  command_packet = bl_rx_buffer[0]+1;                 /*Total length of command packet*/
-	u32 command_length_without_crc = command_packet-8;      /*Length to be sent to (bl_verify_crc) function*/
+	u32 command_length_without_crc = command_packet-4;      /*Length to be sent to (bl_verify_crc) function*/
 	u32 crc_host;
 
 
-	char2hex(&bl_rx_buffer[command_length_without_crc], Local_u8FinalHostCRC, 4);
-	crc_host= *((u32*)Local_u8FinalHostCRC);     /*Extract the CRC32 sent by host*/
+	//char2hex(&bl_rx_buffer[command_length_without_crc], Local_u8FinalHostCRC, 4);
+	//crc_host= *((u32*)Local_u8FinalHostCRC);     /*Extract the CRC32 sent by host*/
+	crc_host= *((u32*)(bl_rx_buffer+command_length_without_crc));         /*Extract the CRC32 sent by host*/
 
 	printmsg1("------------------------------------------------\r\n");
 	printmsg1("BL_DEBUG_MSG: bootloader_handle_dis_write_protect_cmd \r\n");
@@ -856,7 +903,9 @@ void bootloader_handle_dis_write_protect_cmd	(u8* bl_rx_buffer)
 		//checksum is correct
 		printmsg1("BL_DEBUG_MSG: checksum success !! \r\n");
 		//processing
-		char2hex(&bl_rx_buffer[2], Local_u8FinalWRProt_mask, 4);
+		//char2hex(&bl_rx_buffer[2], Local_u8FinalWRProt_mask, 4);
+		for(index=0;index<4;index++)
+			Local_u8FinalWRProt_mask[index]=bl_rx_buffer[2+index];
 		WRProt_mask= *((u32*)Local_u8FinalWRProt_mask);     /*Extract the WRProt_mask sent by host*/
 
 		FLASH_OPT_Unlock();
@@ -864,6 +913,10 @@ void bootloader_handle_dis_write_protect_cmd	(u8* bl_rx_buffer)
 
 		//Stating that a reply of zero bytes is going to be sent
 		bootloader_send_ack(0);
+		/*Convert array to char to send them over WIFI*/
+		hex2char(Global_u8ResponseArray, Local_u8FinalReply, BL_DIS_W_PROTECT_REPLY_LEN);
+		/*Send converted Bytes over WIFI*/
+		WIFI_u8SendCommandToServer(Local_u8FinalReply, BL_DIS_W_PROTECT_REPLY_LEN*2);
 
 	}
 	else
@@ -922,16 +975,17 @@ void bootloader_handle_read_sectors_status_cmd	(u8* bl_rx_buffer)
 	#define REPLY_LEN 10
 	u8  RDP_status;
 	u32 WRP_status;
-	u8  Local_u8FinalHostCRC[4];
+	//u8  Local_u8FinalHostCRC[4];
 
 
 	u8  command_packet = bl_rx_buffer[0]+1;                 /*Total length of command packet*/
-	u32 command_length_without_crc = command_packet-8;      /*Length to be sent to (bl_verify_crc) function*/
+	u32 command_length_without_crc = command_packet-4;      /*Length to be sent to (bl_verify_crc) function*/
 	u32 crc_host;
 
 
-	char2hex(&bl_rx_buffer[command_length_without_crc], Local_u8FinalHostCRC, 4);
-	crc_host= *((u32*)Local_u8FinalHostCRC);     /*Extract the CRC32 sent by host*/
+	//char2hex(&bl_rx_buffer[command_length_without_crc], Local_u8FinalHostCRC, 4);
+	//crc_host= *((u32*)Local_u8FinalHostCRC);     /*Extract the CRC32 sent by host*/
+	crc_host= *((u32*)(bl_rx_buffer+command_length_without_crc));         /*Extract the CRC32 sent by host*/
 
 	printmsg1("------------------------------------------------\r\n");
 	printmsg1("BL_DEBUG_MSG: bootloader_handle_read_sectors_status_cmd \r\n");
@@ -971,14 +1025,16 @@ void bootloader_handle_read_sectors_status_cmd	(u8* bl_rx_buffer)
 
 void bootloader_handle_system_reset_cmd			(u8* bl_rx_buffer)
 {
-	u8  Local_u8FinalHostCRC[4];
+	u8  Local_u8FinalReply[BL_SYSTEM_RESET_REPLY_LEN*2]={0};		/*This local variable will hold the array that will be send over WIFI*/
+	//u8  Local_u8FinalHostCRC[4];
 
 	u8  command_packet = bl_rx_buffer[0]+1;                 /*Total length of command packet*/
-	u32 command_length_without_crc = command_packet-8;      /*Length to be sent to (bl_verify_crc) function*/
+	u32 command_length_without_crc = command_packet-4;      /*Length to be sent to (bl_verify_crc) function*/
 	u32 crc_host;
 
-	char2hex(&bl_rx_buffer[command_length_without_crc], Local_u8FinalHostCRC, 4);
-	crc_host= *((u32*)Local_u8FinalHostCRC);     /*Extract the CRC32 sent by host*/
+	//char2hex(&bl_rx_buffer[command_length_without_crc], Local_u8FinalHostCRC, 4);
+	//crc_host= *((u32*)Local_u8FinalHostCRC);     /*Extract the CRC32 sent by host*/
+	crc_host= *((u32*)(bl_rx_buffer+command_length_without_crc));         /*Extract the CRC32 sent by host*/
 
 	printmsg1("------------------------------------------------\r\n");
 	printmsg1("BL_DEBUG_MSG: bootloader_handle_system_reset_cmd \r\n");
@@ -990,6 +1046,10 @@ void bootloader_handle_system_reset_cmd			(u8* bl_rx_buffer)
 		//processing
 		//Stating that a reply of zero bytes is going to be sent
 		bootloader_send_ack(0);
+		/*Convert array to char to send them over WIFI*/
+		hex2char(Global_u8ResponseArray, Local_u8FinalReply, BL_SYSTEM_RESET_REPLY_LEN);
+		/*Send converted Bytes over WIFI*/
+		WIFI_u8SendCommandToServer(Local_u8FinalReply, BL_SYSTEM_RESET_REPLY_LEN*2);
 
 		FLASH_SystemReset();
 	}

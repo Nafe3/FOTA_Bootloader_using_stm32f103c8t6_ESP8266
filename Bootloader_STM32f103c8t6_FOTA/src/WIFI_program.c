@@ -469,7 +469,8 @@ u8 WIFI_u8SendCommandToServer (u8* Copy_u8commandNumber, u16 Copy_u16Size)
 	u8 Local_u8SendSize[20]={0};
 	//u8 Local_u8SendSize[]="AT+CIPSEND=118\r\n";
 	/*These local variables will contain the command that we want to send to our server. It is divided as two parts so that we can concatenate command to it*/
-	u8 Local_u8SendRequest[512]="GET https://api.thingspeak.com/update?api_key=1H61N46CEZA65MTJ&field1=";
+	//u8 Local_u8SendRequest[512]="GET https://api.thingspeak.com/update?api_key=1H61N46CEZA65MTJ&field1=";
+	u8 Local_u8SendRequest[512]="GET https://api.thingspeak.com/update?api_key=PCF4VMCRFW340IZ8&field1=";
 	u8 Local_u8SendRequest2[]="\r\nHost:api.thingspeak.com\r\n\r\n\r\n\r\n\r\n";
 	/*This Local variable will be used as an iterator for concatenating string, we will use it so that we can avoid garbage better*/
 	u16 Local_u16Iterator=0;

@@ -161,7 +161,8 @@ u8 HOST_voidReceiveCommand (u8* Copy_u8Buffer)
     /*This variable will hold the server reply*/
     u8 server_reply[2000]={0};
     /*This local Variable will hold request to receive current command*/
-    u8 *Local_u8GetCurrentCommand="GET https://api.thingspeak.com/channels/1082594/fields/1/last.txt?api_key=GL3M7JAK48BR8RRA\r\n\r\n";
+  //u8 *Local_u8GetCurrentCommand="GET https://api.thingspeak.com/channels/1082594/fields/1/last.txt?api_key=GL3M7JAK48BR8RRA\r\n\r\n";
+    u8 *Local_u8GetCurrentCommand="GET https://api.thingspeak.com/channels/1086352/fields/1/last.txt?api_key=PCF4VMCRFW340IZ8\r\n\r\n";
     /*This local variable will be used as iterator for passing reply to passed buffer*/
     u16 Local_u16Iterator=0;
     /*This local variable will be used as a flag for the while loop which will be used to pass the received buffer to passed buffer*/
