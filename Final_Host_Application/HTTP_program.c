@@ -111,17 +111,15 @@ u8 HOST_voidSendCommand (u8* Copy_u8UserCommand, u16 Copy_u16Size)
     /*If connection to server was successful, proceed with sending the command*/
     if (Local_u8ConnectionStatus==STATUS_OK)
     {
-//        /*Get Desired command from user*/
-//        printf("Enter your desired command: ");
-//        scanf("%s",Local_u8UserCommand);
-//        printf("Command to be sent is %s\n", Local_u8UserCommand);
-
         /*Formulate command request in the request format*/
         strcpy(Local_u8FinalCommand,HTTP_SEND_NEW_COMMAND);
         strcat(Local_u8FinalCommand,Local_u8FinalData);
         strcat(Local_u8FinalCommand,HTTP_EOL);
 
+        #if HTTP_DEBUG_MODE==1
         printf("Final Command is %s\n", Local_u8FinalCommand);
+        #endif // HTTP_DEBUG_MODE
+
         /*Send new command*/
         if( send(s , Local_u8FinalCommand , strlen(Local_u8FinalCommand) , 0) < 0)
         {
@@ -134,11 +132,15 @@ u8 HOST_voidSendCommand (u8* Copy_u8UserCommand, u16 Copy_u16Size)
         {
             puts("recv failed");
         }
-        //puts("Reply received\n");
 
+        //printf("\n   Please wait while server processes command");
+        //delay(5000);
+        //puts("\n   Command posted to server successfully");
+        #if HTTP_DEBUG_MODE==1
         //Add a NULL terminating u8acter to make it a proper string before printing
         server_reply[recv_size] = '\0';
         puts(server_reply);
+        #endif // HTTP_DEBUG_MODE
 
         /*After we are done with the code, close socket and unload library from RAM*/
         closesocket(s);
@@ -161,8 +163,8 @@ u8 HOST_voidReceiveCommand (u8* Copy_u8Buffer)
     /*This variable will hold the server reply*/
     u8 server_reply[2000]={0};
     /*This local Variable will hold request to receive current command*/
-  //u8 *Local_u8GetCurrentCommand="GET https://api.thingspeak.com/channels/1082594/fields/1/last.txt?api_key=GL3M7JAK48BR8RRA\r\n\r\n";
-    u8 *Local_u8GetCurrentCommand="GET https://api.thingspeak.com/channels/1086352/fields/1/last.txt?api_key=PCF4VMCRFW340IZ8\r\n\r\n";
+  //u8 *Local_u8GetCurrentCommand="GET https://api.thingspeak.com/channels/1082594/fields/1/last.txt?api_key=GL3M7JAK48BR8RRA\r\n\r\n"; //Requests server
+    u8 *Local_u8GetCurrentCommand="GET https://api.thingspeak.com/channels/1086352/fields/1/last.txt?api_key=PCF4VMCRFW340IZ8\r\n\r\n"; //Responses server
     /*This local variable will be used as iterator for passing reply to passed buffer*/
     u16 Local_u16Iterator=0;
     /*This local variable will be used as a flag for the while loop which will be used to pass the received buffer to passed buffer*/
@@ -190,9 +192,11 @@ u8 HOST_voidReceiveCommand (u8* Copy_u8Buffer)
         }
         //puts("Reply received\n");
 
+        #if HTTP_DEBUG_MODE==1
         //Add a NULL terminating character to make it a proper string before printing
         server_reply[recv_size] = '\0';
         puts(server_reply);
+        #endif // HTTP_DEBUG_MODE
 
         /*Pass local Buffer to passed buffer*/
         while(Local_u8TransferFlag==1)
@@ -210,6 +214,76 @@ u8 HOST_voidReceiveCommand (u8* Copy_u8Buffer)
             }
 
         }
+
+        /*After we are done with the code, close socket and unload library from RAM*/
+        closesocket(s);
+        WSACleanup();
+    }
+    return Local_u8Status;
+}
+
+/*Description: This API will be used to send clear responses channel or post something specific to it
+Parameters: New Command (u8*), Desired Size (u16)
+Return: Error Status (u8)*/
+u8 HOST_voidSendCommandToResponses (u8* Copy_u8UserCommand, u16 Copy_u16Size)
+{
+    /*This local variable will hold the status of the current function*/
+    u8 Local_u8Status=STATUS_NOK;
+    /*This local variable will hold the status of the connect to server function*/
+    u8 Local_u8ConnectionStatus=STATUS_NOK;
+    /*This Local variable will hold the final string that will be sent*/
+    u8  Local_u8FinalCommand[1024]={0};
+    /*This variable holds the size of the data that we will receive as a response*/
+    u16 recv_size;
+    /*This variable will hold the server request*/
+    u8 server_reply[2000];
+    /*This variable will be used to hold data incoming from user to prevent getting garbage by mistake*/
+    u8 Local_u8FinalData[2000]={0};
+    /*This variable will be used as an iterator to fill up data variable with proper data*/
+    u16 Local_u16Iterator=0;
+
+    /*Fill up data array with proper data by receiving data from incoming buffer until we reach desired size passed*/
+    for (Local_u16Iterator=0; Local_u16Iterator<Copy_u16Size; Local_u16Iterator++)
+    {
+        Local_u8FinalData[Local_u16Iterator]=Copy_u8UserCommand[Local_u16Iterator];
+    }
+
+    /*Connect to server*/
+    Local_u8ConnectionStatus=HOST_voidConnectToServer(HTTP_SERVER_NAME);
+
+    /*If connection to server was successful, proceed with sending the command*/
+    if (Local_u8ConnectionStatus==STATUS_OK)
+    {
+        /*Formulate command request in the request format*/
+        strcpy(Local_u8FinalCommand,HTTP_SEND_NEW_COMMAND_RESPONSE_CHANNEL);
+        strcat(Local_u8FinalCommand,Local_u8FinalData);
+        strcat(Local_u8FinalCommand,HTTP_EOL);
+
+        #if HTTP_DEBUG_MODE==1
+        printf("Final Command is %s\n", Local_u8FinalCommand);
+        #endif // HTTP_DEBUG_MODE
+
+        /*Send new command*/
+        if( send(s , Local_u8FinalCommand , strlen(Local_u8FinalCommand) , 0) < 0)
+        {
+            puts("Send failed");
+            return 1;
+        }
+        //puts("Data Sent\n");
+
+        if((recv_size = recv(s , server_reply , 2000 , 0)) == SOCKET_ERROR)
+        {
+            puts("recv failed");
+        }
+
+        //printf("\n   Please wait while server processes command");
+        //delay(5000);
+        //puts("\n   Command posted to server successfully");
+        #if HTTP_DEBUG_MODE==1
+        //Add a NULL terminating u8acter to make it a proper string before printing
+        server_reply[recv_size] = '\0';
+        puts(server_reply);
+        #endif // HTTP_DEBUG_MODE
 
         /*After we are done with the code, close socket and unload library from RAM*/
         closesocket(s);

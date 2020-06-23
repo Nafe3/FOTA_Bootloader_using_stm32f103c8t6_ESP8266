@@ -1,15 +1,21 @@
 #include "main.h"
+#include "HTTP_interface.h"
 #define WINDOWS_HOST
 
 int main()
 {
+
      /*----------------------------- Ask Menu implementation----------------------------------------*/
     printf("\n\n +==========================================+");
     printf("\n |           STM32F4 BootLoader v1           |");
     printf("\n +==========================================+\n");
-
-
-    //Serial_Port_Configuration();
+            //Serial_Port_Configuration();
+    printf("   INITIALIZING SERVER, Please Wait");
+    HOST_voidSendCommand("EMPTY",5);
+    HOST_voidSendCommandToResponses("EMPTY",5);
+    delay(15000);
+    printf("   INITIALIZATION Complete");
+    printf("\n +==========================================+\n");
 
     while(1)
     {
@@ -51,6 +57,12 @@ int main()
         scanf(" %d",&command_code);
 
         decode_menu_command_code(command_code);
+        printf("\n   Waiting for server to be ready again\n");
+        delay(15000);
+        HOST_voidSendCommand("EMPTY",5);
+        HOST_voidSendCommandToResponses("EMPTY",5);
+        delay(15000);
+
 
 #if 0
         printf("\n\n   Do you want to continue(y/n) ?:");

@@ -42,15 +42,15 @@ int read_bootloader_reply(uint8_t command_code, uint8_t* Copy_u8DataBuffer)
 
 
         case COMMAND_BL_FLASH_ERASE:
-            process_COMMAND_BL_FLASH_ERASE(len_to_follow);
+            process_COMMAND_BL_FLASH_ERASE(len_to_follow, Copy_u8DataBuffer);
             break;
         case COMMAND_BL_MASS_ERASE:
-            process_COMMAND_BL_FLASH_MASS_ERASE(len_to_follow);
+            process_COMMAND_BL_FLASH_MASS_ERASE(len_to_follow, Copy_u8DataBuffer);
             break;
 
 
         case COMMAND_BL_MEM_WRITE:
-            process_COMMAND_BL_MEM_WRITE(len_to_follow);
+            process_COMMAND_BL_MEM_WRITE(len_to_follow, Copy_u8DataBuffer);
             break;
         case COMMAND_BL_MEM_READ:
             process_COMMAND_BL_MEM_READ(len_to_follow);
@@ -58,29 +58,31 @@ int read_bootloader_reply(uint8_t command_code, uint8_t* Copy_u8DataBuffer)
 
 
         case COMMAND_BL_EN_R_PROTECT:
-            process_COMMAND_BL_EN_R_PROTECT(len_to_follow);
+            process_COMMAND_BL_EN_R_PROTECT(len_to_follow, Copy_u8DataBuffer);
             break;
         case COMMAND_BL_DIS_R_PROTECT:
-            process_COMMAND_BL_DIS_R_PROTECT(len_to_follow);
+            process_COMMAND_BL_DIS_R_PROTECT(len_to_follow, Copy_u8DataBuffer);
             break;
         case COMMAND_BL_EN_W_PROTECT:
-            process_COMMAND_BL_EN_W_PROTECT(len_to_follow);
+            process_COMMAND_BL_EN_W_PROTECT(len_to_follow, Copy_u8DataBuffer);
             break;
         case COMMAND_BL_DIS_W_PROTECT:
-            process_COMMAND_BL_DIS_W_PROTECT(len_to_follow);
+            process_COMMAND_BL_DIS_W_PROTECT(len_to_follow, Copy_u8DataBuffer);
             break;
         case COMMAND_BL_GET_RDP_STATUS:
-            process_COMMAND_BL_GET_RDP_STATUS(len_to_follow);
+            process_COMMAND_BL_GET_RDP_STATUS(len_to_follow, Copy_u8DataBuffer);
             break;
         case COMMAND_BL_READ_SECTOR_P_STATUS:
-            process_COMMAND_BL_READ_SECTOR_P_STATUS(len_to_follow);
+            process_COMMAND_BL_READ_SECTOR_P_STATUS(len_to_follow, Copy_u8DataBuffer);
             break;
 
 
         case COMMAND_BL_MY_SYSTEM_RESET:
             process_COMMAND_BL_MY_SYSTEM_RESET(len_to_follow);
+            break;
         case COMMAND_BL_EXISTING_APPS:
             process_COMMAND_BL_EXISTING_APPS(len_to_follow);
+            break;
         default:
             printf("\n  Invalid command code\n");
 
@@ -150,19 +152,19 @@ void process_COMMAND_BL_GO_TO_ADDR(uint32_t len, uint8_t* Copy_u8DataBuffer)
 
 
 
-void process_COMMAND_BL_FLASH_ERASE(uint32_t len)
+void process_COMMAND_BL_FLASH_ERASE(uint32_t len, uint8_t* Copy_u8DataBuffer)
 {
-    uint8_t erase_status=0;
-    read_serial_port(&erase_status,len);
+    uint8_t erase_status=Copy_u8DataBuffer[2];
+    //read_serial_port(&erase_status,len);
 
     if(erase_status) printf("   Erase Status : Success!");
     else             printf("   Erase Status : Failed!");
 }
 
-void process_COMMAND_BL_FLASH_MASS_ERASE(uint32_t len_to_follow)
+void process_COMMAND_BL_FLASH_MASS_ERASE(uint32_t len_to_follow, uint8_t* Copy_u8DataBuffer)
 {
-    uint8_t erase_status=0;
-    read_serial_port(&erase_status,len_to_follow);
+    uint8_t erase_status=Copy_u8DataBuffer[2];
+    //read_serial_port(&erase_status,len_to_follow);
     //printf("Erase Status = 0x%x\n",erase_status);
     printf("   Erase Status : Success!");
 
@@ -171,7 +173,7 @@ void process_COMMAND_BL_FLASH_MASS_ERASE(uint32_t len_to_follow)
 
 
 
-void process_COMMAND_BL_MEM_WRITE(uint32_t len)
+void process_COMMAND_BL_MEM_WRITE(uint32_t len, uint8_t* Copy_u8DataBuffer)
 {
     uint8_t write_status=0;
     read_serial_port(&write_status,len);
@@ -185,46 +187,46 @@ void process_COMMAND_BL_MEM_READ(uint32_t len)
 
 
 
-void process_COMMAND_BL_EN_R_PROTECT(uint32_t len)
+void process_COMMAND_BL_EN_R_PROTECT(uint32_t len, uint8_t* Copy_u8DataBuffer)
 {
-    uint8_t status=0;
-    read_serial_port(&status,len);
+    uint8_t status=Copy_u8DataBuffer[2];
+    //read_serial_port(&status,len);
     printf("\n\n   Done!\n");
 }
 
-void process_COMMAND_BL_DIS_R_PROTECT(uint32_t len)
+void process_COMMAND_BL_DIS_R_PROTECT(uint32_t len, uint8_t* Copy_u8DataBuffer)
 {
-    uint8_t status=0;
-    read_serial_port(&status,len);
+    uint8_t status=Copy_u8DataBuffer[2];
+    //read_serial_port(&status,len);
     printf("\n\n   Done!\n");
 }
 
-void process_COMMAND_BL_EN_W_PROTECT(uint32_t len)
+void process_COMMAND_BL_EN_W_PROTECT(uint32_t len, uint8_t* Copy_u8DataBuffer)
 {
-    uint8_t status=0;
-    read_serial_port(&status,len);
-    printf("\n\n   Done!\n");
+    uint8_t status=Copy_u8DataBuffer[2];
+    //read_serial_port(&status,len);
+    printf("\n\n   Done!Please reset microcontroller for changes to take change.\n");
 }
 
-void process_COMMAND_BL_DIS_W_PROTECT(uint32_t len)
+void process_COMMAND_BL_DIS_W_PROTECT(uint32_t len, uint8_t* Copy_u8DataBuffer)
 {
     uint8_t status=0;
-    read_serial_port(&status,len);
-    printf("\n\n   Done!\n");
+    //read_serial_port(&status,len);
+    printf("\n\n   Done!Please reset microcontroller for changes to take change.\n");
 }
 
 
 
-void process_COMMAND_BL_GET_RDP_STATUS(uint32_t len)
+void process_COMMAND_BL_GET_RDP_STATUS(uint32_t len, uint8_t* Copy_u8DataBuffer)
 {
-    uint8_t rdp=0;
-    read_serial_port(&rdp,len);
+    uint8_t rdp=Copy_u8DataBuffer[2];
+    //read_serial_port(&rdp,len);
     printf("\n   RDP Status : 0x%X\r\n",rdp);
     if(rdp) printf("\n   RDP Status : Flash memory is read-protected\r\n");
     else printf("\n   RDP Status : Flash memory is NOT read-protected\r\n");
 }
 
-void process_COMMAND_BL_READ_SECTOR_P_STATUS(uint32_t len)
+void process_COMMAND_BL_READ_SECTOR_P_STATUS(uint32_t len, uint8_t* Copy_u8DataBuffer)
 {
     uint8_t index;
     uint8_t reply[10] = {0} ;
@@ -233,11 +235,13 @@ void process_COMMAND_BL_READ_SECTOR_P_STATUS(uint32_t len)
     uint8_t  rdp  =0;
     uint32_t wrp  =0;
 
-    read_serial_port(reply, len);
-    char2hex(reply, reply_final, 5);
+    //read_serial_port(reply, len);
+    //char2hex(reply, reply_final, 5);
 
-    rdp  =           reply_final[0];
-    wrp  = *((uint32_t*)(reply_final+1));
+    //rdp  =           reply_final[0];
+    //wrp  = *((uint32_t*)(reply_final+1));
+    rdp  =           Copy_u8DataBuffer[2];
+    wrp  = *((uint32_t*)(Copy_u8DataBuffer+3));
 
     if(rdp) printf("\n   RDP Status : Flash memory is read-protected\r\n");
     else    printf("\n   RDP Status : Flash memory is NOT read-protected\r\n");
@@ -267,8 +271,8 @@ void process_COMMAND_BL_READ_SECTOR_P_STATUS(uint32_t len)
 void process_COMMAND_BL_MY_SYSTEM_RESET			(uint32_t len)
 {
      uint8_t status=0;
-     read_serial_port(&status,len);
-     printf("\n\n   Done!\n");
+     //read_serial_port(&status,len);
+     printf("\n\n   Done! Resetting system\n");
 }
 void process_COMMAND_BL_EXISTING_APPS			(uint32_t len)
 {

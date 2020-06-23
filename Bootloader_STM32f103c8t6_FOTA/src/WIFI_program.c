@@ -58,7 +58,7 @@ u16 Global_u16IteratorForNumberOfTimesDataAreReceived=0;
 static u32 static_u32DataSize=0;
 
 /*This array is for debugging purposes to detect what is wrong with the counting function*/
-u8 Global_u8TestCounting[1050]={0};
+//u8 Global_u8TestCounting[8000]={0};
 
 /*This callback function will be used to count data on the website*/
 void callBackCountingRX (void)
@@ -79,11 +79,11 @@ void callBackCountingRX (void)
 			{
 				static_u8StartSavingData=0;
 			}
-			if (static_u8Response!=' ' && static_u8Response!='\n'&& static_u8Response!='<' && static_u8Response!='+' && static_u8Response!='\r')
+			if (static_u8Response!=' ' && static_u8Response!='\n'&& static_u8Response!='<' && static_u8Response!='+' && static_u8Response!='\r'&& static_u8Response!='I' && static_u8Response!='P'&& static_u8Response!=':')
 			{
-				Global_u8TestCounting[static_u32DataArrayIterator]=static_u8Response;
+				//Global_u8TestCounting[static_u32DataArrayIterator]=static_u8Response;
 				static_u32DataSize++;
-				static_u32DataArrayIterator++;
+				//static_u32DataArrayIterator++;
 			}
 
 			/*We check for end of receiving through the word "CLOSED", we will check for the last two chars of the word*/
@@ -143,7 +143,9 @@ void callBackRX (void)
 					static_u8StartSavingData=0;
 				}
 				/*If we reached a proper data that is not garbage or separators, check for flags and save data according to them*/
-				if (static_u8Response!=' ' && static_u8Response!='\n'&& static_u8Response!='<' && static_u8Response!='+' && static_u8Response!='\r')
+				if (static_u8Response!=' ' && static_u8Response!='\n'&& static_u8Response!='<' && static_u8Response!='+' && static_u8Response!='\r'&& static_u8Response!='I' && static_u8Response!='P'&& static_u8Response!=':' &&static_u8Response!='r' && static_u8Response!='>' && static_u8Response!='n')
+				//if ((static_u8Response=='0') | (static_u8Response=='1')| (static_u8Response=='2') | (static_u8Response=='3') | (static_u8Response=='4')| (static_u8Response=='5') | (static_u8Response=='6')| (static_u8Response=='7')
+					//	| (static_u8Response=='8') | (static_u8Response=='9')| (static_u8Response=='a')| (static_u8Response=='b')| (static_u8Response=='c')| (static_u8Response=='d')| (static_u8Response=='e')| (static_u8Response=='f'))
 				{
 					/*Check which index we are at now, and in case we reached the required index, raise flag
 					 * index is multiplied by 2 because the data on site is as string and every byte is divided into 2

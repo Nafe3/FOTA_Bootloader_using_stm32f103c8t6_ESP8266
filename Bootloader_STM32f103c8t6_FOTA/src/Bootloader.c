@@ -1,4 +1,4 @@
-/*bl
+/*bl024
  * Bootloader.c
  *
  *  Created on: June 20, 2020
@@ -30,8 +30,7 @@
 #define BL_RX_LEN 						2200
 u8  	bl_rx_buffer[BL_RX_LEN]      =  {0};
 
-#define FLASH_RX_LEN					1024
-u8 		FLASH_src_buffer_1K[FLASH_RX_LEN]=  {0};
+
 
 /*Boot-loader supported commands*/
 #define BL_GET_VER						0X51	/*This command is used to read the boot-loader version from the MCU*/
@@ -166,7 +165,8 @@ u8 i=0;
 /*This iterator will be used for initializing the data array*/
 u16 iterator=0;
 GPIO_Pin_t OnBoard_Led;
-
+/*This variable is used in the data receiving function for flashing*/
+extern u16 Global_u16IteratorForNumberOfTimesDataAreReceived;
 
 #define BOOTLOADER_RESPONSE_ARRAY_SIZE		(u16)256
 /*This array will be used for holding data that will be sent to webserver*/
@@ -206,6 +206,7 @@ void bootloader_voidJumpToUserApp(void)
 /*Reads the command packet which comes from the host application*/
 void bootloader_voidUARTReadData (void)
 {
+
 
 	OnBoard_Led.port = PORTC;
 	OnBoard_Led.mode = GPIO_MODE_OUTPUT_PUSH_PULL;
@@ -307,6 +308,7 @@ void bootloader_voidUARTReadData (void)
 				printmsg1("\nBL_DEBUG_MSG: Invalid command code received from host \r\n");
 				break;
 		}
+		delay_ms(15000);
 	}
 }
 
@@ -573,7 +575,7 @@ void bootloader_handle_flash_erase_cmd			(u8* bl_rx_buffer)
 			Local_u8FinalAddress[index]=bl_rx_buffer[2+index];
 		sector_start_address = *((u32*)Local_u8FinalAddress);
 
-		number_of_sectors_to_be_erased = bl_rx_buffer[10];
+		number_of_sectors_to_be_erased = bl_rx_buffer[6];
 		FLASH_Unlock();
 		status = FLASH_MultiplePageErase(sector_start_address,number_of_sectors_to_be_erased);
 
@@ -644,7 +646,7 @@ void bootloader_handle_mem_write_cmd			(u8* bl_rx_buffer)
 	u8  Local_u8FinalReply[BL_MEM_WRITE_REPLY_LEN*2]={0};		/*This local variable will hold the array that will be send over WIFI*/
 
 	GPIO_Pin_Write(&OnBoard_Led,LOW);
-	u32 destination_address = 0 ;
+
 	u8 addr_valid   = ADDR_VALID;
 	u8 addr_invalid = ADDR_INVALID;
 
@@ -654,6 +656,21 @@ void bootloader_handle_mem_write_cmd			(u8* bl_rx_buffer)
 	//u32 len_to_read = bl_rx_buffer[10];
 	u8 Local_u8FinalAddress[4];								/*This local variable will hold the concatenated address  value that should be passed*/
 	//u8 Local_u8FinalHostCRC[4];								/*This local variable will hold the concatenated host crc value that should be passed*/
+	/*This local variable will hold length of the file to be flashed*/
+	u32 Local_u32FileSize     =0;
+	u32 bytes_remaining       =0;
+	u32 bytes_received_so_far =0;
+	u32 len_to_read			  =0;
+	u32 destination_address   =0;
+	#define FLASH_RX_LEN					1024
+	u8	FLASH_src_buffer_1K[FLASH_RX_LEN]=  {0};
+	#define WEB_RX_LEN						2048
+	u8	website_buffer[WEB_RX_LEN]=			{0};
+	/*This variable will be used as the start byte for each buffer received from the internet, it starts at byte #1 and keeps increasing by the buffer
+	 * size during each loop*/
+	u16 Local_u16BufferStartByte=1;
+
+
 
 	//char2hex(&bl_rx_buffer[11+len_to_read], Local_u8FinalHostCRC, 4);
 	//crc_host= *((u32*)Local_u8FinalHostCRC);     			/*Extract the CRC32 sent by host*/
@@ -666,8 +683,8 @@ void bootloader_handle_mem_write_cmd			(u8* bl_rx_buffer)
 		//checksum is correct
 		printmsg1("BL_DEBUG_MSG: checksum success !! \r\n");
 
-		//processing
-
+		/*Place size in size variable*/
+		Local_u32FileSize=*((u32*)&bl_rx_buffer[6]);
 		//extracting the destination address
 		//char2hex(&bl_rx_buffer[2],Local_u8FinalAddress,4);
 		for(index=0;index<4;index++)
@@ -677,15 +694,41 @@ void bootloader_handle_mem_write_cmd			(u8* bl_rx_buffer)
 		printmsg1("BL_DEBUG_MSG: destination address: 0x%02x%02x%02x%02x\r\n",Local_u8FinalAddress[3],Local_u8FinalAddress[2],Local_u8FinalAddress[1],Local_u8FinalAddress[0]);
 		 if( verify_address(destination_address) == ADDR_VALID )
 		 {
+			 	FLASH_Unlock();
+			 	bytes_remaining = Local_u32FileSize;
+			 	while(bytes_remaining)
+			 	{
+			 		if(bytes_remaining >= 1024)
+			 		{
+			 			len_to_read=1024;
+			 		}
+			 		else
+			 		{
+			 			len_to_read=bytes_remaining;
+			 		}
 
-			 	//FLASH_MultiplePageErase   			(u32 pageAddress, 8); //since the file's size is 7992 bytes and that's about 8KB
-				for(index=0;index<64;index++)
-					FLASH_src_buffer_1K[index]=bl_rx_buffer[11+index];
-			 	//char2hex(&bl_rx_buffer[11],FLASH_src_buffer_1K,64);
+					//FLASH_MultiplePageErase   			(u32 pageAddress, 8); //since the file's size is 7992 bytes and that's about 8KB
+					//for(index=0;index<64;index++)
+						//FLASH_src_buffer_1K[index]=bl_rx_buffer[11+index];
+			 		WIFI_u8ReceiveData(Local_u16BufferStartByte, Local_u32FileSize, website_buffer);
+			 		Local_u16BufferStartByte=+1024;
+			 		Global_u16IteratorForNumberOfTimesDataAreReceived++;
+//					char2hex(website_buffer,FLASH_src_buffer_1K,1024);
+//
+//
+//				    FLASH_PageErase		(destination_address);
+//					FLASH_WriteProgram	((u32*)FLASH_src_buffer_1K, (u32*)destination_address, 64);
+					/**************************** Updating variables for the next loop ****************************/
+					//update base mem address for the next loop
+					destination_address 	+= len_to_read;
+					bytes_received_so_far 	+= len_to_read;
+					bytes_remaining			 = Local_u32FileSize - bytes_received_so_far;
+			 	}
+			 	/*Reset iterators*/
+		 		Local_u16BufferStartByte=+1024;
+		 		Global_u16IteratorForNumberOfTimesDataAreReceived++;
 
-			    FLASH_Unlock();
-			   // FLASH_PageErase((u32)0x08008000);
-			    FLASH_WriteProgram	((u32*)FLASH_src_buffer_1K, (u32*)destination_address, 64);
+			 	FLASH_Lock();
 				//Stating that a reply of one byte is going to be sent
 				bootloader_send_ack(1);
 				//tell host that address is fine
@@ -1006,9 +1049,9 @@ void bootloader_handle_read_sectors_status_cmd	(u8* bl_rx_buffer)
 		hex2char(Global_u8ResponseArray, &Local_u8FinalReply[0], 2);
 		/*Write reply bytes after the first two bytes of ack*/
 		/*Convert RDP byte to char to send them over WIFI*/
-		hex2char(&RDP_status           , &Local_u8FinalReply[2], 1);
+		hex2char(&RDP_status           , &Local_u8FinalReply[4], 1);
 		/*Convert WRP 4 bytes to char to send them over WIFI*/
-		hex2char((u8*)&WRP_status      , &Local_u8FinalReply[4], 4);
+		hex2char((u8*)&WRP_status      , &Local_u8FinalReply[6], 4);
 
 		/*Send converted Bytes over WIFI*/
 		WIFI_u8SendCommandToServer(Local_u8FinalReply, BL_PROTECTION_STATUS_REPLY_LEN*2);

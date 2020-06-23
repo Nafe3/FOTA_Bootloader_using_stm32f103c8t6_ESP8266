@@ -16,18 +16,18 @@ void process_COMMAND_BL_GET_CID					(uint32_t len, uint8_t* Copy_u8DataBuffer);
 
 void process_COMMAND_BL_GO_TO_ADDR				(uint32_t len, uint8_t* Copy_u8DataBuffer);
 
-void process_COMMAND_BL_FLASH_ERASE				(uint32_t len);
-void process_COMMAND_BL_FLASH_MASS_ERASE		(uint32_t len);
+void process_COMMAND_BL_FLASH_ERASE				(uint32_t len, uint8_t* Copy_u8DataBuffer);
+void process_COMMAND_BL_FLASH_MASS_ERASE		(uint32_t len, uint8_t* Copy_u8DataBuffer);
 
-void process_COMMAND_BL_MEM_WRITE				(uint32_t len);
+void process_COMMAND_BL_MEM_WRITE				(uint32_t len, uint8_t* Copy_u8DataBuffer);
 void process_COMMAND_BL_MEM_READ				(uint32_t len);
 
-void process_COMMAND_BL_EN_R_PROTECT			(uint32_t len);
-void process_COMMAND_BL_DIS_R_PROTECT			(uint32_t len);
-void process_COMMAND_BL_EN_W_PROTECT			(uint32_t len);
-void process_COMMAND_BL_DIS_W_PROTECT			(uint32_t len);
-void process_COMMAND_BL_GET_RDP_STATUS			(uint32_t len);
-void process_COMMAND_BL_READ_SECTOR_P_STATUS	(uint32_t len);
+void process_COMMAND_BL_EN_R_PROTECT			(uint32_t len, uint8_t* Copy_u8DataBuffer);
+void process_COMMAND_BL_DIS_R_PROTECT			(uint32_t len, uint8_t* Copy_u8DataBuffer);
+void process_COMMAND_BL_EN_W_PROTECT			(uint32_t len, uint8_t* Copy_u8DataBuffer);
+void process_COMMAND_BL_DIS_W_PROTECT			(uint32_t len, uint8_t* Copy_u8DataBuffer);
+void process_COMMAND_BL_GET_RDP_STATUS			(uint32_t len, uint8_t* Copy_u8DataBuffer);
+void process_COMMAND_BL_READ_SECTOR_P_STATUS	(uint32_t len, uint8_t* Copy_u8DataBuffer);
 
 void process_COMMAND_BL_MY_SYSTEM_RESET			(uint32_t len);
 void process_COMMAND_BL_EXISTING_APPS			(uint32_t len);
@@ -77,20 +77,20 @@ uint32_t 	calc_file_len	(void);
 
 #define COMMAND_BL_GO_TO_ADDR_LEN			10
 
-#define COMMAND_BL_FLASH_ERASE_LEN			19       //8
-#define COMMAND_BL_MASS_ERASE_LEN			10       //8
+#define COMMAND_BL_FLASH_ERASE_LEN			11       //8 //19
+#define COMMAND_BL_MASS_ERASE_LEN			6       //8 //10
 
 #define COMMAND_BL_MEM_WRITE_LEN(x)			(11+x+8)//(11+x+8)//(11+x+4) //(7+x+4)
 #define COMMAND_BL_MEM_READ_LEN				11
 
-#define COMMAND_BL_EN_R_PROTECT_LEN			10
-#define COMMAND_BL_DIS_R_PROTECT_LEN		10
-#define COMMAND_BL_EN_W_PROTECT_LEN			18
-#define COMMAND_BL_DIS_W_PROTECT_LEN		18
+#define COMMAND_BL_EN_R_PROTECT_LEN			6      //10
+#define COMMAND_BL_DIS_R_PROTECT_LEN		6       //10
+#define COMMAND_BL_EN_W_PROTECT_LEN			10      //18
+#define COMMAND_BL_DIS_W_PROTECT_LEN		10      //18
 #define COMMAND_BL_GET_RDP_STATUS_LEN		6
-#define COMMAND_BL_READ_SECTOR_P_STATUS_LEN	10
+#define COMMAND_BL_READ_SECTOR_P_STATUS_LEN	6      //10
 
-#define COMMAND_BL_MY_SYSTEM_RESET_LEN		10
+#define COMMAND_BL_MY_SYSTEM_RESET_LEN		6      //10
 #define COMMAND_BL_EXISTING_APPS_LEN		10
 
 /* Values to be used with WRP */

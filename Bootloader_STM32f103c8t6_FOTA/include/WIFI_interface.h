@@ -25,7 +25,7 @@
 #define		 WIFI_COMMAND_GET_DATA_FROM_SERVER				(u8*)"GET https://api.thingspeak.com/apps/thinghttp/send_request?api_key=Y4JOXUDQZBLGOMHJ\r\nHost:api.thingspeak.com\r\n\r\n\r\n\r\n\r\n"
 #define		 WIFI_COMMAND_GET_COMMAND_FROM_SERVER			(u8*)"GET https://api.thingspeak.com/channels/1082594/fields/1/last.txt?api_key=GL3M7JAK48BR8RRA\r\nHost:api.thingspeak.com\r\n"
 
-#define 	 WIFI_RECEIVE_ARRAY_SIZE						(u16)(512)
+#define 	 WIFI_RECEIVE_ARRAY_SIZE						(u16)(2048)
 
 
 

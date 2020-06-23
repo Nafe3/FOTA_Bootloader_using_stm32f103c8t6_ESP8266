@@ -228,6 +228,11 @@ void decode_menu_command_code(uint32_t command_code)
     /*This variable will be used as iterator in the next function*/
     uint16_t Local_u16Iterator=0;
 
+    /*Flash erase variables*/
+    volatile uint8_t  sector_num;
+    volatile uint8_t  nsec;
+    uint32_t sector_address;
+
     switch(command_code)
     {
     case 0:
@@ -250,6 +255,9 @@ void decode_menu_command_code(uint32_t command_code)
         hex2char(data_buf,commandPacket_TxBuffer,COMMAND_BL_GET_VER_LEN);
         /*Send data to server*/
         HOST_voidSendCommand(commandPacket_TxBuffer,COMMAND_BL_GET_VER_LEN*2);
+        /*Give bootloader time to receive command and process it*/
+        printf("\n   Waiting for bootloader to process request\n");
+        delay(5000);
         while (replyFromBootloaderHex[0]!=0xA5 && replyFromBootloaderHex!=0x7f)
         {
             /*Get response from bootloader and through WIFI*/
@@ -260,9 +268,8 @@ void decode_menu_command_code(uint32_t command_code)
             if(timeout_counter==TIMEOUT)break;
 
             timeout_counter++;
-            printf("waiting for response\n");
         }
-        printf("Done receiving\n");
+        //printf("Done receiving\n");
         /*Pass hex array to process it as reply of bootloader*/
         ret_value = read_bootloader_reply(COMMAND_BL_GET_VER, replyFromBootloaderHex);
 
@@ -283,6 +290,9 @@ void decode_menu_command_code(uint32_t command_code)
         hex2char(data_buf,commandPacket_TxBuffer,COMMAND_BL_GET_HELP_LEN);
         /*Send data to server*/
         HOST_voidSendCommand(commandPacket_TxBuffer,COMMAND_BL_GET_HELP_LEN*2);
+        /*Give bootloader time to receive command and process it*/
+        printf("\n   Waiting for bootloader to process request\n");
+        delay(5000);
 
         while (replyFromBootloaderHex[0]!=0xA5 && replyFromBootloaderHex!=0x7f)
         {
@@ -293,13 +303,13 @@ void decode_menu_command_code(uint32_t command_code)
             /*If we reached timeout threshold, break from loop, otherwise increase variable*/
             if(timeout_counter==TIMEOUT)break;
             timeout_counter++;
-            printf("waiting for response\n");
+            //printf("waiting for response\n");
         }
         /*Save the size insize the variable which represents reply without ack size*/
         bl_reply_without_ack = replyFromBootloaderHex[1];
         /*Convert rest of array into hex*/
         char2hex(&replyFromBootloaderChar[4],&replyFromBootloaderHex[2],bl_reply_without_ack);
-        printf("Done receiving\n");
+        //printf("Done receiving\n");
 
         /*Pass hex array to process it as reply of bootloader*/
         ret_value = read_bootloader_reply(COMMAND_BL_GET_HELP, replyFromBootloaderHex);
@@ -319,7 +329,9 @@ void decode_menu_command_code(uint32_t command_code)
         hex2char(data_buf,commandPacket_TxBuffer,COMMAND_BL_GET_CID_LEN);
         /*Send data to server*/
         HOST_voidSendCommand(commandPacket_TxBuffer,COMMAND_BL_GET_CID_LEN*2);
-
+        /*Give bootloader time to receive command and process it*/
+        printf("\n   Waiting for bootloader to process request\n");
+        delay(5000);
         while (replyFromBootloaderHex[0]!=0xA5 && replyFromBootloaderHex!=0x7f)
         {
             /*Get response from bootloader and through WIFI*/
@@ -329,13 +341,13 @@ void decode_menu_command_code(uint32_t command_code)
             /*If we reached timeout threshold, break from loop, otherwise increase variable*/
             if(timeout_counter==TIMEOUT)break;
             timeout_counter++;
-            printf("waiting for response\n");
+            //printf("waiting for response\n");
         }
         /*Save the size insize the variable which represents reply without ack size*/
         bl_reply_without_ack = replyFromBootloaderHex[1];
         /*Convert rest of array into hex*/
         char2hex(&replyFromBootloaderChar[4],&replyFromBootloaderHex[2],bl_reply_without_ack);
-        printf("Done receiving\n");
+        //printf("Done receiving\n");
 
         /*Pass hex array to process it as reply of bootloader*/
         ret_value = read_bootloader_reply(COMMAND_BL_GET_CID, replyFromBootloaderHex);
@@ -358,7 +370,6 @@ void decode_menu_command_code(uint32_t command_code)
         {
             data_buf[2+Local_u16Iterator]=go_address[Local_u16Iterator];
         }
-        //*(data_buf+2)=go_address;
 //        data_buf[2]=(uint8_t)go_address;
 //        data_buf[3]=(uint8_t)go_address>>8;
 //        data_buf[4]=(uint8_t)go_address>>16;
@@ -373,6 +384,9 @@ void decode_menu_command_code(uint32_t command_code)
 
         /*Send data to server*/
         HOST_voidSendCommand(commandPacket_TxBuffer,COMMAND_BL_GO_TO_ADDR_LEN*2);
+        /*Give bootloader time to receive command and process it*/
+        printf("\n   Waiting for bootloader to process request\n");
+        delay(5000);
 
         while (replyFromBootloaderHex[0]!=0xA5 && replyFromBootloaderHex[0]!=0x7f)
         {
@@ -383,259 +397,330 @@ void decode_menu_command_code(uint32_t command_code)
             /*If we reached timeout threshold, break from loop, otherwise increase variable*/
             if(timeout_counter==TIMEOUT)break;
             timeout_counter++;
-            printf("waiting for response\n");
+            //printf("waiting for response\n");
         }
         /*Save the size insize the variable which represents reply without ack size*/
         bl_reply_without_ack = replyFromBootloaderHex[1];
         /*Convert rest of array into hex*/
         char2hex(&replyFromBootloaderChar[4],&replyFromBootloaderHex[2],bl_reply_without_ack);
-        printf("Done receiving\n");
+        //printf("Done receiving\n");
 
         /*Pass hex array to process it as reply of bootloader*/
         ret_value = read_bootloader_reply(COMMAND_BL_GO_TO_ADDR, replyFromBootloaderHex);
-//        /*Send length of data to be sent*/
-//        Write_to_serial_port(&data_buf[0],1);
-//        /*Send an empty frame to empty DR and prevent data length being read again by bootloader as data*/
-//        Write_to_serial_port(&emptyFrame,1);
-//        /*Wait for bootloader to be ready to receive data*/
-//        delay(20);
-//        for (iterator=1; iterator<COMMAND_BL_GO_TO_ADDR_LEN;iterator++)
-//        {
-//            Write_to_serial_port(&data_buf[iterator],1);
-//            //delay (500);
-//        }
-//        /*We will send empty frame now to clear DR*/
-//        Write_to_serial_port(&emptyFrame,1);
-//        /*Get Response for bootloader*/
-//        ret_value = read_bootloader_reply(data_buf[1]);
         break;
-//
-//    case 5:
-//        printf("\n   Command == > BL_FLASH_ERASE");
-//
-//        data_buf[0] = COMMAND_BL_FLASH_ERASE_LEN-1;
-//        data_buf[1] = COMMAND_BL_FLASH_ERASE;
-//        uint8_t  sector_num;
-//        uint8_t  nsec;
-//        uint32_t sector_address;
-//
-//        printf("\n\n   Enter sector number(0-127) here : ");
-//        scanf(" %d",&sector_num);
-//        //printf("\n\n   %d\n ",sector_num);
-//             if(sector_num == 0  ) sector_address = FLASH_MEMORY_PAGE_0;
-//        else if(sector_num == 1  ) sector_address = FLASH_MEMORY_PAGE_1  ;
-//		else if(sector_num == 2  ) sector_address = FLASH_MEMORY_PAGE_2  ;
-//		else if(sector_num == 3  ) sector_address = FLASH_MEMORY_PAGE_3  ;
-//		else if(sector_num == 4  ) sector_address = FLASH_MEMORY_PAGE_4  ;
-//		else if(sector_num == 5  ) sector_address = FLASH_MEMORY_PAGE_5  ;
-//		else if(sector_num == 6  ) sector_address = FLASH_MEMORY_PAGE_6  ;
-//		else if(sector_num == 7  ) sector_address = FLASH_MEMORY_PAGE_7  ;
-//		else if(sector_num == 8  ) sector_address = FLASH_MEMORY_PAGE_8  ;
-//		else if(sector_num == 9  ) sector_address = FLASH_MEMORY_PAGE_9  ;
-//		else if(sector_num == 10 ) sector_address = FLASH_MEMORY_PAGE_10 ;
-//		else if(sector_num == 11 ) sector_address = FLASH_MEMORY_PAGE_11 ;
-//		else if(sector_num == 12 ) sector_address = FLASH_MEMORY_PAGE_12 ;
-//		else if(sector_num == 13 ) sector_address = FLASH_MEMORY_PAGE_13 ;
-//		else if(sector_num == 14 ) sector_address = FLASH_MEMORY_PAGE_14 ;
-//		else if(sector_num == 15 ) sector_address = FLASH_MEMORY_PAGE_15 ;
-//		else if(sector_num == 16 ) sector_address = FLASH_MEMORY_PAGE_16 ;
-//		else if(sector_num == 17 ) sector_address = FLASH_MEMORY_PAGE_17 ;
-//		else if(sector_num == 18 ) sector_address = FLASH_MEMORY_PAGE_18 ;
-//		else if(sector_num == 19 ) sector_address = FLASH_MEMORY_PAGE_19 ;
-//		else if(sector_num == 20 ) sector_address = FLASH_MEMORY_PAGE_20 ;
-//		else if(sector_num == 21 ) sector_address = FLASH_MEMORY_PAGE_21 ;
-//		else if(sector_num == 22 ) sector_address = FLASH_MEMORY_PAGE_22 ;
-//		else if(sector_num == 23 ) sector_address = FLASH_MEMORY_PAGE_23 ;
-//		else if(sector_num == 24 ) sector_address = FLASH_MEMORY_PAGE_24 ;
-//		else if(sector_num == 25 ) sector_address = FLASH_MEMORY_PAGE_25 ;
-//		else if(sector_num == 26 ) sector_address = FLASH_MEMORY_PAGE_26 ;
-//		else if(sector_num == 27 ) sector_address = FLASH_MEMORY_PAGE_27 ;
-//		else if(sector_num == 28 ) sector_address = FLASH_MEMORY_PAGE_28 ;
-//		else if(sector_num == 29 ) sector_address = FLASH_MEMORY_PAGE_29 ;
-//		else if(sector_num == 30 ) sector_address = FLASH_MEMORY_PAGE_30 ;
-//		else if(sector_num == 31 ) sector_address = FLASH_MEMORY_PAGE_31 ;
-//		else if(sector_num == 32 ) sector_address = FLASH_MEMORY_PAGE_32 ;
-//		else if(sector_num == 33 ) sector_address = FLASH_MEMORY_PAGE_33 ;
-//		else if(sector_num == 34 ) sector_address = FLASH_MEMORY_PAGE_34 ;
-//		else if(sector_num == 35 ) sector_address = FLASH_MEMORY_PAGE_35 ;
-//		else if(sector_num == 36 ) sector_address = FLASH_MEMORY_PAGE_36 ;
-//		else if(sector_num == 37 ) sector_address = FLASH_MEMORY_PAGE_37 ;
-//		else if(sector_num == 38 ) sector_address = FLASH_MEMORY_PAGE_38 ;
-//		else if(sector_num == 39 ) sector_address = FLASH_MEMORY_PAGE_39 ;
-//		else if(sector_num == 40 ) sector_address = FLASH_MEMORY_PAGE_40 ;
-//		else if(sector_num == 41 ) sector_address = FLASH_MEMORY_PAGE_41 ;
-//		else if(sector_num == 42 ) sector_address = FLASH_MEMORY_PAGE_42 ;
-//		else if(sector_num == 43 ) sector_address = FLASH_MEMORY_PAGE_43 ;
-//		else if(sector_num == 44 ) sector_address = FLASH_MEMORY_PAGE_44 ;
-//		else if(sector_num == 45 ) sector_address = FLASH_MEMORY_PAGE_45 ;
-//		else if(sector_num == 46 ) sector_address = FLASH_MEMORY_PAGE_46 ;
-//		else if(sector_num == 47 ) sector_address = FLASH_MEMORY_PAGE_47 ;
-//		else if(sector_num == 48 ) sector_address = FLASH_MEMORY_PAGE_48 ;
-//		else if(sector_num == 49 ) sector_address = FLASH_MEMORY_PAGE_49 ;
-//		else if(sector_num == 50 ) sector_address = FLASH_MEMORY_PAGE_50 ;
-//		else if(sector_num == 51 ) sector_address = FLASH_MEMORY_PAGE_51 ;
-//		else if(sector_num == 52 ) sector_address = FLASH_MEMORY_PAGE_52 ;
-//		else if(sector_num == 53 ) sector_address = FLASH_MEMORY_PAGE_53 ;
-//		else if(sector_num == 54 ) sector_address = FLASH_MEMORY_PAGE_54 ;
-//		else if(sector_num == 55 ) sector_address = FLASH_MEMORY_PAGE_55 ;
-//		else if(sector_num == 56 ) sector_address = FLASH_MEMORY_PAGE_56 ;
-//		else if(sector_num == 57 ) sector_address = FLASH_MEMORY_PAGE_57 ;
-//		else if(sector_num == 58 ) sector_address = FLASH_MEMORY_PAGE_58 ;
-//		else if(sector_num == 59 ) sector_address = FLASH_MEMORY_PAGE_59 ;
-//		else if(sector_num == 60 ) sector_address = FLASH_MEMORY_PAGE_60 ;
-//		else if(sector_num == 61 ) sector_address = FLASH_MEMORY_PAGE_61 ;
-//		else if(sector_num == 62 ) sector_address = FLASH_MEMORY_PAGE_62 ;
-//		else if(sector_num == 63 ) sector_address = FLASH_MEMORY_PAGE_63 ;
-//		else if(sector_num == 64 ) sector_address = FLASH_MEMORY_PAGE_64 ;
-//		else if(sector_num == 65 ) sector_address = FLASH_MEMORY_PAGE_65 ;
-//		else if(sector_num == 66 ) sector_address = FLASH_MEMORY_PAGE_66 ;
-//		else if(sector_num == 67 ) sector_address = FLASH_MEMORY_PAGE_67 ;
-//		else if(sector_num == 68 ) sector_address = FLASH_MEMORY_PAGE_68 ;
-//		else if(sector_num == 69 ) sector_address = FLASH_MEMORY_PAGE_69 ;
-//		else if(sector_num == 70 ) sector_address = FLASH_MEMORY_PAGE_70 ;
-//		else if(sector_num == 71 ) sector_address = FLASH_MEMORY_PAGE_71 ;
-//		else if(sector_num == 72 ) sector_address = FLASH_MEMORY_PAGE_72 ;
-//		else if(sector_num == 73 ) sector_address = FLASH_MEMORY_PAGE_73 ;
-//		else if(sector_num == 74 ) sector_address = FLASH_MEMORY_PAGE_74 ;
-//		else if(sector_num == 75 ) sector_address = FLASH_MEMORY_PAGE_75 ;
-//		else if(sector_num == 76 ) sector_address = FLASH_MEMORY_PAGE_76 ;
-//		else if(sector_num == 77 ) sector_address = FLASH_MEMORY_PAGE_77 ;
-//		else if(sector_num == 78 ) sector_address = FLASH_MEMORY_PAGE_78 ;
-//		else if(sector_num == 79 ) sector_address = FLASH_MEMORY_PAGE_79 ;
-//		else if(sector_num == 80 ) sector_address = FLASH_MEMORY_PAGE_80 ;
-//		else if(sector_num == 81 ) sector_address = FLASH_MEMORY_PAGE_81 ;
-//		else if(sector_num == 82 ) sector_address = FLASH_MEMORY_PAGE_82 ;
-//		else if(sector_num == 83 ) sector_address = FLASH_MEMORY_PAGE_83 ;
-//		else if(sector_num == 84 ) sector_address = FLASH_MEMORY_PAGE_84 ;
-//		else if(sector_num == 85 ) sector_address = FLASH_MEMORY_PAGE_85 ;
-//		else if(sector_num == 86 ) sector_address = FLASH_MEMORY_PAGE_86 ;
-//		else if(sector_num == 87 ) sector_address = FLASH_MEMORY_PAGE_87 ;
-//		else if(sector_num == 88 ) sector_address = FLASH_MEMORY_PAGE_88 ;
-//		else if(sector_num == 89 ) sector_address = FLASH_MEMORY_PAGE_89 ;
-//		else if(sector_num == 90 ) sector_address = FLASH_MEMORY_PAGE_90 ;
-//		else if(sector_num == 91 ) sector_address = FLASH_MEMORY_PAGE_91 ;
-//		else if(sector_num == 92 ) sector_address = FLASH_MEMORY_PAGE_92 ;
-//		else if(sector_num == 93 ) sector_address = FLASH_MEMORY_PAGE_93 ;
-//		else if(sector_num == 94 ) sector_address = FLASH_MEMORY_PAGE_94 ;
-//		else if(sector_num == 95 ) sector_address = FLASH_MEMORY_PAGE_95 ;
-//		else if(sector_num == 96 ) sector_address = FLASH_MEMORY_PAGE_96 ;
-//		else if(sector_num == 97 ) sector_address = FLASH_MEMORY_PAGE_97 ;
-//		else if(sector_num == 98 ) sector_address = FLASH_MEMORY_PAGE_98 ;
-//		else if(sector_num == 99 ) sector_address = FLASH_MEMORY_PAGE_99 ;
-//		else if(sector_num == 100) sector_address = FLASH_MEMORY_PAGE_100;
-//		else if(sector_num == 101) sector_address = FLASH_MEMORY_PAGE_101;
-//		else if(sector_num == 102) sector_address = FLASH_MEMORY_PAGE_102;
-//		else if(sector_num == 103) sector_address = FLASH_MEMORY_PAGE_103;
-//		else if(sector_num == 104) sector_address = FLASH_MEMORY_PAGE_104;
-//		else if(sector_num == 105) sector_address = FLASH_MEMORY_PAGE_105;
-//		else if(sector_num == 106) sector_address = FLASH_MEMORY_PAGE_106;
-//		else if(sector_num == 107) sector_address = FLASH_MEMORY_PAGE_107;
-//		else if(sector_num == 108) sector_address = FLASH_MEMORY_PAGE_108;
-//		else if(sector_num == 109) sector_address = FLASH_MEMORY_PAGE_109;
-//		else if(sector_num == 110) sector_address = FLASH_MEMORY_PAGE_110;
-//		else if(sector_num == 111) sector_address = FLASH_MEMORY_PAGE_111;
-//		else if(sector_num == 112) sector_address = FLASH_MEMORY_PAGE_112;
-//		else if(sector_num == 113) sector_address = FLASH_MEMORY_PAGE_113;
-//		else if(sector_num == 114) sector_address = FLASH_MEMORY_PAGE_114;
-//		else if(sector_num == 115) sector_address = FLASH_MEMORY_PAGE_115;
-//		else if(sector_num == 116) sector_address = FLASH_MEMORY_PAGE_116;
-//		else if(sector_num == 117) sector_address = FLASH_MEMORY_PAGE_117;
-//		else if(sector_num == 118) sector_address = FLASH_MEMORY_PAGE_118;
-//		else if(sector_num == 119) sector_address = FLASH_MEMORY_PAGE_119;
-//		else if(sector_num == 120) sector_address = FLASH_MEMORY_PAGE_120;
-//		else if(sector_num == 121) sector_address = FLASH_MEMORY_PAGE_121;
-//		else if(sector_num == 122) sector_address = FLASH_MEMORY_PAGE_122;
-//		else if(sector_num == 123) sector_address = FLASH_MEMORY_PAGE_123;
-//		else if(sector_num == 124) sector_address = FLASH_MEMORY_PAGE_124;
-//		else if(sector_num == 125) sector_address = FLASH_MEMORY_PAGE_125;
-//		else if(sector_num == 126) sector_address = FLASH_MEMORY_PAGE_126;
-//		else if(sector_num == 127) sector_address = FLASH_MEMORY_PAGE_127;
-//        else{printf("\nInvalid Sector number!!!\r\n");return;}
-//
-//        printf("   Enter number of sectors to be erased here : ");
-//        scanf(" %d",&nsec);
-//
-//        //populate base mem address
-//        hex2char(&sector_address, &data_buf[2], 4); //assigning the 32bits memory address to 8 bytes to be sent to BL
-//
-//        data_buf[10]= nsec;
-//        //printf(" sector num : %d %d \n",sector_num,nsec);
-//
-//        crc32       = get_crc(data_buf,COMMAND_BL_FLASH_ERASE_LEN-8);
-//        hex2char(&crc32, &data_buf[COMMAND_BL_FLASH_ERASE_LEN-8], 4);
-//
-//        /*Send length of data to be sent*/
-//        Write_to_serial_port(&data_buf[0],1);
-//        /*Send an empty frame to empty DR and prevent data length being read again by bootloader as data*/
-//        Write_to_serial_port(&emptyFrame,1);
-//        /*Wait for bootloader to be ready to receive data*/
-//        delay(20);
-//        for (iterator=1; iterator<COMMAND_BL_FLASH_ERASE_LEN;iterator++)
-//        {
-//            Write_to_serial_port(&data_buf[iterator],1);
-//           // delay (500);
-//        }
-//
-//        /*We will send empty frame now to clear DR*/
-//        Write_to_serial_port(&emptyFrame,1);
-//        /*Get Response for bootloader*/
-//        ret_value = read_bootloader_reply(data_buf[1]);
-//
-//        printf("\n\n   Erased %d sectors starting from sector %d \n",nsec,sector_num);
-//
-//
-//        break;
-//
-//    case 6:
-//        printf("\n   Command == > BL_FLASH_MASS_ERASE\n");
-//        data_buf[0] = COMMAND_BL_MASS_ERASE_LEN-1;
-//        data_buf[1] = COMMAND_BL_MASS_ERASE;
-//
-//        crc32       = get_crc(data_buf,COMMAND_BL_MASS_ERASE_LEN-8);
-//        hex2char(&crc32, &data_buf[COMMAND_BL_MASS_ERASE_LEN-8], 4);
-//
-//        /*Send length of data to be sent*/
-//        Write_to_serial_port(&data_buf[0],1);
-//        /*Send an empty frame to empty DR and prevent data length being read again by bootloader as data*/
-//        Write_to_serial_port(&emptyFrame,1);
-//        /*Wait for bootloader to be ready to receive data*/
-//        delay(20);
-//        for (iterator=1; iterator<COMMAND_BL_MASS_ERASE_LEN;iterator++)
-//        {
-//            Write_to_serial_port(&data_buf[iterator],1);
-//           // delay (500);
-//        }
-//
-//        /*We will send empty frame now to clear DR*/
-//        Write_to_serial_port(&emptyFrame,1);
-//        /*Get Response for bootloader*/
-//        ret_value = read_bootloader_reply(data_buf[1]);
-//
-//        printf("\n\n   Mass Erase Done!\n");
-//
-//        break;
-//
-//    case 7:
-//        printf("\n   Command == > BL_MEM_WRITE");
+
+    case 5:
+        printf("\n   Command == > BL_FLASH_ERASE");
+
+        data_buf[0] = COMMAND_BL_FLASH_ERASE_LEN-1;
+        data_buf[1] = COMMAND_BL_FLASH_ERASE;
+
+        printf("\n   Enter number of sectors to be erased here : ");
+        scanf("%d",&nsec);
+
+        printf("\n   Enter sector number(0-127): ");
+        scanf("%d",&sector_num );
+        //printf("\n\n   %d\n ",sector_num);
+             if(sector_num == 0  ) sector_address = FLASH_MEMORY_PAGE_0;
+        else if(sector_num == 1  ) sector_address = FLASH_MEMORY_PAGE_1  ;
+		else if(sector_num == 2  ) sector_address = FLASH_MEMORY_PAGE_2  ;
+		else if(sector_num == 3  ) sector_address = FLASH_MEMORY_PAGE_3  ;
+		else if(sector_num == 4  ) sector_address = FLASH_MEMORY_PAGE_4  ;
+		else if(sector_num == 5  ) sector_address = FLASH_MEMORY_PAGE_5  ;
+		else if(sector_num == 6  ) sector_address = FLASH_MEMORY_PAGE_6  ;
+		else if(sector_num == 7  ) sector_address = FLASH_MEMORY_PAGE_7  ;
+		else if(sector_num == 8  ) sector_address = FLASH_MEMORY_PAGE_8  ;
+		else if(sector_num == 9  ) sector_address = FLASH_MEMORY_PAGE_9  ;
+		else if(sector_num == 10 ) sector_address = FLASH_MEMORY_PAGE_10 ;
+		else if(sector_num == 11 ) sector_address = FLASH_MEMORY_PAGE_11 ;
+		else if(sector_num == 12 ) sector_address = FLASH_MEMORY_PAGE_12 ;
+		else if(sector_num == 13 ) sector_address = FLASH_MEMORY_PAGE_13 ;
+		else if(sector_num == 14 ) sector_address = FLASH_MEMORY_PAGE_14 ;
+		else if(sector_num == 15 ) sector_address = FLASH_MEMORY_PAGE_15 ;
+		else if(sector_num == 16 ) sector_address = FLASH_MEMORY_PAGE_16 ;
+		else if(sector_num == 17 ) sector_address = FLASH_MEMORY_PAGE_17 ;
+		else if(sector_num == 18 ) sector_address = FLASH_MEMORY_PAGE_18 ;
+		else if(sector_num == 19 ) sector_address = FLASH_MEMORY_PAGE_19 ;
+		else if(sector_num == 20 ) sector_address = FLASH_MEMORY_PAGE_20 ;
+		else if(sector_num == 21 ) sector_address = FLASH_MEMORY_PAGE_21 ;
+		else if(sector_num == 22 ) sector_address = FLASH_MEMORY_PAGE_22 ;
+		else if(sector_num == 23 ) sector_address = FLASH_MEMORY_PAGE_23 ;
+		else if(sector_num == 24 ) sector_address = FLASH_MEMORY_PAGE_24 ;
+		else if(sector_num == 25 ) sector_address = FLASH_MEMORY_PAGE_25 ;
+		else if(sector_num == 26 ) sector_address = FLASH_MEMORY_PAGE_26 ;
+		else if(sector_num == 27 ) sector_address = FLASH_MEMORY_PAGE_27 ;
+		else if(sector_num == 28 ) sector_address = FLASH_MEMORY_PAGE_28 ;
+		else if(sector_num == 29 ) sector_address = FLASH_MEMORY_PAGE_29 ;
+		else if(sector_num == 30 ) sector_address = FLASH_MEMORY_PAGE_30 ;
+		else if(sector_num == 31 ) sector_address = FLASH_MEMORY_PAGE_31 ;
+		else if(sector_num == 32 ) sector_address = FLASH_MEMORY_PAGE_32 ;
+		else if(sector_num == 33 ) sector_address = FLASH_MEMORY_PAGE_33 ;
+		else if(sector_num == 34 ) sector_address = FLASH_MEMORY_PAGE_34 ;
+		else if(sector_num == 35 ) sector_address = FLASH_MEMORY_PAGE_35 ;
+		else if(sector_num == 36 ) sector_address = FLASH_MEMORY_PAGE_36 ;
+		else if(sector_num == 37 ) sector_address = FLASH_MEMORY_PAGE_37 ;
+		else if(sector_num == 38 ) sector_address = FLASH_MEMORY_PAGE_38 ;
+		else if(sector_num == 39 ) sector_address = FLASH_MEMORY_PAGE_39 ;
+		else if(sector_num == 40 ) sector_address = FLASH_MEMORY_PAGE_40 ;
+		else if(sector_num == 41 ) sector_address = FLASH_MEMORY_PAGE_41 ;
+		else if(sector_num == 42 ) sector_address = FLASH_MEMORY_PAGE_42 ;
+		else if(sector_num == 43 ) sector_address = FLASH_MEMORY_PAGE_43 ;
+		else if(sector_num == 44 ) sector_address = FLASH_MEMORY_PAGE_44 ;
+		else if(sector_num == 45 ) sector_address = FLASH_MEMORY_PAGE_45 ;
+		else if(sector_num == 46 ) sector_address = FLASH_MEMORY_PAGE_46 ;
+		else if(sector_num == 47 ) sector_address = FLASH_MEMORY_PAGE_47 ;
+		else if(sector_num == 48 ) sector_address = FLASH_MEMORY_PAGE_48 ;
+		else if(sector_num == 49 ) sector_address = FLASH_MEMORY_PAGE_49 ;
+		else if(sector_num == 50 ) sector_address = FLASH_MEMORY_PAGE_50 ;
+		else if(sector_num == 51 ) sector_address = FLASH_MEMORY_PAGE_51 ;
+		else if(sector_num == 52 ) sector_address = FLASH_MEMORY_PAGE_52 ;
+		else if(sector_num == 53 ) sector_address = FLASH_MEMORY_PAGE_53 ;
+		else if(sector_num == 54 ) sector_address = FLASH_MEMORY_PAGE_54 ;
+		else if(sector_num == 55 ) sector_address = FLASH_MEMORY_PAGE_55 ;
+		else if(sector_num == 56 ) sector_address = FLASH_MEMORY_PAGE_56 ;
+		else if(sector_num == 57 ) sector_address = FLASH_MEMORY_PAGE_57 ;
+		else if(sector_num == 58 ) sector_address = FLASH_MEMORY_PAGE_58 ;
+		else if(sector_num == 59 ) sector_address = FLASH_MEMORY_PAGE_59 ;
+		else if(sector_num == 60 ) sector_address = FLASH_MEMORY_PAGE_60 ;
+		else if(sector_num == 61 ) sector_address = FLASH_MEMORY_PAGE_61 ;
+		else if(sector_num == 62 ) sector_address = FLASH_MEMORY_PAGE_62 ;
+		else if(sector_num == 63 ) sector_address = FLASH_MEMORY_PAGE_63 ;
+		else if(sector_num == 64 ) sector_address = FLASH_MEMORY_PAGE_64 ;
+		else if(sector_num == 65 ) sector_address = FLASH_MEMORY_PAGE_65 ;
+		else if(sector_num == 66 ) sector_address = FLASH_MEMORY_PAGE_66 ;
+		else if(sector_num == 67 ) sector_address = FLASH_MEMORY_PAGE_67 ;
+		else if(sector_num == 68 ) sector_address = FLASH_MEMORY_PAGE_68 ;
+		else if(sector_num == 69 ) sector_address = FLASH_MEMORY_PAGE_69 ;
+		else if(sector_num == 70 ) sector_address = FLASH_MEMORY_PAGE_70 ;
+		else if(sector_num == 71 ) sector_address = FLASH_MEMORY_PAGE_71 ;
+		else if(sector_num == 72 ) sector_address = FLASH_MEMORY_PAGE_72 ;
+		else if(sector_num == 73 ) sector_address = FLASH_MEMORY_PAGE_73 ;
+		else if(sector_num == 74 ) sector_address = FLASH_MEMORY_PAGE_74 ;
+		else if(sector_num == 75 ) sector_address = FLASH_MEMORY_PAGE_75 ;
+		else if(sector_num == 76 ) sector_address = FLASH_MEMORY_PAGE_76 ;
+		else if(sector_num == 77 ) sector_address = FLASH_MEMORY_PAGE_77 ;
+		else if(sector_num == 78 ) sector_address = FLASH_MEMORY_PAGE_78 ;
+		else if(sector_num == 79 ) sector_address = FLASH_MEMORY_PAGE_79 ;
+		else if(sector_num == 80 ) sector_address = FLASH_MEMORY_PAGE_80 ;
+		else if(sector_num == 81 ) sector_address = FLASH_MEMORY_PAGE_81 ;
+		else if(sector_num == 82 ) sector_address = FLASH_MEMORY_PAGE_82 ;
+		else if(sector_num == 83 ) sector_address = FLASH_MEMORY_PAGE_83 ;
+		else if(sector_num == 84 ) sector_address = FLASH_MEMORY_PAGE_84 ;
+		else if(sector_num == 85 ) sector_address = FLASH_MEMORY_PAGE_85 ;
+		else if(sector_num == 86 ) sector_address = FLASH_MEMORY_PAGE_86 ;
+		else if(sector_num == 87 ) sector_address = FLASH_MEMORY_PAGE_87 ;
+		else if(sector_num == 88 ) sector_address = FLASH_MEMORY_PAGE_88 ;
+		else if(sector_num == 89 ) sector_address = FLASH_MEMORY_PAGE_89 ;
+		else if(sector_num == 90 ) sector_address = FLASH_MEMORY_PAGE_90 ;
+		else if(sector_num == 91 ) sector_address = FLASH_MEMORY_PAGE_91 ;
+		else if(sector_num == 92 ) sector_address = FLASH_MEMORY_PAGE_92 ;
+		else if(sector_num == 93 ) sector_address = FLASH_MEMORY_PAGE_93 ;
+		else if(sector_num == 94 ) sector_address = FLASH_MEMORY_PAGE_94 ;
+		else if(sector_num == 95 ) sector_address = FLASH_MEMORY_PAGE_95 ;
+		else if(sector_num == 96 ) sector_address = FLASH_MEMORY_PAGE_96 ;
+		else if(sector_num == 97 ) sector_address = FLASH_MEMORY_PAGE_97 ;
+		else if(sector_num == 98 ) sector_address = FLASH_MEMORY_PAGE_98 ;
+		else if(sector_num == 99 ) sector_address = FLASH_MEMORY_PAGE_99 ;
+		else if(sector_num == 100) sector_address = FLASH_MEMORY_PAGE_100;
+		else if(sector_num == 101) sector_address = FLASH_MEMORY_PAGE_101;
+		else if(sector_num == 102) sector_address = FLASH_MEMORY_PAGE_102;
+		else if(sector_num == 103) sector_address = FLASH_MEMORY_PAGE_103;
+		else if(sector_num == 104) sector_address = FLASH_MEMORY_PAGE_104;
+		else if(sector_num == 105) sector_address = FLASH_MEMORY_PAGE_105;
+		else if(sector_num == 106) sector_address = FLASH_MEMORY_PAGE_106;
+		else if(sector_num == 107) sector_address = FLASH_MEMORY_PAGE_107;
+		else if(sector_num == 108) sector_address = FLASH_MEMORY_PAGE_108;
+		else if(sector_num == 109) sector_address = FLASH_MEMORY_PAGE_109;
+		else if(sector_num == 110) sector_address = FLASH_MEMORY_PAGE_110;
+		else if(sector_num == 111) sector_address = FLASH_MEMORY_PAGE_111;
+		else if(sector_num == 112) sector_address = FLASH_MEMORY_PAGE_112;
+		else if(sector_num == 113) sector_address = FLASH_MEMORY_PAGE_113;
+		else if(sector_num == 114) sector_address = FLASH_MEMORY_PAGE_114;
+		else if(sector_num == 115) sector_address = FLASH_MEMORY_PAGE_115;
+		else if(sector_num == 116) sector_address = FLASH_MEMORY_PAGE_116;
+		else if(sector_num == 117) sector_address = FLASH_MEMORY_PAGE_117;
+		else if(sector_num == 118) sector_address = FLASH_MEMORY_PAGE_118;
+		else if(sector_num == 119) sector_address = FLASH_MEMORY_PAGE_119;
+		else if(sector_num == 120) sector_address = FLASH_MEMORY_PAGE_120;
+		else if(sector_num == 121) sector_address = FLASH_MEMORY_PAGE_121;
+		else if(sector_num == 122) sector_address = FLASH_MEMORY_PAGE_122;
+		else if(sector_num == 123) sector_address = FLASH_MEMORY_PAGE_123;
+		else if(sector_num == 124) sector_address = FLASH_MEMORY_PAGE_124;
+		else if(sector_num == 125) sector_address = FLASH_MEMORY_PAGE_125;
+		else if(sector_num == 126) sector_address = FLASH_MEMORY_PAGE_126;
+		else if(sector_num == 127) sector_address = FLASH_MEMORY_PAGE_127;
+        else{printf("\nInvalid Sector number!!!\r\n");return;}
+
+
+
+        //populate base mem address
+        //hex2char(&sector_address, &data_buf[2], 4); //assigning the 32bits memory address to 8 bytes to be sent to BL
+        /*Populate sector address inside data buffer*/
+        data_buf[2]=sector_address;
+        data_buf[3]=sector_address>>8;
+        data_buf[4]=sector_address>>16;
+        data_buf[5]=sector_address>>24;
+
+        //data_buf[10]= nsec;
+        data_buf[6]= nsec;
+        //printf(" sector num : %d %d \n",sector_num,nsec);
+        //crc32       = get_crc(data_buf,COMMAND_BL_FLASH_ERASE_LEN-8);
+        crc32       = get_crc(data_buf,COMMAND_BL_FLASH_ERASE_LEN-4);
+        data_buf[7] = word_to_byte(crc32,1,1);
+        data_buf[8] = word_to_byte(crc32,2,1);
+        data_buf[9] = word_to_byte(crc32,3,1);
+        data_buf[10] = word_to_byte(crc32,4,1);
+
+         /*Convert buffer to char*/
+        hex2char(data_buf,commandPacket_TxBuffer,COMMAND_BL_FLASH_ERASE_LEN);
+
+        /*Send data to server*/
+        HOST_voidSendCommand(commandPacket_TxBuffer,COMMAND_BL_FLASH_ERASE_LEN*2);
+        /*Give bootloader time to receive command and process it*/
+        printf("\n   Waiting for bootloader to process request\n");
+        delay(5000);
+
+        while (replyFromBootloaderHex[0]!=0xA5 && replyFromBootloaderHex[0]!=0x7f)
+        {
+            /*Get response from bootloader and through WIFI*/
+            HOST_voidReceiveCommand(replyFromBootloaderChar);
+            /*Convert 2 variables only from response from char to hex, which represent ack and size of packet*/
+            char2hex(replyFromBootloaderChar,replyFromBootloaderHex,2);
+            /*If we reached timeout threshold, break from loop, otherwise increase variable*/
+            if(timeout_counter==TIMEOUT)break;
+            timeout_counter++;
+            //printf("waiting for response\n");
+        }
+        /*Save the size insize the variable which represents reply without ack size*/
+        bl_reply_without_ack = replyFromBootloaderHex[1];
+        /*Convert rest of array into hex*/
+        char2hex(&replyFromBootloaderChar[4],&replyFromBootloaderHex[2],bl_reply_without_ack);
+        //printf("Done receiving\n");
+
+        /*Pass hex array to process it as reply of bootloader*/
+        ret_value = read_bootloader_reply(COMMAND_BL_FLASH_ERASE, replyFromBootloaderHex);
+        printf("\n\n   Erased %d sectors starting from sector %d \n",nsec,sector_num);
+        break;
+
+    case 6:
+        printf("\n   Command == > BL_FLASH_MASS_ERASE\n");
+        data_buf[0] = COMMAND_BL_MASS_ERASE_LEN-1;
+        data_buf[1] = COMMAND_BL_MASS_ERASE;
+
+        crc32       = get_crc(data_buf,COMMAND_BL_MASS_ERASE_LEN-4);
+        data_buf[2] = word_to_byte(crc32,1,1);
+        data_buf[3] = word_to_byte(crc32,2,1);
+        data_buf[4] = word_to_byte(crc32,3,1);
+        data_buf[5] = word_to_byte(crc32,4,1);
+        //hex2char(&crc32, &data_buf[COMMAND_BL_MASS_ERASE_LEN-8], 4);
+         /*Convert buffer to char*/
+        hex2char(data_buf,commandPacket_TxBuffer,COMMAND_BL_MASS_ERASE_LEN);
+
+        /*Send data to server*/
+        HOST_voidSendCommand(commandPacket_TxBuffer,COMMAND_BL_MASS_ERASE_LEN*2);
+        /*Give bootloader time to receive command and process it*/
+        printf("\n   Waiting for bootloader to process request\n");
+        delay(5000);
+
+        while (replyFromBootloaderHex[0]!=0xA5 && replyFromBootloaderHex[0]!=0x7f)
+        {
+            /*Get response from bootloader and through WIFI*/
+            HOST_voidReceiveCommand(replyFromBootloaderChar);
+            /*Convert 2 variables only from response from char to hex, which represent ack and size of packet*/
+            char2hex(replyFromBootloaderChar,replyFromBootloaderHex,2);
+            /*If we reached timeout threshold, break from loop, otherwise increase variable*/
+            if(timeout_counter==TIMEOUT)break;
+            timeout_counter++;
+            //printf("waiting for response\n");
+        }
+        /*Save the size insize the variable which represents reply without ack size*/
+        bl_reply_without_ack = replyFromBootloaderHex[1];
+        /*Convert rest of array into hex*/
+        char2hex(&replyFromBootloaderChar[4],&replyFromBootloaderHex[2],bl_reply_without_ack);
+        //printf("Done receiving\n");
+
+        /*Pass hex array to process it as reply of bootloader*/
+        ret_value = read_bootloader_reply(COMMAND_BL_MASS_ERASE, replyFromBootloaderHex);
+
+        printf("\n\n   Mass Erase Done!\n");
+
+        break;
+
+    case 7:
+        printf("\n   Command == > BL_MEM_WRITE");
 //        uint32_t bytes_remaining   = 0;
-//        uint32_t t_len_of_file     = 0;
+        uint32_t t_len_of_file     = 0;
 //        uint32_t bytes_so_far_sent = 0;
 //        uint32_t len_to_read       = 0;
-//        uint32_t base_mem_address  = 0;
-//
-//        data_buf[1] = COMMAND_BL_MEM_WRITE;
-//
+        uint32_t base_mem_address  = 0;
+
+        /*Length of packet to be sent
+        /* 1 byte len + 1 byte command code + 4 byte mem base address+ 4 byte CRC=10
+        */
+        uint32_t mem_write_cmd_total_len = 14;
+        /*Put command length in first variable*/
+        data_buf[0] = mem_write_cmd_total_len-1;
+        /*Put command code in index 1*/
+        data_buf[1] = COMMAND_BL_MEM_WRITE;
+
 //        //First get the total number of bytes in the .bin file.
-//        t_len_of_file = calc_file_len();
+        t_len_of_file = calc_file_len();
 //
 //        //keep opening the file
 //        open_the_file();
 //
 //        bytes_remaining = t_len_of_file - bytes_so_far_sent;
-//
-//        printf("\n\n   Enter the memory write address here : ");
-//        scanf(" %x",&base_mem_address);
-//
+
+        printf("\n\n   Enter the memory write address here : ");
+        scanf(" %x",&base_mem_address);
+
+        /*Place address inside data buffer array*/
+        data_buf[2]=base_mem_address;
+        data_buf[3]=base_mem_address>>8;
+        data_buf[4]=base_mem_address>>16;
+        data_buf[5]=base_mem_address>>24;
+
+        data_buf[6]=t_len_of_file;
+        data_buf[7]=t_len_of_file>>8;
+        data_buf[8]=t_len_of_file>>16;
+        data_buf[9]=t_len_of_file>>24;
+
+        crc32       = get_crc(data_buf,mem_write_cmd_total_len-4);
+        data_buf[10] = word_to_byte(crc32,1,1);
+        data_buf[11] = word_to_byte(crc32,2,1);
+        data_buf[12] = word_to_byte(crc32,3,1);
+        data_buf[13] = word_to_byte(crc32,4,1);
+
+        /*Convert buffer to char*/
+        hex2char(data_buf,commandPacket_TxBuffer,mem_write_cmd_total_len);
+
+        /*Send data to server*/
+        HOST_voidSendCommand(commandPacket_TxBuffer,mem_write_cmd_total_len*2);
+        /*Give bootloader time to receive command and process it*/
+        printf("\n   Waiting for bootloader to process request\n");
+        delay(5000);
+
+        while (replyFromBootloaderHex[0]!=0xA5 && replyFromBootloaderHex[0]!=0x7f)
+        {
+            /*Get response from bootloader and through WIFI*/
+            HOST_voidReceiveCommand(replyFromBootloaderChar);
+            /*Convert 2 variables only from response from char to hex, which represent ack and size of packet*/
+            char2hex(replyFromBootloaderChar,replyFromBootloaderHex,2);
+            /*If we reached timeout threshold, break from loop, otherwise increase variable*/
+            if(timeout_counter==TIMEOUT)break;
+            timeout_counter++;
+            //printf("waiting for response\n");
+        }
+        /*Save the size insize the variable which represents reply without ack size*/
+        bl_reply_without_ack = replyFromBootloaderHex[1];
+        /*Convert rest of array into hex*/
+        char2hex(&replyFromBootloaderChar[4],&replyFromBootloaderHex[2],bl_reply_without_ack);
+        //printf("Done receiving\n");
+
+        /*Pass hex array to process it as reply of bootloader*/
+        ret_value = read_bootloader_reply(COMMAND_BL_MEM_WRITE, replyFromBootloaderHex);
+        break;
+
 //        while(bytes_remaining)
 //        {
 //
@@ -646,18 +731,18 @@ void decode_menu_command_code(uint32_t command_code)
 //            {
 //                len_to_read = bytes_remaining;
 //            }
-//
-//
+
+
 //            printf("\n   base mem address = %#.8x\n",base_mem_address);
 //
 //            /**************************** Preparing the sending buffer ****************************/
 //            /* 1 byte len + 1 byte command code + 4 byte mem base address
 //             * 1 byte payload len + len_to_read is amount of bytes read from file + 4 byte CRC
 //             */
-//            uint32_t mem_write_cmd_total_len = COMMAND_BL_MEM_WRITE_LEN(len_to_read*2);
+//            //uint32_t mem_write_cmd_total_len = COMMAND_BL_MEM_WRITE_LEN(len_to_read*2);
 //
 //            //first field is "len_to_follow"
-//            data_buf[0] = mem_write_cmd_total_len-1;
+//
 //
 //            //populate base mem address
 //            hex2char(&base_mem_address, &data_buf[2], 4); //assigning the 32bits memory address to 8 bytes to be sent to BL
@@ -698,354 +783,460 @@ void decode_menu_command_code(uint32_t command_code)
 //
 //            printf("\n\n   Bytes sent so far= %d -- bytes_remaining:%d\n",bytes_so_far_sent,bytes_remaining);
 //            /**************************** Receiving reply from BL ****************************/
-//            /*Get Response for bootloader*/
-//            ret_value = read_bootloader_reply(data_buf[1]);
-//         }
-//        break;
-//
-//    case 8:
-//        printf("\n   Command == > BL_MEM_READ\n");
-//        printf("\n   This command is not supported");
-//        break;
-//
-//    case 9:
-//        printf("\n   Command == > BL_EN_R_PROTECT");
-//        data_buf[0] = COMMAND_BL_EN_R_PROTECT_LEN-1;   //command length macro
-//        data_buf[1] = COMMAND_BL_EN_R_PROTECT; //command code macro
-//
-//        crc32       = get_crc(data_buf,COMMAND_BL_EN_R_PROTECT_LEN-8);
-//        hex2char(&crc32, &data_buf[COMMAND_BL_EN_R_PROTECT_LEN-8], 4);
-//
-//        /*Send length of data to be sent*/
-//        Write_to_serial_port(&data_buf[0],1);
-//        /*Send an empty frame to empty DR and prevent data length being read again by bootloader as data*/
-//        Write_to_serial_port(&emptyFrame,1);
-//        /*Wait for bootloader to be ready to receive data*/
-//        delay(20);
-//        for (iterator=1; iterator<COMMAND_BL_EN_R_PROTECT_LEN;iterator++)
-//        {
-//            Write_to_serial_port(&data_buf[iterator],1);
-//           // delay (500);
-//        }
-//
-//        /*We will send empty frame now to clear DR*/
-//        Write_to_serial_port(&emptyFrame,1);
-//        /*Get Response for bootloader*/
-//        ret_value = read_bootloader_reply(data_buf[1]);
-//
-//        break;
-//    case 10:
-//        printf("\n   Command == > BL_DIS_R_PROTECT");
-//        data_buf[0] = COMMAND_BL_DIS_R_PROTECT_LEN-1;   //command length macro
-//        data_buf[1] = COMMAND_BL_DIS_R_PROTECT; //command code macro
-//
-//        crc32       = get_crc(data_buf,COMMAND_BL_DIS_R_PROTECT_LEN-8);
-//        hex2char(&crc32, &data_buf[COMMAND_BL_DIS_R_PROTECT_LEN-8], 4);
-//
-//        /*Send length of data to be sent*/
-//        Write_to_serial_port(&data_buf[0],1);
-//        /*Send an empty frame to empty DR and prevent data length being read again by bootloader as data*/
-//        Write_to_serial_port(&emptyFrame,1);
-//        /*Wait for bootloader to be ready to receive data*/
-//        delay(20);
-//        for (iterator=1; iterator<COMMAND_BL_DIS_R_PROTECT_LEN;iterator++)
-//        {
-//            Write_to_serial_port(&data_buf[iterator],1);
-//           // delay (500);
-//        }
-//
-//        /*We will send empty frame now to clear DR*/
-//        Write_to_serial_port(&emptyFrame,1);
-//        /*Get Response for bootloader*/
-//        ret_value = read_bootloader_reply(data_buf[1]);
-//
-//        break;
-//    case 11:
-//
-//
-//        printf("\n   Command == > BL_EN_W_PROTECT");
-//
-//        data_buf[0] = COMMAND_BL_EN_W_PROTECT_LEN-1;    //command length macro
-//        data_buf[1] = COMMAND_BL_EN_W_PROTECT;          //command code macro
-//
-//        printf("\n   Flash memory pages: ");
-//        printf("\n   Pages0to3    \t-->0 ");
-//		printf("\n   Pages4to7    \t-->1 ");
-//		printf("\n   Pages8to11   \t-->2 ");
-//		printf("\n   Pages12to15  \t-->3 ");
-//		printf("\n   Pages16to19  \t-->4 ");
-//		printf("\n   Pages20to23  \t-->5 ");
-//		printf("\n   Pages24to27  \t-->6 ");
-//		printf("\n   Pages28to31  \t-->7 ");
-//		printf("\n   Pages32to35  \t-->8 ");
-//		printf("\n   Pages36to39  \t-->9 ");
-//		printf("\n   Pages40to43  \t-->10");
-//		printf("\n   Pages44to47  \t-->11");
-//		printf("\n   Pages48to51  \t-->12");
-//		printf("\n   Pages52to55  \t-->13");
-//		printf("\n   Pages56to59  \t-->14");
-//		printf("\n   Pages60to63  \t-->15");
-//		printf("\n   Pages64to67  \t-->16");
-//		printf("\n   Pages68to71  \t-->17");
-//		printf("\n   Pages72to75  \t-->18");
-//		printf("\n   Pages76to79  \t-->19");
-//		printf("\n   Pages80to83  \t-->20");
-//		printf("\n   Pages84to87  \t-->21");
-//		printf("\n   Pages88to91  \t-->22");
-//		printf("\n   Pages92to95  \t-->23");
-//		printf("\n   Pages96to99  \t-->24");
-//		printf("\n   Pages100to103\t-->25");
-//		printf("\n   Pages104to107\t-->26");
-//		printf("\n   Pages108to111\t-->27");
-//		printf("\n   Pages112to115\t-->28");
-//		printf("\n   Pages116to119\t-->29");
-//		printf("\n   Pages120to123\t-->30");
-//		printf("\n   Pages124to127\t-->31");
-//		printf("\n   All pages\t-->32"    );
-//        printf("\n   Please Choose a number that,\n   corresponds to the pages you want to enable \n   their write-protection here: ");
-//        scanf("%d", &choice);
-//
-//             if(choice == 0 )wrprot_mask=FLASH_WRProt_Pages0to3    ;
-//        else if(choice == 1 )wrprot_mask=FLASH_WRProt_Pages4to7    ;
-//        else if(choice == 2 )wrprot_mask=FLASH_WRProt_Pages8to11   ;
-//        else if(choice == 3 )wrprot_mask=FLASH_WRProt_Pages12to15  ;
-//        else if(choice == 4 )wrprot_mask=FLASH_WRProt_Pages16to19  ;
-//        else if(choice == 5 )wrprot_mask=FLASH_WRProt_Pages20to23  ;
-//        else if(choice == 6 )wrprot_mask=FLASH_WRProt_Pages24to27  ;
-//        else if(choice == 7 )wrprot_mask=FLASH_WRProt_Pages28to31  ;
-//        else if(choice == 8 )wrprot_mask=FLASH_WRProt_Pages32to35  ;
-//        else if(choice == 9 )wrprot_mask=FLASH_WRProt_Pages36to39  ;
-//        else if(choice == 10)wrprot_mask=FLASH_WRProt_Pages40to43  ;
-//        else if(choice == 11)wrprot_mask=FLASH_WRProt_Pages44to47  ;
-//        else if(choice == 12)wrprot_mask=FLASH_WRProt_Pages48to51  ;
-//        else if(choice == 13)wrprot_mask=FLASH_WRProt_Pages52to55  ;
-//        else if(choice == 14)wrprot_mask=FLASH_WRProt_Pages56to59  ;
-//        else if(choice == 15)wrprot_mask=FLASH_WRProt_Pages60to63  ;
-//        else if(choice == 16)wrprot_mask=FLASH_WRProt_Pages64to67  ;
-//        else if(choice == 17)wrprot_mask=FLASH_WRProt_Pages68to71  ;
-//        else if(choice == 18)wrprot_mask=FLASH_WRProt_Pages72to75  ;
-//        else if(choice == 19)wrprot_mask=FLASH_WRProt_Pages76to79  ;
-//        else if(choice == 20)wrprot_mask=FLASH_WRProt_Pages80to83  ;
-//        else if(choice == 21)wrprot_mask=FLASH_WRProt_Pages84to87  ;
-//        else if(choice == 22)wrprot_mask=FLASH_WRProt_Pages88to91  ;
-//        else if(choice == 23)wrprot_mask=FLASH_WRProt_Pages92to95  ;
-//        else if(choice == 24)wrprot_mask=FLASH_WRProt_Pages96to99  ;
-//        else if(choice == 25)wrprot_mask=FLASH_WRProt_Pages100to103;
-//        else if(choice == 26)wrprot_mask=FLASH_WRProt_Pages104to107;
-//        else if(choice == 27)wrprot_mask=FLASH_WRProt_Pages108to111;
-//        else if(choice == 28)wrprot_mask=FLASH_WRProt_Pages112to115;
-//        else if(choice == 29)wrprot_mask=FLASH_WRProt_Pages116to119;
-//        else if(choice == 30)wrprot_mask=FLASH_WRProt_Pages120to123;
-//        else if(choice == 31)wrprot_mask=FLASH_WRProt_Pages124to127;
-//		else if(choice == 32)wrprot_mask=FLASH_WRProt_AllPages     ;
-//		else {printf("\n\n   Invalid Input!!\r\n");return;}
-//
-//        hex2char(&wrprot_mask, &data_buf[2], 4);
-//        crc32 = get_crc(data_buf,COMMAND_BL_EN_W_PROTECT_LEN-8);
-//        hex2char(&crc32, &data_buf[COMMAND_BL_EN_W_PROTECT_LEN-8], 4);
-//
-//        /*Send length of data to be sent*/
-//        Write_to_serial_port(&data_buf[0],1);
-//        /*Send an empty frame to empty DR and prevent data length being read again by bootloader as data*/
-//        Write_to_serial_port(&emptyFrame,1);
-//        /*Wait for bootloader to be ready to receive data*/
-//        delay(20);
-//        for (iterator=1; iterator<COMMAND_BL_EN_W_PROTECT_LEN;iterator++)
-//        {
-//            Write_to_serial_port(&data_buf[iterator],1);
-//           // delay (500);
-//        }
-//
-//        /*We will send empty frame now to clear DR*/
-//        Write_to_serial_port(&emptyFrame,1);
-//        /*Get Response for bootloader*/
-//        ret_value = read_bootloader_reply(data_buf[1]);
-//
-//        break;
-//    case 12:
-//        printf("\n   Command == > BL_DIS_W_PROTECT");
-//        data_buf[0] = COMMAND_BL_DIS_W_PROTECT_LEN-1;   //command length macro
-//        data_buf[1] = COMMAND_BL_DIS_W_PROTECT; //command code macro
-//
-//        printf("\n   Flash memory pages: ");
-//        printf("\n   Pages0to3    \t-->0 ");
-//		printf("\n   Pages4to7    \t-->1 ");
-//		printf("\n   Pages8to11   \t-->2 ");
-//		printf("\n   Pages12to15  \t-->3 ");
-//		printf("\n   Pages16to19  \t-->4 ");
-//		printf("\n   Pages20to23  \t-->5 ");
-//		printf("\n   Pages24to27  \t-->6 ");
-//		printf("\n   Pages28to31  \t-->7 ");
-//		printf("\n   Pages32to35  \t-->8 ");
-//		printf("\n   Pages36to39  \t-->9 ");
-//		printf("\n   Pages40to43  \t-->10");
-//		printf("\n   Pages44to47  \t-->11");
-//		printf("\n   Pages48to51  \t-->12");
-//		printf("\n   Pages52to55  \t-->13");
-//		printf("\n   Pages56to59  \t-->14");
-//		printf("\n   Pages60to63  \t-->15");
-//		printf("\n   Pages64to67  \t-->16");
-//		printf("\n   Pages68to71  \t-->17");
-//		printf("\n   Pages72to75  \t-->18");
-//		printf("\n   Pages76to79  \t-->19");
-//		printf("\n   Pages80to83  \t-->20");
-//		printf("\n   Pages84to87  \t-->21");
-//		printf("\n   Pages88to91  \t-->22");
-//		printf("\n   Pages92to95  \t-->23");
-//		printf("\n   Pages96to99  \t-->24");
-//		printf("\n   Pages100to103\t-->25");
-//		printf("\n   Pages104to107\t-->26");
-//		printf("\n   Pages108to111\t-->27");
-//		printf("\n   Pages112to115\t-->28");
-//		printf("\n   Pages116to119\t-->29");
-//		printf("\n   Pages120to123\t-->30");
-//		printf("\n   Pages124to127\t-->31");
-//		printf("\n   All pages\t-->32"    );
-//        printf("\n   Please Choose a number that,\n   corresponds to the pages you want to disable \n   their write-protection here: ");
-//        scanf("%d", &choice);
-//
-//             if(choice == 0 )wrprot_mask=FLASH_WRProt_Pages0to3    ;
-//        else if(choice == 1 )wrprot_mask=FLASH_WRProt_Pages4to7    ;
-//        else if(choice == 2 )wrprot_mask=FLASH_WRProt_Pages8to11   ;
-//        else if(choice == 3 )wrprot_mask=FLASH_WRProt_Pages12to15  ;
-//        else if(choice == 4 )wrprot_mask=FLASH_WRProt_Pages16to19  ;
-//        else if(choice == 5 )wrprot_mask=FLASH_WRProt_Pages20to23  ;
-//        else if(choice == 6 )wrprot_mask=FLASH_WRProt_Pages24to27  ;
-//        else if(choice == 7 )wrprot_mask=FLASH_WRProt_Pages28to31  ;
-//        else if(choice == 8 )wrprot_mask=FLASH_WRProt_Pages32to35  ;
-//        else if(choice == 9 )wrprot_mask=FLASH_WRProt_Pages36to39  ;
-//        else if(choice == 10)wrprot_mask=FLASH_WRProt_Pages40to43  ;
-//        else if(choice == 11)wrprot_mask=FLASH_WRProt_Pages44to47  ;
-//        else if(choice == 12)wrprot_mask=FLASH_WRProt_Pages48to51  ;
-//        else if(choice == 13)wrprot_mask=FLASH_WRProt_Pages52to55  ;
-//        else if(choice == 14)wrprot_mask=FLASH_WRProt_Pages56to59  ;
-//        else if(choice == 15)wrprot_mask=FLASH_WRProt_Pages60to63  ;
-//        else if(choice == 16)wrprot_mask=FLASH_WRProt_Pages64to67  ;
-//        else if(choice == 17)wrprot_mask=FLASH_WRProt_Pages68to71  ;
-//        else if(choice == 18)wrprot_mask=FLASH_WRProt_Pages72to75  ;
-//        else if(choice == 19)wrprot_mask=FLASH_WRProt_Pages76to79  ;
-//        else if(choice == 20)wrprot_mask=FLASH_WRProt_Pages80to83  ;
-//        else if(choice == 21)wrprot_mask=FLASH_WRProt_Pages84to87  ;
-//        else if(choice == 22)wrprot_mask=FLASH_WRProt_Pages88to91  ;
-//        else if(choice == 23)wrprot_mask=FLASH_WRProt_Pages92to95  ;
-//        else if(choice == 24)wrprot_mask=FLASH_WRProt_Pages96to99  ;
-//        else if(choice == 25)wrprot_mask=FLASH_WRProt_Pages100to103;
-//        else if(choice == 26)wrprot_mask=FLASH_WRProt_Pages104to107;
-//        else if(choice == 27)wrprot_mask=FLASH_WRProt_Pages108to111;
-//        else if(choice == 28)wrprot_mask=FLASH_WRProt_Pages112to115;
-//        else if(choice == 29)wrprot_mask=FLASH_WRProt_Pages116to119;
-//        else if(choice == 30)wrprot_mask=FLASH_WRProt_Pages120to123;
-//        else if(choice == 31)wrprot_mask=FLASH_WRProt_Pages124to127;
-//		else if(choice == 32)wrprot_mask=FLASH_WRProt_AllPages     ;
-//		else {printf("\n\n   Invalid Input!!\r\n");return;}
-//
-//        hex2char(&wrprot_mask, &data_buf[2], 4);
-//        crc32       = get_crc(data_buf,COMMAND_BL_DIS_W_PROTECT_LEN-8);
-//        hex2char(&crc32, &data_buf[COMMAND_BL_DIS_W_PROTECT_LEN-8], 4);
-//
-//        /*Send length of data to be sent*/
-//        Write_to_serial_port(&data_buf[0],1);
-//        /*Send an empty frame to empty DR and prevent data length being read again by bootloader as data*/
-//        Write_to_serial_port(&emptyFrame,1);
-//        /*Wait for bootloader to be ready to receive data*/
-//        delay(20);
-//        for (iterator=1; iterator<COMMAND_BL_DIS_W_PROTECT_LEN;iterator++)
-//        {
-//            Write_to_serial_port(&data_buf[iterator],1);
-//           // delay (500);
-//        }
-//
-//        /*We will send empty frame now to clear DR*/
-//        Write_to_serial_port(&emptyFrame,1);
-//        /*Get Response for bootloader*/
-//        ret_value = read_bootloader_reply(data_buf[1]);
-//
-//        break;
-//    case 13:
-//        printf("\n   Command == > BL_GET_RDP_STATUS");
-//
-//        data_buf[0] = COMMAND_BL_GET_RDP_STATUS_LEN-1;
-//        data_buf[1] = COMMAND_BL_GET_RDP_STATUS;
-//        crc32       = get_crc(data_buf,COMMAND_BL_GET_RDP_STATUS_LEN-4);
-//        data_buf[2] = word_to_byte(crc32,1,1);
-//        data_buf[3] = word_to_byte(crc32,2,1);
-//        data_buf[4] = word_to_byte(crc32,3,1);
-//        data_buf[5] = word_to_byte(crc32,4,1);
-//
-//        /*Send length of data to be sent*/
-//        Write_to_serial_port(&data_buf[0],1);
-//        /*Send an empty frame to empty DR and prevent data length being read again by bootloader as data*/
-//        Write_to_serial_port(&emptyFrame,1);
-//        /*Wait for bootloader to be ready to receive data*/
-//        delay(20);
-//        for (iterator=1; iterator<COMMAND_BL_GET_RDP_STATUS_LEN;iterator++)
-//        {
-//            Write_to_serial_port(&data_buf[iterator],1);
-//            //delay (5);
-//        }
-//
-//        /*We will send empty frame now to clear DR*/
-//        Write_to_serial_port(&emptyFrame,1);
-//        /*Get Response for bootloader*/
-//        ret_value = read_bootloader_reply(data_buf[1]);
-//
-//        break;
-//
-//
-//    case 14:
-//        printf("\n   Command == > BL_PROTECTION_STATUS ");
-//        data_buf[0] = COMMAND_BL_READ_SECTOR_P_STATUS_LEN-1;    //command length macro
-//        data_buf[1] = COMMAND_BL_READ_SECTOR_P_STATUS;          //command code macro
-//
-//        crc32       = get_crc(data_buf,COMMAND_BL_READ_SECTOR_P_STATUS_LEN-8);
-//        hex2char(&crc32, &data_buf[COMMAND_BL_READ_SECTOR_P_STATUS_LEN-8], 4);
-//
-//        /*Send length of data to be sent*/
-//        Write_to_serial_port(&data_buf[0],1);
-//        /*Send an empty frame to empty DR and prevent data length being read again by bootloader as data*/
-//        Write_to_serial_port(&emptyFrame,1);
-//        /*Wait for bootloader to be ready to receive data*/
-//        delay(20);
-//        for (iterator=1; iterator<COMMAND_BL_READ_SECTOR_P_STATUS_LEN;iterator++)
-//        {
-//            Write_to_serial_port(&data_buf[iterator],1);
-//           // delay (500);
-//        }
-//
-//        /*We will send empty frame now to clear DR*/
-//        Write_to_serial_port(&emptyFrame,1);
-//        /*Get Response for bootloader*/
-//        ret_value = read_bootloader_reply(data_buf[1]);
-//
-//
-//        break;
-//    case 15:
-//        printf("\n   Command == > BL_SYSTEM_RESET\n");
-//        data_buf[0] = COMMAND_BL_MY_SYSTEM_RESET_LEN-1;   //command length macro
-//        data_buf[1] = COMMAND_BL_MY_SYSTEM_RESET; //command code macro
-//
-//        crc32       = get_crc(data_buf,COMMAND_BL_MY_SYSTEM_RESET_LEN-8);
-//        hex2char(&crc32, &data_buf[COMMAND_BL_MY_SYSTEM_RESET_LEN-8], 4);
-//
-//        /*Send length of data to be sent*/
-//        Write_to_serial_port(&data_buf[0],1);
-//        /*Send an empty frame to empty DR and prevent data length being read again by bootloader as data*/
-//        Write_to_serial_port(&emptyFrame,1);
-//        /*Wait for bootloader to be ready to receive data*/
-//        delay(20);
-//        for (iterator=1; iterator<COMMAND_BL_MY_SYSTEM_RESET_LEN;iterator++)
-//        {
-//            Write_to_serial_port(&data_buf[iterator],1);
-//           // delay (500);
-//        }
-//
-//        /*We will send empty frame now to clear DR*/
-//        Write_to_serial_port(&emptyFrame,1);
-//        /*Get Response for bootloader*/
-//        ret_value = read_bootloader_reply(data_buf[1]);
-//
-//
-//        break;
+            /*Get Response for bootloader*/
+            //ret_value = read_bootloader_reply(data_buf[1]);
+         //}
+
+
+    case 8:
+        printf("\n   Command == > BL_MEM_READ\n");
+        printf("\n   This command is not supported");
+        break;
+
+    case 9:
+        printf("\n   Command == > BL_EN_R_PROTECT");
+        data_buf[0] = COMMAND_BL_EN_R_PROTECT_LEN-1;   //command length macro
+        data_buf[1] = COMMAND_BL_EN_R_PROTECT; //command code macro
+
+        crc32       = get_crc(data_buf,COMMAND_BL_EN_R_PROTECT_LEN-4);
+        data_buf[2] = word_to_byte(crc32,1,1);
+        data_buf[3] = word_to_byte(crc32,2,1);
+        data_buf[4] = word_to_byte(crc32,3,1);
+        data_buf[5] = word_to_byte(crc32,4,1);
+
+         /*Convert buffer to char*/
+        hex2char(data_buf,commandPacket_TxBuffer,COMMAND_BL_EN_R_PROTECT_LEN);
+
+        /*Send data to server*/
+        HOST_voidSendCommand(commandPacket_TxBuffer,COMMAND_BL_MASS_ERASE_LEN*2);
+        /*Give bootloader time to receive command and process it*/
+        printf("\n   Waiting for bootloader to process request\n");
+        delay(5000);
+
+        while (replyFromBootloaderHex[0]!=0xA5 && replyFromBootloaderHex[0]!=0x7f)
+        {
+            /*Get response from bootloader and through WIFI*/
+            HOST_voidReceiveCommand(replyFromBootloaderChar);
+            /*Convert 2 variables only from response from char to hex, which represent ack and size of packet*/
+            char2hex(replyFromBootloaderChar,replyFromBootloaderHex,2);
+            /*If we reached timeout threshold, break from loop, otherwise increase variable*/
+            if(timeout_counter==TIMEOUT)break;
+            timeout_counter++;
+            //printf("waiting for response\n");
+        }
+        /*Save the size insize the variable which represents reply without ack size*/
+        bl_reply_without_ack = replyFromBootloaderHex[1];
+        /*Convert rest of array into hex*/
+        char2hex(&replyFromBootloaderChar[4],&replyFromBootloaderHex[2],bl_reply_without_ack);
+        //printf("Done receiving\n");
+
+        /*Pass hex array to process it as reply of bootloader*/
+        ret_value = read_bootloader_reply(COMMAND_BL_EN_R_PROTECT, replyFromBootloaderHex);
+        break;
+
+    /*Disable Memory Read command*/
+    case 10:
+        printf("\n   Command == > BL_DIS_R_PROTECT");
+        data_buf[0] = COMMAND_BL_DIS_R_PROTECT_LEN-1;   //command length macro
+        data_buf[1] = COMMAND_BL_DIS_R_PROTECT; //command code macro
+
+        crc32       = get_crc(data_buf,COMMAND_BL_DIS_R_PROTECT_LEN-4);
+        data_buf[2] = word_to_byte(crc32,1,1);
+        data_buf[3] = word_to_byte(crc32,2,1);
+        data_buf[4] = word_to_byte(crc32,3,1);
+        data_buf[5] = word_to_byte(crc32,4,1);
+         /*Convert buffer to char*/
+        hex2char(data_buf,commandPacket_TxBuffer,COMMAND_BL_DIS_R_PROTECT_LEN);
+
+        /*Send data to server*/
+        HOST_voidSendCommand(commandPacket_TxBuffer,COMMAND_BL_DIS_R_PROTECT_LEN*2);
+        /*Give bootloader time to receive command and process it*/
+        printf("\n   Waiting for bootloader to process request\n");
+        delay(5000);
+
+        while (replyFromBootloaderHex[0]!=0xA5 && replyFromBootloaderHex[0]!=0x7f)
+        {
+            /*Get response from bootloader and through WIFI*/
+            HOST_voidReceiveCommand(replyFromBootloaderChar);
+            /*Convert 2 variables only from response from char to hex, which represent ack and size of packet*/
+            char2hex(replyFromBootloaderChar,replyFromBootloaderHex,2);
+            /*If we reached timeout threshold, break from loop, otherwise increase variable*/
+            if(timeout_counter==TIMEOUT)break;
+            timeout_counter++;
+            //printf("waiting for response\n");
+        }
+        /*Save the size insize the variable which represents reply without ack size*/
+        bl_reply_without_ack = replyFromBootloaderHex[1];
+        /*Convert rest of array into hex*/
+        char2hex(&replyFromBootloaderChar[4],&replyFromBootloaderHex[2],bl_reply_without_ack);
+        //printf("Done receiving\n");
+
+        /*Pass hex array to process it as reply of bootloader*/
+        ret_value = read_bootloader_reply(COMMAND_BL_DIS_R_PROTECT, replyFromBootloaderHex);
+
+        break;
+        /*End of disable memory read command*/
+
+    /*Enable write protection command*/
+    case 11:
+
+
+        printf("\n   Command == > BL_EN_W_PROTECT");
+
+        data_buf[0] = COMMAND_BL_EN_W_PROTECT_LEN-1;    //command length macro
+        data_buf[1] = COMMAND_BL_EN_W_PROTECT;          //command code macro
+
+        printf("\n   Flash memory pages: ");
+        printf("\n   Pages0to3    \t-->0 ");
+		printf("\n   Pages4to7    \t-->1 ");
+		printf("\n   Pages8to11   \t-->2 ");
+		printf("\n   Pages12to15  \t-->3 ");
+		printf("\n   Pages16to19  \t-->4 ");
+		printf("\n   Pages20to23  \t-->5 ");
+		printf("\n   Pages24to27  \t-->6 ");
+		printf("\n   Pages28to31  \t-->7 ");
+		printf("\n   Pages32to35  \t-->8 ");
+		printf("\n   Pages36to39  \t-->9 ");
+		printf("\n   Pages40to43  \t-->10");
+		printf("\n   Pages44to47  \t-->11");
+		printf("\n   Pages48to51  \t-->12");
+		printf("\n   Pages52to55  \t-->13");
+		printf("\n   Pages56to59  \t-->14");
+		printf("\n   Pages60to63  \t-->15");
+		printf("\n   Pages64to67  \t-->16");
+		printf("\n   Pages68to71  \t-->17");
+		printf("\n   Pages72to75  \t-->18");
+		printf("\n   Pages76to79  \t-->19");
+		printf("\n   Pages80to83  \t-->20");
+		printf("\n   Pages84to87  \t-->21");
+		printf("\n   Pages88to91  \t-->22");
+		printf("\n   Pages92to95  \t-->23");
+		printf("\n   Pages96to99  \t-->24");
+		printf("\n   Pages100to103\t-->25");
+		printf("\n   Pages104to107\t-->26");
+		printf("\n   Pages108to111\t-->27");
+		printf("\n   Pages112to115\t-->28");
+		printf("\n   Pages116to119\t-->29");
+		printf("\n   Pages120to123\t-->30");
+		printf("\n   Pages124to127\t-->31");
+		printf("\n   All pages\t-->32"    );
+        printf("\n   Please Choose a number that,\n   corresponds to the pages you want to enable \n   their write-protection here: ");
+        scanf("%d", &choice);
+
+             if(choice == 0 )wrprot_mask=FLASH_WRProt_Pages0to3    ;
+        else if(choice == 1 )wrprot_mask=FLASH_WRProt_Pages4to7    ;
+        else if(choice == 2 )wrprot_mask=FLASH_WRProt_Pages8to11   ;
+        else if(choice == 3 )wrprot_mask=FLASH_WRProt_Pages12to15  ;
+        else if(choice == 4 )wrprot_mask=FLASH_WRProt_Pages16to19  ;
+        else if(choice == 5 )wrprot_mask=FLASH_WRProt_Pages20to23  ;
+        else if(choice == 6 )wrprot_mask=FLASH_WRProt_Pages24to27  ;
+        else if(choice == 7 )wrprot_mask=FLASH_WRProt_Pages28to31  ;
+        else if(choice == 8 )wrprot_mask=FLASH_WRProt_Pages32to35  ;
+        else if(choice == 9 )wrprot_mask=FLASH_WRProt_Pages36to39  ;
+        else if(choice == 10)wrprot_mask=FLASH_WRProt_Pages40to43  ;
+        else if(choice == 11)wrprot_mask=FLASH_WRProt_Pages44to47  ;
+        else if(choice == 12)wrprot_mask=FLASH_WRProt_Pages48to51  ;
+        else if(choice == 13)wrprot_mask=FLASH_WRProt_Pages52to55  ;
+        else if(choice == 14)wrprot_mask=FLASH_WRProt_Pages56to59  ;
+        else if(choice == 15)wrprot_mask=FLASH_WRProt_Pages60to63  ;
+        else if(choice == 16)wrprot_mask=FLASH_WRProt_Pages64to67  ;
+        else if(choice == 17)wrprot_mask=FLASH_WRProt_Pages68to71  ;
+        else if(choice == 18)wrprot_mask=FLASH_WRProt_Pages72to75  ;
+        else if(choice == 19)wrprot_mask=FLASH_WRProt_Pages76to79  ;
+        else if(choice == 20)wrprot_mask=FLASH_WRProt_Pages80to83  ;
+        else if(choice == 21)wrprot_mask=FLASH_WRProt_Pages84to87  ;
+        else if(choice == 22)wrprot_mask=FLASH_WRProt_Pages88to91  ;
+        else if(choice == 23)wrprot_mask=FLASH_WRProt_Pages92to95  ;
+        else if(choice == 24)wrprot_mask=FLASH_WRProt_Pages96to99  ;
+        else if(choice == 25)wrprot_mask=FLASH_WRProt_Pages100to103;
+        else if(choice == 26)wrprot_mask=FLASH_WRProt_Pages104to107;
+        else if(choice == 27)wrprot_mask=FLASH_WRProt_Pages108to111;
+        else if(choice == 28)wrprot_mask=FLASH_WRProt_Pages112to115;
+        else if(choice == 29)wrprot_mask=FLASH_WRProt_Pages116to119;
+        else if(choice == 30)wrprot_mask=FLASH_WRProt_Pages120to123;
+        else if(choice == 31)wrprot_mask=FLASH_WRProt_Pages124to127;
+		else if(choice == 32)wrprot_mask=FLASH_WRProt_AllPages     ;
+		else {printf("\n\n   Invalid Input!!\r\n");return;}
+
+        data_buf[2]=wrprot_mask;
+        data_buf[3]=wrprot_mask>>8;
+        data_buf[4]=wrprot_mask>>16;
+        data_buf[5]=wrprot_mask>>24;
+
+        crc32       = get_crc(data_buf,COMMAND_BL_EN_W_PROTECT_LEN-4);
+        data_buf[6] = word_to_byte(crc32,1,1);
+        data_buf[7] = word_to_byte(crc32,2,1);
+        data_buf[8] = word_to_byte(crc32,3,1);
+        data_buf[9] = word_to_byte(crc32,4,1);
+
+         /*Convert buffer to char*/
+        hex2char(data_buf,commandPacket_TxBuffer,COMMAND_BL_EN_W_PROTECT_LEN);
+
+        /*Send data to server*/
+        HOST_voidSendCommand(commandPacket_TxBuffer,COMMAND_BL_EN_W_PROTECT_LEN*2);
+        /*Give bootloader time to receive command and process it*/
+        printf("\n   Waiting for bootloader to process request\n");
+        delay(5000);
+
+        while (replyFromBootloaderHex[0]!=0xA5 && replyFromBootloaderHex[0]!=0x7f)
+        {
+            /*Get response from bootloader and through WIFI*/
+            HOST_voidReceiveCommand(replyFromBootloaderChar);
+            /*Convert 2 variables only from response from char to hex, which represent ack and size of packet*/
+            char2hex(replyFromBootloaderChar,replyFromBootloaderHex,2);
+            /*If we reached timeout threshold, break from loop, otherwise increase variable*/
+            if(timeout_counter==TIMEOUT)break;
+            timeout_counter++;
+            //printf("waiting for response\n");
+        }
+        /*Save the size insize the variable which represents reply without ack size*/
+        bl_reply_without_ack = replyFromBootloaderHex[1];
+        /*Convert rest of array into hex*/
+        char2hex(&replyFromBootloaderChar[4],&replyFromBootloaderHex[2],bl_reply_without_ack);
+        //printf("Done receiving\n");
+
+        /*Pass hex array to process it as reply of bootloader*/
+        ret_value = read_bootloader_reply(COMMAND_BL_EN_W_PROTECT, replyFromBootloaderHex);
+        break;
+    /*End of enable write protection*/
+    /*Disable write protection*/
+    case 12:
+        printf("\n   Command == > BL_DIS_W_PROTECT");
+        data_buf[0] = COMMAND_BL_DIS_W_PROTECT_LEN-1;   //command length macro
+        data_buf[1] = COMMAND_BL_DIS_W_PROTECT; //command code macro
+
+        printf("\n   Flash memory pages: ");
+        printf("\n   Pages0to3    \t-->0 ");
+		printf("\n   Pages4to7    \t-->1 ");
+		printf("\n   Pages8to11   \t-->2 ");
+		printf("\n   Pages12to15  \t-->3 ");
+		printf("\n   Pages16to19  \t-->4 ");
+		printf("\n   Pages20to23  \t-->5 ");
+		printf("\n   Pages24to27  \t-->6 ");
+		printf("\n   Pages28to31  \t-->7 ");
+		printf("\n   Pages32to35  \t-->8 ");
+		printf("\n   Pages36to39  \t-->9 ");
+		printf("\n   Pages40to43  \t-->10");
+		printf("\n   Pages44to47  \t-->11");
+		printf("\n   Pages48to51  \t-->12");
+		printf("\n   Pages52to55  \t-->13");
+		printf("\n   Pages56to59  \t-->14");
+		printf("\n   Pages60to63  \t-->15");
+		printf("\n   Pages64to67  \t-->16");
+		printf("\n   Pages68to71  \t-->17");
+		printf("\n   Pages72to75  \t-->18");
+		printf("\n   Pages76to79  \t-->19");
+		printf("\n   Pages80to83  \t-->20");
+		printf("\n   Pages84to87  \t-->21");
+		printf("\n   Pages88to91  \t-->22");
+		printf("\n   Pages92to95  \t-->23");
+		printf("\n   Pages96to99  \t-->24");
+		printf("\n   Pages100to103\t-->25");
+		printf("\n   Pages104to107\t-->26");
+		printf("\n   Pages108to111\t-->27");
+		printf("\n   Pages112to115\t-->28");
+		printf("\n   Pages116to119\t-->29");
+		printf("\n   Pages120to123\t-->30");
+		printf("\n   Pages124to127\t-->31");
+		printf("\n   All pages\t-->32"    );
+        printf("\n   Please Choose a number that,\n   corresponds to the pages you want to disable \n   their write-protection here: ");
+        scanf("%d", &choice);
+
+             if(choice == 0 )wrprot_mask=FLASH_WRProt_Pages0to3    ;
+        else if(choice == 1 )wrprot_mask=FLASH_WRProt_Pages4to7    ;
+        else if(choice == 2 )wrprot_mask=FLASH_WRProt_Pages8to11   ;
+        else if(choice == 3 )wrprot_mask=FLASH_WRProt_Pages12to15  ;
+        else if(choice == 4 )wrprot_mask=FLASH_WRProt_Pages16to19  ;
+        else if(choice == 5 )wrprot_mask=FLASH_WRProt_Pages20to23  ;
+        else if(choice == 6 )wrprot_mask=FLASH_WRProt_Pages24to27  ;
+        else if(choice == 7 )wrprot_mask=FLASH_WRProt_Pages28to31  ;
+        else if(choice == 8 )wrprot_mask=FLASH_WRProt_Pages32to35  ;
+        else if(choice == 9 )wrprot_mask=FLASH_WRProt_Pages36to39  ;
+        else if(choice == 10)wrprot_mask=FLASH_WRProt_Pages40to43  ;
+        else if(choice == 11)wrprot_mask=FLASH_WRProt_Pages44to47  ;
+        else if(choice == 12)wrprot_mask=FLASH_WRProt_Pages48to51  ;
+        else if(choice == 13)wrprot_mask=FLASH_WRProt_Pages52to55  ;
+        else if(choice == 14)wrprot_mask=FLASH_WRProt_Pages56to59  ;
+        else if(choice == 15)wrprot_mask=FLASH_WRProt_Pages60to63  ;
+        else if(choice == 16)wrprot_mask=FLASH_WRProt_Pages64to67  ;
+        else if(choice == 17)wrprot_mask=FLASH_WRProt_Pages68to71  ;
+        else if(choice == 18)wrprot_mask=FLASH_WRProt_Pages72to75  ;
+        else if(choice == 19)wrprot_mask=FLASH_WRProt_Pages76to79  ;
+        else if(choice == 20)wrprot_mask=FLASH_WRProt_Pages80to83  ;
+        else if(choice == 21)wrprot_mask=FLASH_WRProt_Pages84to87  ;
+        else if(choice == 22)wrprot_mask=FLASH_WRProt_Pages88to91  ;
+        else if(choice == 23)wrprot_mask=FLASH_WRProt_Pages92to95  ;
+        else if(choice == 24)wrprot_mask=FLASH_WRProt_Pages96to99  ;
+        else if(choice == 25)wrprot_mask=FLASH_WRProt_Pages100to103;
+        else if(choice == 26)wrprot_mask=FLASH_WRProt_Pages104to107;
+        else if(choice == 27)wrprot_mask=FLASH_WRProt_Pages108to111;
+        else if(choice == 28)wrprot_mask=FLASH_WRProt_Pages112to115;
+        else if(choice == 29)wrprot_mask=FLASH_WRProt_Pages116to119;
+        else if(choice == 30)wrprot_mask=FLASH_WRProt_Pages120to123;
+        else if(choice == 31)wrprot_mask=FLASH_WRProt_Pages124to127;
+		else if(choice == 32)wrprot_mask=FLASH_WRProt_AllPages     ;
+		else {printf("\n\n   Invalid Input!!\r\n");return;}
+        data_buf[2]=wrprot_mask;
+        data_buf[3]=wrprot_mask>>8;
+        data_buf[4]=wrprot_mask>>16;
+        data_buf[5]=wrprot_mask>>24;
+
+        crc32       = get_crc(data_buf,COMMAND_BL_DIS_W_PROTECT_LEN-4);
+        data_buf[6] = word_to_byte(crc32,1,1);
+        data_buf[7] = word_to_byte(crc32,2,1);
+        data_buf[8] = word_to_byte(crc32,3,1);
+        data_buf[9] = word_to_byte(crc32,4,1);
+
+         /*Convert buffer to char*/
+        hex2char(data_buf,commandPacket_TxBuffer,COMMAND_BL_DIS_W_PROTECT_LEN);
+
+        /*Send data to server*/
+        HOST_voidSendCommand(commandPacket_TxBuffer,COMMAND_BL_DIS_W_PROTECT_LEN*2);
+        /*Give bootloader time to receive command and process it*/
+        printf("\n   Waiting for bootloader to process request\n");
+        delay(5000);
+
+        while (replyFromBootloaderHex[0]!=0xA5 && replyFromBootloaderHex[0]!=0x7f)
+        {
+            /*Get response from bootloader and through WIFI*/
+            HOST_voidReceiveCommand(replyFromBootloaderChar);
+            /*Convert 2 variables only from response from char to hex, which represent ack and size of packet*/
+            char2hex(replyFromBootloaderChar,replyFromBootloaderHex,2);
+            /*If we reached timeout threshold, break from loop, otherwise increase variable*/
+            if(timeout_counter==TIMEOUT)break;
+            timeout_counter++;
+            //printf("waiting for response\n");
+        }
+        /*Save the size insize the variable which represents reply without ack size*/
+        bl_reply_without_ack = replyFromBootloaderHex[1];
+        /*Convert rest of array into hex*/
+        char2hex(&replyFromBootloaderChar[4],&replyFromBootloaderHex[2],bl_reply_without_ack);
+        //printf("Done receiving\n");
+
+        /*Pass hex array to process it as reply of bootloader*/
+        ret_value = read_bootloader_reply(COMMAND_BL_DIS_W_PROTECT, replyFromBootloaderHex);
+        break;
+    /*End of Disable memory write protection*/
+    /*Get Read protection status*/
+    case 13:
+        printf("\n   Command == > BL_GET_RDP_STATUS");
+
+        data_buf[0] = COMMAND_BL_GET_RDP_STATUS_LEN-1;
+        data_buf[1] = COMMAND_BL_GET_RDP_STATUS;
+        crc32       = get_crc(data_buf,COMMAND_BL_GET_RDP_STATUS_LEN-4);
+        data_buf[2] = word_to_byte(crc32,1,1);
+        data_buf[3] = word_to_byte(crc32,2,1);
+        data_buf[4] = word_to_byte(crc32,3,1);
+        data_buf[5] = word_to_byte(crc32,4,1);
+
+                 /*Convert buffer to char to be sent through WIFI*/
+        hex2char(data_buf,commandPacket_TxBuffer,COMMAND_BL_GET_RDP_STATUS_LEN);
+        /*Send data to server*/
+        HOST_voidSendCommand(commandPacket_TxBuffer,COMMAND_BL_GET_RDP_STATUS_LEN*2);
+        /*Give bootloader time to receive command and process it*/
+        printf("\n   Waiting for bootloader to process request\n");
+        delay(5000);
+
+        while (replyFromBootloaderHex[0]!=0xA5 && replyFromBootloaderHex!=0x7f)
+        {
+            /*Get response from bootloader and through WIFI*/
+            HOST_voidReceiveCommand(replyFromBootloaderChar);
+            /*Convert 2 variables only from response from char to hex, which represent ack and size of packet*/
+            char2hex(replyFromBootloaderChar,replyFromBootloaderHex,2);
+            /*If we reached timeout threshold, break from loop, otherwise increase variable*/
+            if(timeout_counter==TIMEOUT)break;
+            timeout_counter++;
+            //printf("waiting for response\n");
+        }
+        /*Save the size insize the variable which represents reply without ack size*/
+        bl_reply_without_ack = replyFromBootloaderHex[1];
+        /*Convert rest of array into hex*/
+        char2hex(&replyFromBootloaderChar[4],&replyFromBootloaderHex[2],bl_reply_without_ack);
+        //printf("Done receiving\n");
+
+        /*Pass hex array to process it as reply of bootloader*/
+        ret_value = read_bootloader_reply(COMMAND_BL_GET_RDP_STATUS, replyFromBootloaderHex);
+        break;
+    /*End of get read protection*/
+    /*Get Write Protection*/
+    case 14:
+        printf("\n   Command == > BL_PROTECTION_STATUS ");
+        data_buf[0] = COMMAND_BL_READ_SECTOR_P_STATUS_LEN-1;    //command length macro
+        data_buf[1] = COMMAND_BL_READ_SECTOR_P_STATUS;          //command code macro
+        crc32       = get_crc(data_buf,COMMAND_BL_READ_SECTOR_P_STATUS_LEN-4);
+        data_buf[2] = word_to_byte(crc32,1,1);
+        data_buf[3] = word_to_byte(crc32,2,1);
+        data_buf[4] = word_to_byte(crc32,3,1);
+        data_buf[5] = word_to_byte(crc32,4,1);
+
+                 /*Convert buffer to char to be sent through WIFI*/
+        hex2char(data_buf,commandPacket_TxBuffer,COMMAND_BL_READ_SECTOR_P_STATUS_LEN);
+        /*Send data to server*/
+        HOST_voidSendCommand(commandPacket_TxBuffer,COMMAND_BL_READ_SECTOR_P_STATUS_LEN*2);
+        /*Give bootloader time to receive command and process it*/
+        printf("\n   Waiting for bootloader to process request\n");
+        delay(5000);
+
+        while (replyFromBootloaderHex[0]!=0xA5 && replyFromBootloaderHex!=0x7f)
+        {
+            /*Get response from bootloader and through WIFI*/
+            HOST_voidReceiveCommand(replyFromBootloaderChar);
+            /*Convert 2 variables only from response from char to hex, which represent ack and size of packet*/
+            char2hex(replyFromBootloaderChar,replyFromBootloaderHex,2);
+            /*If we reached timeout threshold, break from loop, otherwise increase variable*/
+            if(timeout_counter==TIMEOUT)break;
+            timeout_counter++;
+            //printf("waiting for response\n");
+        }
+        /*Save the size insize the variable which represents reply without ack size*/
+        bl_reply_without_ack = replyFromBootloaderHex[1];
+        /*Convert rest of array into hex*/
+        char2hex(&replyFromBootloaderChar[4],&replyFromBootloaderHex[2],bl_reply_without_ack);
+        //printf("Done receiving\n");
+
+        /*Pass hex array to process it as reply of bootloader*/
+        ret_value = read_bootloader_reply(COMMAND_BL_READ_SECTOR_P_STATUS, replyFromBootloaderHex);
+        break;
+    /*End of get write protection*/
+    /*System Reset*/
+    case 15:
+        printf("\n   Command == > BL_SYSTEM_RESET\n");
+        data_buf[0] = COMMAND_BL_MY_SYSTEM_RESET_LEN-1;   //command length macro
+        data_buf[1] = COMMAND_BL_MY_SYSTEM_RESET; //command code macro
+        crc32       = get_crc(data_buf,COMMAND_BL_MY_SYSTEM_RESET_LEN-4);
+        data_buf[2] = word_to_byte(crc32,1,1);
+        data_buf[3] = word_to_byte(crc32,2,1);
+        data_buf[4] = word_to_byte(crc32,3,1);
+        data_buf[5] = word_to_byte(crc32,4,1);
+
+        /*Convert buffer to char to be sent through WIFI*/
+        hex2char(data_buf,commandPacket_TxBuffer,COMMAND_BL_MY_SYSTEM_RESET_LEN);
+        /*Send data to server*/
+        HOST_voidSendCommand(commandPacket_TxBuffer,COMMAND_BL_MY_SYSTEM_RESET_LEN*2);
+        /*Give bootloader time to receive command and process it*/
+        printf("\n   Waiting for bootloader to process request\n");
+        delay(5000);
+        while (replyFromBootloaderHex[0]!=0xA5 && replyFromBootloaderHex!=0x7f)
+        {
+            /*Get response from bootloader and through WIFI*/
+            HOST_voidReceiveCommand(replyFromBootloaderChar);
+            /*Convert 2 variables only from response from char to hex, which represent ack and size of packet*/
+            char2hex(replyFromBootloaderChar,replyFromBootloaderHex,2);
+            /*If we reached timeout threshold, break from loop, otherwise increase variable*/
+            if(timeout_counter==TIMEOUT)break;
+            timeout_counter++;
+            //printf("waiting for response\n");
+        }
+        /*Save the size insize the variable which represents reply without ack size*/
+        bl_reply_without_ack = replyFromBootloaderHex[1];
+        /*Convert rest of array into hex*/
+        char2hex(&replyFromBootloaderChar[4],&replyFromBootloaderHex[2],bl_reply_without_ack);
+        //printf("Done receiving\n");
+
+        /*Pass hex array to process it as reply of bootloader*/
+        ret_value = read_bootloader_reply(COMMAND_BL_MY_SYSTEM_RESET, replyFromBootloaderHex);
+        break;
+        /*End of System Reser*/
 //    case 16:
 //        printf("\n   Command == > BL_EXISTING_APPS\n");
 //        break;
