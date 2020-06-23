@@ -387,16 +387,23 @@ u8 WIFI_u8ReceiveData (u16 Copy_u16startByte, u16 Copy_u16TotalSize, u8* Copy_u8
 
 	/*Reinitialize array so that we recieve new data successfully*/
 	memset(Global_u8DataReceivedArray,0,sizeof(Global_u8DataReceivedArray));
+	memset(Copy_u8DestinationArray,0,sizeof(Copy_u8DestinationArray));
 
 	/*Reinitialize other flags in case they were used in something else*/
 	static_u32DataArrayIterator=0;
 	static_u8StartSavingData=0;
 	static_u32DataToBeSavedIterator=0;
 	static_u8IteratorFlag=0;
+	Global_u16NumberOfTimesDataWillBeReceived=0;
 
 	/*Check how many times we should get data from server by dividing total size to size of buffer
 	 * total size is multiplied by 2 because every 2 chars on the site will be equal to 1 byte*/
 	Global_u16NumberOfTimesDataWillBeReceived=(Copy_u16TotalSize*2)/WIFI_RECEIVE_ARRAY_SIZE;
+	/*IF the division of total size by array size has remainder, increase variable by one*/
+	if (((Copy_u16TotalSize*2)%WIFI_RECEIVE_ARRAY_SIZE)!=0)
+	{
+		Global_u16NumberOfTimesDataWillBeReceived++;
+	}
 //	/*Determine start index*/
 //	static_u32DataToBeSavedIterator= (Copy_u16startByte-1)*2;
 	/*Set the byte that data saving should start with and save it in the static variable*/

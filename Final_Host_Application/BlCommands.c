@@ -169,7 +169,8 @@ void   char2hex(uint8_t* inBuffer, uint8_t* outBuffer, uint16_t NumOfBytesToBeCo
 	uint16_t index;
 	for(index=0;index<NumOfBytesToBeConverted;index++)
 	{
-		//outBuffer[NumOfBytesToBeConverted-1-index]  = ( (inBuffer[index*2]<<4) | (inBuffer[index*2+1]&0x0F) );
+		if(inBuffer[index*2]   > 0x60)inBuffer[index*2  ]+=9;
+		if(inBuffer[index*2+1] > 0x60)inBuffer[index*2+1]+=9;
 		outBuffer[index]  = ( (inBuffer[index*2]<<4) | (inBuffer[index*2+1]&0x0F) );
 	}
 }
@@ -185,15 +186,17 @@ void hex2char(uint8_t* inBuffer, uint8_t* outBuffer, uint16_t NumOfBytesToBeConv
 
         if      ( outBuffer[index*2] >= 0x0 && outBuffer[index*2] <= 0x9 )
                   outBuffer[index*2] |= 0x30;
-        else if ( outBuffer[index*2] >= 0xA && outBuffer[index*2] <= 0xF )
-                  outBuffer[index*2] |= 0x40;
+        else if ( outBuffer[index*2] >= 0xA && outBuffer[index*2] <= 0xF ){
+                  outBuffer[index*2] |= 0x60;
+                  outBuffer[index*2] -= 9;}
 
         outBuffer[index*2+1] = inBuffer[index] & 0x0F ;
 
         if      ( outBuffer[index*2+1] >= 0x0 && outBuffer[index*2+1] <= 0x9 )
                   outBuffer[index*2+1] |= 0x30;
-        else if ( outBuffer[index*2+1] >= 0xA && outBuffer[index*2+1] <= 0xF )
-                  outBuffer[index*2+1] |= 0x40;
+        else if ( outBuffer[index*2+1] >= 0xA && outBuffer[index*2+1] <= 0xF ){
+                  outBuffer[index*2+1] |= 0x60;
+                  outBuffer[index*2+1] -= 9;}
 
     }
 }

@@ -214,6 +214,7 @@ void bootloader_voidUARTReadData (void)
 	OnBoard_Led.speed= GPIO_OUTPUT_SPEED_50MHz;
 
 	GPIO_Init(&OnBoard_Led);
+	GPIO_Pin_Write(&OnBoard_Led,HIGH);
 
 	/*This variable holds the length of the data that will follow the command. It will be used to know how many bytes
 	to convert and save in the receiving buffer*/
@@ -645,7 +646,7 @@ void bootloader_handle_mem_write_cmd			(u8* bl_rx_buffer)
 	u8  index;
 	u8  Local_u8FinalReply[BL_MEM_WRITE_REPLY_LEN*2]={0};		/*This local variable will hold the array that will be send over WIFI*/
 
-	GPIO_Pin_Write(&OnBoard_Led,LOW);
+
 
 	u8 addr_valid   = ADDR_VALID;
 	u8 addr_invalid = ADDR_INVALID;
@@ -713,11 +714,12 @@ void bootloader_handle_mem_write_cmd			(u8* bl_rx_buffer)
 			 		WIFI_u8ReceiveData(Local_u16BufferStartByte, Local_u32FileSize, website_buffer);
 			 		Local_u16BufferStartByte=+1024;
 			 		Global_u16IteratorForNumberOfTimesDataAreReceived++;
-//					char2hex(website_buffer,FLASH_src_buffer_1K,1024);
-//
-//
-//				    FLASH_PageErase		(destination_address);
-//					FLASH_WriteProgram	((u32*)FLASH_src_buffer_1K, (u32*)destination_address, 64);
+					char2hex(website_buffer,FLASH_src_buffer_1K,1024);
+
+					GPIO_Pin_Write(&OnBoard_Led,LOW);
+				    FLASH_PageErase		(destination_address);
+					FLASH_WriteProgram	((u32*)FLASH_src_buffer_1K, (u32*)destination_address, len_to_read);
+					GPIO_Pin_Write(&OnBoard_Led,HIGH);
 					/**************************** Updating variables for the next loop ****************************/
 					//update base mem address for the next loop
 					destination_address 	+= len_to_read;
@@ -762,7 +764,7 @@ void bootloader_handle_mem_write_cmd			(u8* bl_rx_buffer)
 		printmsg1("BL_DEBUG_MSG: checksum fail !! \r\n");
 		bootloader_send_nack();
 	}
-	GPIO_Pin_Write(&OnBoard_Led,HIGH);
+
 }
 
 /*Handle function to handle BL_MEM_READ command*/
@@ -1221,12 +1223,13 @@ void save_app_info(u8 app_num, u32 app_base_address, u32 app_size_in_bytes, u8* 
  * for example : (inBuffer) has 1024 bytes
  * 				 (outBuffer) has 512 bytes
  * 				 so we are going to iterate for 512 times*/
-void   char2hex(u8* inBuffer, u8* outBuffer, u16 NumOfBytesToBeConverted )
+void char2hex(u8* inBuffer, u8* outBuffer, u16 NumOfBytesToBeConverted )
 {
 	u16 index;
 	for(index=0;index<NumOfBytesToBeConverted;index++)
 	{
-		//outBuffer[NumOfBytesToBeConverted-1-index]  = ( (inBuffer[index*2]<<4) | (inBuffer[index*2+1]&0x0F) );
+		if(inBuffer[index*2]   > 0x60)inBuffer[index*2  ]+=9;
+		if(inBuffer[index*2+1] > 0x60)inBuffer[index*2+1]+=9;
 		outBuffer[index]  = ( (inBuffer[index*2]<<4) | (inBuffer[index*2+1]&0x0F) );
 	}
 }
@@ -1242,15 +1245,17 @@ void hex2char(u8* inBuffer, u8* outBuffer, u16 NumOfBytesToBeConverted)
 
         if      ( outBuffer[index*2] >= 0x0 && outBuffer[index*2] <= 0x9 )
                   outBuffer[index*2] |= 0x30;
-        else if ( outBuffer[index*2] >= 0xA && outBuffer[index*2] <= 0xF )
-                  outBuffer[index*2] |= 0x40;
+        else if ( outBuffer[index*2] >= 0xA && outBuffer[index*2] <= 0xF ){
+                  outBuffer[index*2] |= 0x60;
+                  outBuffer[index*2] -= 9;}
 
         outBuffer[index*2+1] = inBuffer[index] & 0x0F ;
 
         if      ( outBuffer[index*2+1] >= 0x0 && outBuffer[index*2+1] <= 0x9 )
                   outBuffer[index*2+1] |= 0x30;
-        else if ( outBuffer[index*2+1] >= 0xA && outBuffer[index*2+1] <= 0xF )
-                  outBuffer[index*2+1] |= 0x40;
+        else if ( outBuffer[index*2+1] >= 0xA && outBuffer[index*2+1] <= 0xF ){
+                  outBuffer[index*2+1] |= 0x60;
+                  outBuffer[index*2+1] -= 9;}
 
     }
 }

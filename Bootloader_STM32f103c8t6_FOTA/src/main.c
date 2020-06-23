@@ -32,14 +32,14 @@ int main(void)
 	//WIFI_u8SetOutput(HUART_USART1);
 	/*Initialize UART peripheral on UART 2
 	 * WIFI must be on UART2 because logic levels of UART2 is 3.3 not 5V*/
-	//delay_ms(1000);
-	//WIFI_u8SendCommand(WIFI_COMMAND_SET_MODE_STATION);
-	//delay_ms(1000);
-	//WIFI_u8SendCommand(WIFI_COMMAND_LIST_AP);
-	//delay_ms(5000);
-	//WIFI_u8ConnectToAccessPoint((u8*)"TEdata61D609",(u8*)"03926003");
-	WIFI_u8ConnectToAccessPoint((u8*)"Hamdy",(u8*)"commandos123");
-	//delay_ms(5000);
+	delay_ms(1000);
+	WIFI_u8SendCommand(WIFI_COMMAND_SET_MODE_STATION);
+	delay_ms(1000);
+	WIFI_u8SendCommand(WIFI_COMMAND_LIST_AP);
+	delay_ms(5000);
+	WIFI_u8ConnectToAccessPoint((u8*)"TEdata61D609",(u8*)"03926003");
+	//WIFI_u8ConnectToAccessPoint((u8*)"Hamdy",(u8*)"commandos123");
+	delay_ms(5000);
 	//HUART_u8SetRXCallBack(rxDone);
 
 
