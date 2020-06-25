@@ -206,6 +206,7 @@ void bootloader_voidJumpToUserApp(void)
 /*Reads the command packet which comes from the host application*/
 void bootloader_voidUARTReadData (void)
 {
+	printmsg1("BL_DEBUG_MSG: Button is pressed .. going to BL mode\r\n");
 
 
 	OnBoard_Led.port = PORTC;
@@ -215,6 +216,24 @@ void bootloader_voidUARTReadData (void)
 
 	GPIO_Init(&OnBoard_Led);
 	GPIO_Pin_Write(&OnBoard_Led,HIGH);
+	/***************************WiFi initialization***************************/
+	printmsg1("BL_DEBUG_MSG: Initializing WiFi module (ESP8266 S01) ...\r\n");
+	WIFI_u8Init(HUART_USART2);
+
+	//WIFI_u8SetOutput(HUART_USART1);
+	/*Initialize UART peripheral on UART 2
+	 * WIFI must be on UART2 because logic levels of UART2 is 3.3 not 5V*/
+	delay_ms(1000);
+	WIFI_u8SendCommand(WIFI_COMMAND_SET_MODE_STATION);
+	delay_ms(1000);
+	WIFI_u8SendCommand(WIFI_COMMAND_LIST_AP);
+	delay_ms(5000);
+	WIFI_u8ConnectToAccessPoint((u8*)"TEdata61D609",(u8*)"03926003");
+	//WIFI_u8ConnectToAccessPoint((u8*)"Hamdy",(u8*)"commandos123");
+	delay_ms(5000);
+	//HUART_u8SetRXCallBack(rxDone);
+	printmsg1("BL_DEBUG_MSG: WiFi initialization Done!\r\n");
+
 
 	/*This variable holds the length of the data that will follow the command. It will be used to know how many bytes
 	to convert and save in the receiving buffer*/
@@ -225,7 +244,7 @@ void bootloader_voidUARTReadData (void)
 	u8 Local_u8Buffer[1100]={0};
 	/*******************End of modification******************/			 											   
 
-	printmsg1("BL_DEBUG_MSG: Button is pressed .. going to BL mode\r\n");
+
 	while(1)
 	{
 		/*Reinitialize these variables because they will be used as flags, this is to work well with the while loop inside*/
@@ -306,7 +325,7 @@ void bootloader_voidUARTReadData (void)
 				bootloader_handle_existing_apps_cmd(bl_rx_buffer);
 				break;
 			default:
-				printmsg1("\nBL_DEBUG_MSG: Invalid command code received from host \r\n");
+				printmsg1("\nBL_DEBUG_MSG: Ready to receive command from HOST application ... \r\n");
 				break;
 		}
 		delay_ms(15000);
@@ -663,6 +682,7 @@ void bootloader_handle_mem_write_cmd			(u8* bl_rx_buffer)
 	u32 bytes_received_so_far =0;
 	u32 len_to_read			  =0;
 	u32 destination_address   =0;
+	f32 loading_percentage    =0;
 	#define FLASH_RX_LEN					1024
 	u8	FLASH_src_buffer_1K[FLASH_RX_LEN]=  {0};
 	#define WEB_RX_LEN						2048
@@ -699,6 +719,7 @@ void bootloader_handle_mem_write_cmd			(u8* bl_rx_buffer)
 			 	bytes_remaining = Local_u32FileSize;
 			 	while(bytes_remaining)
 			 	{
+			 		GPIO_Pin_Write(&OnBoard_Led,LOW);
 			 		if(bytes_remaining >= 1024)
 			 		{
 			 			len_to_read=1024;
@@ -716,15 +737,18 @@ void bootloader_handle_mem_write_cmd			(u8* bl_rx_buffer)
 			 		Global_u16IteratorForNumberOfTimesDataAreReceived++;
 					char2hex(website_buffer,FLASH_src_buffer_1K,1024);
 
-					GPIO_Pin_Write(&OnBoard_Led,LOW);
+
 				    FLASH_PageErase		(destination_address);
 					FLASH_WriteProgram	((u32*)FLASH_src_buffer_1K, (u32*)destination_address, len_to_read);
-					GPIO_Pin_Write(&OnBoard_Led,HIGH);
+
 					/**************************** Updating variables for the next loop ****************************/
 					//update base mem address for the next loop
 					destination_address 	+= len_to_read;
 					bytes_received_so_far 	+= len_to_read;
 					bytes_remaining			 = Local_u32FileSize - bytes_received_so_far;
+					loading_percentage       = ((f32)bytes_received_so_far/(f32)Local_u32FileSize)*100;
+					printmsg1("\rFlashing : %.f %% \tdone  ",loading_percentage);
+					GPIO_Pin_Write(&OnBoard_Led,HIGH);
 			 	}
 			 	/*Reset iterators*/
 		 		Local_u16BufferStartByte=+1024;

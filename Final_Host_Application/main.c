@@ -6,9 +6,9 @@ int main()
 {
 
      /*----------------------------- Ask Menu implementation----------------------------------------*/
-    printf("\n\n +==========================================+");
-    printf("\n |           STM32F4 BootLoader v1           |");
-    printf("\n +==========================================+\n");
+    printf("\n\n |==========================================|");
+    printf("\n |           STM32F103C8T6 BootLoader v1      |");
+    printf("\n |==========================================|\n");
             //Serial_Port_Configuration();
     printf("   INITIALIZING SERVER, Please Wait");
     HOST_voidSendCommand("EMPTY",5);

@@ -52,6 +52,7 @@ u8 		FLASH_src_buffer_1K[FLASH_RX_LEN]=  {0};
 
 #define BL_SYSTEM_RESET					0X5D	/**/
 #define BL_EXISTING_APPS				0x5E	/**/
+#define BL_SAVE_APP_INFO				0x61	/*Set app info*/
 
 /*ACK and NACK bytes*/
 #define BL_ACK							0xA5
@@ -97,6 +98,7 @@ void bootloader_handle_getrdp_cmd				(u8* bl_rx_buffer);
 void bootloader_handle_read_sectors_status_cmd	(u8* bl_rx_buffer);
 void bootloader_handle_system_reset_cmd			(u8* bl_rx_buffer);
 void bootloader_handle_existing_apps_cmd		(u8* bl_rx_buffer);
+void bootloader_handle_save_app_info_cmd		(u8* bl_rx_buffer);
 
 
 
@@ -124,7 +126,8 @@ u8   supported_commands[] = {
 							BL_GET_RDP_STATUS	    ,
 							BL_PROTECTION_STATUS    ,
 							BL_SYSTEM_RESET		    ,
-							BL_EXISTING_APPS
+							BL_EXISTING_APPS		,
+							BL_SAVE_APP_INFO
 							};
 
 
@@ -388,6 +391,9 @@ extern void bootloader_voidUARTReadData (void)
 				break;
 			case BL_EXISTING_APPS:
 				bootloader_handle_existing_apps_cmd(bl_rx_buffer);
+				break;
+			case BL_SAVE_APP_INFO:
+				bootloader_handle_save_app_info_cmd(bl_rx_buffer);
 				break;
 			default:
 				printmsg1("BL_DEBUG_MSG: Invalid command code received from host \r\n");
@@ -985,8 +991,9 @@ void bootloader_handle_system_reset_cmd			(u8* bl_rx_buffer)
 }
 void bootloader_handle_existing_apps_cmd		(u8* bl_rx_buffer)
 {
-	u32 application_info_block_start_address = FLASH_MEMORY_PAGE_20;
-	u8  number_of_apps = *((u8*)FLASH_MEMORY_PAGE_20);
+	u8  index;
+	//u32 application_info_block_start_address = FLASH_MEMORY_PAGE_19;
+	u8  number_of_apps = *((u8*)FLASH_MEMORY_PAGE_19);
 	u8  Local_u8FinalHostCRC[4];
 
 	u8  command_packet = bl_rx_buffer[0]+1;                 /*Total length of command packet*/
@@ -997,18 +1004,24 @@ void bootloader_handle_existing_apps_cmd		(u8* bl_rx_buffer)
 	crc_host= *((u32*)Local_u8FinalHostCRC);     /*Extract the CRC32 sent by host*/
 
 	printmsg1("------------------------------------------------\r\n");
-	printmsg1("BL_DEBUG_MSG: bootloader_handle_en_read_protect_cmd \r\n");
+	printmsg1("BL_DEBUG_MSG: bootloader_handle_existing_apps_cmd \r\n");
 	// 1) verify the checksum
 	if(! bootloader_verify_crc(bl_rx_buffer, command_length_without_crc, crc_host))
 	{
 		//checksum is correct
 		printmsg1("BL_DEBUG_MSG: checksum success !! \r\n");
 		//processing
-		//Stating that a reply of zero bytes is going to be sent
-		bootloader_send_ack(0);
 
-		FLASH_OPT_Unlock();
-		FLASH_OPT_ReadProtection_Enable();
+		//Stating that a reply of zero bytes is going to be sent
+		bootloader_send_ack(number_of_apps*16);
+		for(index=0;index<number_of_apps;index++)
+		{
+			HUART_u8SendSync(HUART_USART2,(u8*)(FLASH_MEMORY_PAGE_19+16+(index*16))  ,4,10);//sending app base memory address
+			HUART_u8SendSync(HUART_USART2,(u8*)(FLASH_MEMORY_PAGE_19+16+(index*16)+4),4,10);//sending app size in bytes
+			HUART_u8SendSync(HUART_USART2,(u8*)(FLASH_MEMORY_PAGE_19+16+(index*16)+8),8,10);//sending app name
+		}
+
+
 	}
 	else
 	{
@@ -1018,6 +1031,91 @@ void bootloader_handle_existing_apps_cmd		(u8* bl_rx_buffer)
 	}
 }
 
+void bootloader_handle_save_app_info_cmd		(u8* bl_rx_buffer)
+//void save_app_info(u8 app_num, u32 app_base_address, u32 app_size_in_bytes, u8* app_name)
+{
+	u8  index;
+	u8  status  =0;
+	//u8  number_of_apps = *((u8*)FLASH_MEMORY_PAGE_19); //0
+	u8  number_of_apps = 0;
+	u32 app_base_address=0;
+	u8  Local_u8FinalAppBaseAddress[4]={0};
+	u8  Local_u8FinalAppSizeInBytes[4]={0};
+	//u32 destination_address = FLASH_MEMORY_PAGE_19+16+(16*(number_of_apps-1));
+	u32 app_size_in_bytes=0;
+	u8  app_name[8]={0};
+	u8  Local_u8FinalHostCRC[4];
+
+
+	u8  command_packet = bl_rx_buffer[0]+1;                 /*Total length of command packet*/
+	u32 command_length_without_crc = command_packet-8;      /*Length to be sent to (bl_verify_crc) function*/
+	u32 crc_host;
+
+
+	char2hex(&bl_rx_buffer[command_length_without_crc], Local_u8FinalHostCRC, 4);
+	crc_host= *((u32*)Local_u8FinalHostCRC);     /*Extract the CRC32 sent by host*/
+
+	printmsg1("------------------------------------------------\r\n");
+	printmsg1("BL_DEBUG_MSG: bootloader_handle_save_app_info_cmd \r\n");
+	// 1) verify the checksum
+	if(! bootloader_verify_crc(bl_rx_buffer, command_length_without_crc, crc_host))
+	{
+		//checksum is correct
+		printmsg1("BL_DEBUG_MSG: checksum success !! \r\n");
+		//processing
+		number_of_apps = *((u8*)FLASH_MEMORY_PAGE_19);
+		if(number_of_apps==0xFF)number_of_apps =0;
+		number_of_apps++;
+		char2hex(&bl_rx_buffer[2], Local_u8FinalAppBaseAddress ,4);
+		char2hex(&bl_rx_buffer[10],Local_u8FinalAppSizeInBytes ,4);
+		app_base_address =*((u32*)Local_u8FinalAppBaseAddress);
+		app_size_in_bytes=*((u32*)Local_u8FinalAppSizeInBytes);
+
+		for(index=0;index<8;index++)
+			app_name[index]=bl_rx_buffer[18+index];
+		printmsg1("\nNumber of apps: %d"    ,number_of_apps);
+		printmsg1("\r\nApp name: %s"        ,app_name);
+		printmsg1("\r\nApp size: %d bytes"    ,app_size_in_bytes);
+		printmsg1("\r\nApp Base address: %#x\r\n"  ,app_base_address);
+
+		FLASH_Unlock();
+		status = FLASH_savePage(FLASH_MEMORY_PAGE_19,SAVE_FLASH);		/*save*/
+		status = FLASH_PageErase(FLASH_MEMORY_PAGE_19);					/*erase*/
+		FLASH_updatePage((u32*)&number_of_apps   ,1,0,SAVE_FLASH);		/*update number of apps			*/
+		FLASH_updatePage(&app_base_address     ,4,(16+(16*(number_of_apps-1))),SAVE_FLASH);		/*update app base memory address*/
+		FLASH_updatePage(&app_size_in_bytes    ,4,(20+(16*(number_of_apps-1))),SAVE_FLASH);		/*update app size in bytes      */
+		FLASH_updatePage((u32*)app_name        ,8,(24+(16*(number_of_apps-1))),SAVE_FLASH);		/*update app name               */
+		//FLASH_updatePage((u32*)app_name        ,4,(24+(16*(number_of_apps-1))),SAVE_FLASH);		/*update app name               */
+		//FLASH_updatePage((u32*)&app_name[4]    ,4,(28+(16*(number_of_apps-1))),SAVE_FLASH);		/*update app name               */
+		FLASH_reloadPage(FLASH_MEMORY_PAGE_19,SAVE_FLASH);              /*reload*/
+		FLASH_Lock();
+		//Stating that a reply of 10 bytes is going to be sent
+		bootloader_send_ack(1);
+		HUART_u8SendSync(HUART_USART2,&status,1,10);
+	}
+	else
+	{
+		//checksum is wrong send nack
+		printmsg1("BL_DEBUG_MSG: checksum fail !! \r\n");
+		bootloader_send_nack();
+	}
+
+
+
+
+	//status = FLASH_savePage(address,SAVE_FLASH);			  /*save*/
+	//status = FLASH_MultiplePageErase(address,1);        	  /*erase*/
+	//FLASH_updatePage(new,2,3,SAVE_FLASH);                   /*update*/
+	//FLASH_reloadPage(address,SAVE_FLASH);                   /*reload*/
+
+	//FLASH_WriteProgram((u8*)app_name, (u32*)destination_address, 8);
+	//destination_address += 8 ;
+	//FLASH_WriteWord((u32*)destination_address, app_base_address);
+	//destination_address += 4 ;
+	//FLASH_WriteWord((u32*)destination_address, app_size_in_bytes);
+    //
+	//FLASH_Lock();
+}
 /******************* Implementation Helper functions prototypes **********************************************/
 
 void bootloader_send_ack(u8 follow_len)
@@ -1067,26 +1165,7 @@ u8 verify_address(u32 go_address)
 
 }
 
-void save_app_info(u8 app_num, u32 app_base_address, u32 app_size_in_bytes, u8* app_name)
-{
-	u32 destination_address = FLASH_MEMORY_PAGE_20+16+(16*app_num-1);
 
-	FLASH_Unlock();
-
-
-	//status = FLASH_savePage(address,SAVE_FLASH);			/*save*/
-	//status = FLASH_MultiplePageErase(address,1);        	/*erase*/
-	//FLASH_updatePage(new,2,3,SAVE_FLASH);                   /*update*/
-	//FLASH_reloadPage(address,SAVE_FLASH);                   /*reload*/
-
-	FLASH_WriteProgram((u8*)app_name, (u32*)destination_address, 8);
-	destination_address += 8 ;
-	FLASH_WriteWord((u32*)destination_address, app_base_address);
-	destination_address += 4 ;
-	FLASH_WriteWord((u32*)destination_address, app_size_in_bytes);
-
-	FLASH_Lock();
-}
 
 /* convert (inBuffer) which has (char) elements of double the size of the (outBuffer)
  * merging every two bytes of the (inBuffer) into one byte of (outBuffer)

@@ -649,6 +649,7 @@ return error_status;
 extern ErrorStatus FLASH_updatePage 					(u32* newData,    u16 numberOfBytes, u16 startIndex, u8 Flash_or_OPT)
 {
 	u8 error_status = STD_TYPES_ERROR_NOK;
+	u8* local_byte =0;
 	u16 index;
 
 	if(Flash_or_OPT == SAVE_OPT)
@@ -668,8 +669,10 @@ extern ErrorStatus FLASH_updatePage 					(u32* newData,    u16 numberOfBytes, u1
 	{
 		for(index=0;index<numberOfBytes;index++)
 		{
-			*newData = *newData>>(index*8);
-			FlashSaveBuffer[startIndex+index] = *((u8*)newData); /*Updating*/
+			local_byte = (u8*)newData;
+			FlashSaveBuffer[startIndex+index] = *(local_byte+index); /*Updating*/
+			//*((u8*)newData) = (*newData>>(index*8));
+			//FlashSaveBuffer[startIndex+index] = *((u8*)newData); /*Updating*/
 		}
 		for(index=0;index<numberOfBytes;index++)
 		{
