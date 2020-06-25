@@ -148,7 +148,7 @@ void bootloader_handle_getrdp_cmd				(u8* bl_rx_buffer);
 void bootloader_handle_read_sectors_status_cmd	(u8* bl_rx_buffer);
 void bootloader_handle_system_reset_cmd			(u8* bl_rx_buffer);
 void bootloader_handle_existing_apps_cmd		(u8* bl_rx_buffer);
-void bootloader_handle_save_app_info_cmd		(u8* bl_rx_buffer);
+void bootloader_handle_save_app_info_cmd		(u8* buff);
 
 
 
@@ -242,7 +242,8 @@ void bootloader_voidUARTReadData (void)
 //	WIFI_u8SendCommand(WIFI_COMMAND_LIST_AP);
 //	delay_ms(5000);
 	//WIFI_u8ConnectToAccessPoint(Local_u8SSID,Local_u8Password);
-	WIFI_u8ConnectToAccessPoint((u8*)"Hamdy",(u8*)"commandos123");
+	//WIFI_u8ConnectToAccessPoint((u8*)"Hamdy",(u8*)"commandos123");
+	WIFI_u8ConnectToAccessPoint((u8*)"TEdata61D609",(u8*)"03926003");
 	delay_ms(5000);
 	//HUART_u8SetRXCallBack(rxDone);
 	printmsg1("BL_DEBUG_MSG: WiFi initialization Done!\r\n");
@@ -336,6 +337,9 @@ void bootloader_voidUARTReadData (void)
 				break;
 			case BL_EXISTING_APPS:
 				bootloader_handle_existing_apps_cmd(bl_rx_buffer);
+				break;
+			case BL_SAVE_APP_INFO:
+				bootloader_handle_save_app_info_cmd(Local_u8Buffer);
 				break;
 			default:
 				printmsg1("\nBL_DEBUG_MSG: Ready to receive command from HOST application ... \r\n");
@@ -1150,7 +1154,7 @@ void bootloader_handle_existing_apps_cmd		(u8* bl_rx_buffer)
 
 	u8  index;
 	//u32 application_info_block_start_address = FLASH_MEMORY_PAGE_19;
-	u8  number_of_apps = *((u8*)FLASH_MEMORY_PAGE_19);
+	u8  number_of_apps = *((u8*)FLASH_MEMORY_PAGE_22);
 	//u8  Local_u8FinalHostCRC[4];
 
 	u8  command_packet = bl_rx_buffer[0]+1;                 /*Total length of command packet*/
@@ -1171,29 +1175,31 @@ void bootloader_handle_existing_apps_cmd		(u8* bl_rx_buffer)
 		//processing
 
 		//Stating that a reply of zero bytes is going to be sent
+		number_of_apps = *((u8*)FLASH_MEMORY_PAGE_22);
+		if(number_of_apps==0xFF)number_of_apps =0;
 		bootloader_send_ack(number_of_apps*16);
 		for(index=0;index<number_of_apps;index++)
 		{
-			Global_u8ResponseArray[(index+2)]=(FLASH_MEMORY_PAGE_19+16+(index*16));//sending app base memory address
-			Global_u8ResponseArray[(index+3)]=(FLASH_MEMORY_PAGE_19+16+(index*16))>>8;//sending app base memory address
-			Global_u8ResponseArray[(index+4)]=(FLASH_MEMORY_PAGE_19+16+(index*16))>>16;//sending app base memory address
-			Global_u8ResponseArray[(index+5)]=(FLASH_MEMORY_PAGE_19+16+(index*16))>>24;//sending app base memory address
+			Global_u8ResponseArray[(index+2)]=(FLASH_MEMORY_PAGE_22+16+(index*16));//sending app base memory address
+			Global_u8ResponseArray[(index+3)]=(FLASH_MEMORY_PAGE_22+16+(index*16))>>8;//sending app base memory address
+			Global_u8ResponseArray[(index+4)]=(FLASH_MEMORY_PAGE_22+16+(index*16))>>16;//sending app base memory address
+			Global_u8ResponseArray[(index+5)]=(FLASH_MEMORY_PAGE_22+16+(index*16))>>24;//sending app base memory address
 
 
-			Global_u8ResponseArray[(index+6)]=(FLASH_MEMORY_PAGE_19+16+(index*16)+4);//sending app size in bytes
-			Global_u8ResponseArray[(index+7)]=(FLASH_MEMORY_PAGE_19+16+(index*16)+4)>>8;//sending app size in bytes
-			Global_u8ResponseArray[(index+8)]=(FLASH_MEMORY_PAGE_19+16+(index*16)+4)>>16;//sending app size in bytes
-			Global_u8ResponseArray[(index+9)]=(FLASH_MEMORY_PAGE_19+16+(index*16)+4)>>24;//sending app size in bytes
+			Global_u8ResponseArray[(index+6)]=(FLASH_MEMORY_PAGE_22+16+(index*16)+4);//sending app size in bytes
+			Global_u8ResponseArray[(index+7)]=(FLASH_MEMORY_PAGE_22+16+(index*16)+4)>>8;//sending app size in bytes
+			Global_u8ResponseArray[(index+8)]=(FLASH_MEMORY_PAGE_22+16+(index*16)+4)>>16;//sending app size in bytes
+			Global_u8ResponseArray[(index+9)]=(FLASH_MEMORY_PAGE_22+16+(index*16)+4)>>24;//sending app size in bytes
 
 
-			Global_u8ResponseArray[(index+10)]=(FLASH_MEMORY_PAGE_19+16+(index*16)+8);//sending app name
-			Global_u8ResponseArray[(index+11)]=(FLASH_MEMORY_PAGE_19+16+(index*16)+8)>>8;//sending app name
-			Global_u8ResponseArray[(index+12)]=(FLASH_MEMORY_PAGE_19+16+(index*16)+8)>>16;//sending app name
-			Global_u8ResponseArray[(index+13)]=(FLASH_MEMORY_PAGE_19+16+(index*16)+8)>>24;//sending app name
-			Global_u8ResponseArray[(index+14)]=(FLASH_MEMORY_PAGE_19+16+(index*16)+12);//sending app name
-			Global_u8ResponseArray[(index+15)]=(FLASH_MEMORY_PAGE_19+16+(index*16)+12)>>8;//sending app name
-			Global_u8ResponseArray[(index+16)]=(FLASH_MEMORY_PAGE_19+16+(index*16)+12)>>16;//sending app name
-			Global_u8ResponseArray[(index+17)]=(FLASH_MEMORY_PAGE_19+16+(index*16)+12)>>24;//sending app name
+			Global_u8ResponseArray[(index+10)]=(FLASH_MEMORY_PAGE_22+16+(index*16)+8);//sending app name
+			Global_u8ResponseArray[(index+11)]=(FLASH_MEMORY_PAGE_22+16+(index*16)+8)>>8;//sending app name
+			Global_u8ResponseArray[(index+12)]=(FLASH_MEMORY_PAGE_22+16+(index*16)+8)>>16;//sending app name
+			Global_u8ResponseArray[(index+13)]=(FLASH_MEMORY_PAGE_22+16+(index*16)+8)>>24;//sending app name
+			Global_u8ResponseArray[(index+14)]=(FLASH_MEMORY_PAGE_22+16+(index*16)+12);//sending app name
+			Global_u8ResponseArray[(index+15)]=(FLASH_MEMORY_PAGE_22+16+(index*16)+12)>>8;//sending app name
+			Global_u8ResponseArray[(index+16)]=(FLASH_MEMORY_PAGE_22+16+(index*16)+12)>>16;//sending app name
+			Global_u8ResponseArray[(index+17)]=(FLASH_MEMORY_PAGE_22+16+(index*16)+12)>>24;//sending app name
 
 
 
@@ -1216,63 +1222,82 @@ void bootloader_handle_existing_apps_cmd		(u8* bl_rx_buffer)
 	}
 }
 
-void bootloader_handle_save_app_info_cmd		(u8* bl_rx_buffer)
+void bootloader_handle_save_app_info_cmd		(u8* buff)
 //void save_app_info(u8 app_num, u32 app_base_address, u32 app_size_in_bytes, u8* app_name)
 {
 	u8  index;
 	u8  status  =0;
-	//u8  number_of_apps = *((u8*)FLASH_MEMORY_PAGE_19); //0
+
 	u8  number_of_apps = 0;
 	u32 app_base_address=0;
-	u8  Local_u8FinalAppBaseAddress[4]={0};
-	u8  Local_u8FinalAppSizeInBytes[4]={0};
-	//u32 destination_address = FLASH_MEMORY_PAGE_19+16+(16*(number_of_apps-1));
+//	u8  Local_u8FinalAppBaseAddress[4]={0};
+//	u8  Local_u8FinalAppSizeInBytes[4]={0};
+
 	u32 app_size_in_bytes=0;
 	u8  app_name[8]={0};
-	u8  Local_u8FinalHostCRC[4];
+//	u8  Local_u8FinalHostCRC[4];
 
 
-	u8  command_packet = bl_rx_buffer[0]+1;                 /*Total length of command packet*/
+
+	u8  command_packet = buff[0]+1;                 /*Total length of command packet*/
 	u32 command_length_without_crc = command_packet-8;      /*Length to be sent to (bl_verify_crc) function*/
 	u32 crc_host;
 
+	u8 Local_u8ConversionBuffer[22]={0};
 
-	char2hex(&bl_rx_buffer[command_length_without_crc], Local_u8FinalHostCRC, 4);
-	crc_host= *((u32*)Local_u8FinalHostCRC);     /*Extract the CRC32 sent by host*/
+	char2hex(buff, Local_u8ConversionBuffer, 10);
+	Local_u8ConversionBuffer[10]=buff[20];
+	Local_u8ConversionBuffer[11]=buff[21];
+	Local_u8ConversionBuffer[12]=buff[22];
+	Local_u8ConversionBuffer[13]=buff[23];
+	Local_u8ConversionBuffer[14]=buff[24];
+	Local_u8ConversionBuffer[15]=buff[25];
+	Local_u8ConversionBuffer[16]=buff[26];
+	Local_u8ConversionBuffer[17]=buff[27];
+	char2hex(&buff[28],&Local_u8ConversionBuffer[18],4);
+
+
+	//char2hex(&buff[command_length_without_crc], Local_u8FinalHostCRC, 4);
+	//crc_host= *((u32*)Local_u8FinalHostCRC);     /*Extract the CRC32 sent by host*/
+	crc_host= *((u32*)&Local_u8ConversionBuffer[18]);     /*Extract the CRC32 sent by host*/
+
 
 	printmsg1("------------------------------------------------\r\n");
 	printmsg1("BL_DEBUG_MSG: bootloader_handle_save_app_info_cmd \r\n");
 	// 1) verify the checksum
-	if(! bootloader_verify_crc(bl_rx_buffer, command_length_without_crc, crc_host))
+	if(! bootloader_verify_crc(buff, command_length_without_crc, crc_host))
 	{
 		//checksum is correct
 		printmsg1("BL_DEBUG_MSG: checksum success !! \r\n");
 		//processing
-		number_of_apps = *((u8*)FLASH_MEMORY_PAGE_19);
+		number_of_apps = *((u8*)FLASH_MEMORY_PAGE_22);
 		if(number_of_apps==0xFF)number_of_apps =0;
 		number_of_apps++;
-		char2hex(&bl_rx_buffer[2], Local_u8FinalAppBaseAddress ,4);
-		char2hex(&bl_rx_buffer[10],Local_u8FinalAppSizeInBytes ,4);
-		app_base_address =*((u32*)Local_u8FinalAppBaseAddress);
-		app_size_in_bytes=*((u32*)Local_u8FinalAppSizeInBytes);
+		//char2hex(&buff[2], Local_u8FinalAppBaseAddress ,4);
+		//char2hex(&buff[10],Local_u8FinalAppSizeInBytes ,4);
+		//app_base_address =*((u32*)Local_u8FinalAppBaseAddress);
+		//app_size_in_bytes=*((u32*)Local_u8FinalAppSizeInBytes);
+		app_base_address =*((u32*)&Local_u8ConversionBuffer[2]);
+		app_size_in_bytes=*((u32*)&Local_u8ConversionBuffer[6]);
 
 		for(index=0;index<8;index++)
-			app_name[index]=bl_rx_buffer[18+index];
+			app_name[index]=Local_u8ConversionBuffer[10+index];
+			//app_name[index]=buff[18+index];
 		printmsg1("\nNumber of apps: %d"    ,number_of_apps);
 		printmsg1("\r\nApp name: %s"        ,app_name);
 		printmsg1("\r\nApp size: %d bytes"    ,app_size_in_bytes);
 		printmsg1("\r\nApp Base address: %#x\r\n"  ,app_base_address);
 
 		FLASH_Unlock();
-		status = FLASH_savePage(FLASH_MEMORY_PAGE_19,SAVE_FLASH);		/*save*/
-		status = FLASH_PageErase(FLASH_MEMORY_PAGE_19);					/*erase*/
+		status = FLASH_savePage(FLASH_MEMORY_PAGE_22,SAVE_FLASH);		/*save*/
+		status = FLASH_PageErase(FLASH_MEMORY_PAGE_22);					/*erase*/
 		FLASH_updatePage((u32*)&number_of_apps   ,1,0,SAVE_FLASH);		/*update number of apps			*/
 		FLASH_updatePage(&app_base_address     ,4,(16+(16*(number_of_apps-1))),SAVE_FLASH);		/*update app base memory address*/
 		FLASH_updatePage(&app_size_in_bytes    ,4,(20+(16*(number_of_apps-1))),SAVE_FLASH);		/*update app size in bytes      */
 		FLASH_updatePage((u32*)app_name        ,8,(24+(16*(number_of_apps-1))),SAVE_FLASH);		/*update app name               */
 		//FLASH_updatePage((u32*)app_name        ,4,(24+(16*(number_of_apps-1))),SAVE_FLASH);		/*update app name               */
 		//FLASH_updatePage((u32*)&app_name[4]    ,4,(28+(16*(number_of_apps-1))),SAVE_FLASH);		/*update app name               */
-		FLASH_reloadPage(FLASH_MEMORY_PAGE_19,SAVE_FLASH);              /*reload*/
+		FLASH_reloadPage(FLASH_MEMORY_PAGE_22,SAVE_FLASH);              /*reload*/
 		FLASH_Lock();
 		//Stating that a reply of 10 bytes is going to be sent
 		bootloader_send_ack(1);

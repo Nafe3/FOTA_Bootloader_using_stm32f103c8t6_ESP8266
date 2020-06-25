@@ -236,6 +236,13 @@ void decode_menu_command_code(uint32_t command_code)
     volatile uint8_t  nsec;
     uint32_t sector_address;
 
+    /*Save app info*/
+    uint32_t app_base_address   = 0;
+    uint32_t app_size_in_bytes  = 0;
+    uint8_t  app_name[8]        = {0};
+    int c;
+    uint8_t index;
+
     switch(command_code)
     {
     case 0:
@@ -1278,53 +1285,84 @@ case 16:
         /*Pass hex array to process it as reply of bootloader*/
         ret_value = read_bootloader_reply(COMMAND_BL_EXISTING_APPS, replyFromBootloaderHex);
         break;
-//    case 17:
-//        printf("\n   Command == > COMMAND_BL_SAVE_APP_INFO\n");
-//
-//        printf("\n\n   Enter the app name here : ");
-//        scanf(" %8s", app_name);
-//        while ((c = fgetc(stdin)) != '\n' && c != EOF); /* Flush stdin */
-//        //fgets(app_name,9,stdin);
-//        printf(  "\n   Enter the app size in bytes here : ");
-//        scanf(" %d",&app_size_in_bytes);
-//        printf(  "\n   Enter the app base memory address here : ");
-//        scanf(" %x",&app_base_address);
-//
-//        //printf("\n\nname: %s\nsize: %d\nbase memory address: %#x",app_name,app_size_in_bytes,app_base_address);
-//
-//        data_buf[0] = COMMAND_BL_SAVE_APP_INFO_LEN-1;   //command length macro
-//        data_buf[1] = COMMAND_BL_SAVE_APP_INFO; //command code macro
-//
-//
-//        hex2char(&app_base_address , &data_buf[2]                             , 4);
-//        hex2char(&app_size_in_bytes, &data_buf[10]                            , 4);
-//       // hex2char( app_name         , &data_buf[18]                            , 8);
-//        for(index=0;index<8;index++)
-//        {
-//            data_buf[18+index]=app_name[index];
-//            if(data_buf[18+index]==0)data_buf[18+index]=0x30;
-//        }
-//        crc32       = get_crc(data_buf,COMMAND_BL_SAVE_APP_INFO_LEN-8);
-//        hex2char(&crc32            , &data_buf[COMMAND_BL_SAVE_APP_INFO_LEN-8], 4);
-//
-//        /*Send length of data to be sent*/
-//        Write_to_serial_port(&data_buf[0],1);
-//        /*Send an empty frame to empty DR and prevent data length being read again by bootloader as data*/
-//        Write_to_serial_port(&emptyFrame,1);
-//        /*Wait for bootloader to be ready to receive data*/
-//        delay(20);
-//        for (iterator=1; iterator<COMMAND_BL_SAVE_APP_INFO_LEN;iterator++)
-//        {
-//            Write_to_serial_port(&data_buf[iterator],1);
-//           // delay (500);
-//        }
-//
-//        /*We will send empty frame now to clear DR*/
-//        Write_to_serial_port(&emptyFrame,1);
-//        /*Get Response for bootloader*/
-//        ret_value = read_bootloader_reply(data_buf[1]);
-//
-//        break;
+    case 17:
+        printf("\n   Command == > COMMAND_BL_SAVE_APP_INFO\n");
+
+        printf("\n\n   Enter the app name here : ");
+        scanf(" %8s", app_name);
+        while ((c = fgetc(stdin)) != '\n' && c != EOF); /* Flush stdin */
+        printf(  "\n   Enter the app size in bytes here : ");
+        scanf(" %d",&app_size_in_bytes);
+        printf(  "\n   Enter the app base memory address here : ");
+        scanf(" %x",&app_base_address);
+
+        //printf("\n\nname: %s\nsize: %d\nbase memory address: %#x",app_name,app_size_in_bytes,app_base_address);
+
+        data_buf[0] = COMMAND_BL_SAVE_APP_INFO_LEN-1;   //command length macro
+        data_buf[1] = COMMAND_BL_SAVE_APP_INFO;         //command code macro
+
+        data_buf[2]  =   word_to_byte(app_base_address,1,1);
+        data_buf[3]  =   word_to_byte(app_base_address,2,1);
+        data_buf[4]  =   word_to_byte(app_base_address,3,1);
+        data_buf[5]  =   word_to_byte(app_base_address,4,1);
+
+        data_buf[6]  =   app_size_in_bytes;
+        data_buf[7]  =   app_size_in_bytes>>8;
+        data_buf[8]  =   app_size_in_bytes>>16;
+        data_buf[9]  =   app_size_in_bytes>>24;
+
+        for(index=0;index<8;index++)
+        {
+            data_buf[10+index]=app_name[index];
+            if(data_buf[10+index]==0)data_buf[10+index]=0x30;
+        }
+
+        crc32       = get_crc(data_buf,COMMAND_BL_SAVE_APP_INFO_LEN-4);
+        data_buf[18] = word_to_byte(crc32,1,1);
+        data_buf[19] = word_to_byte(crc32,2,1);
+        data_buf[20] = word_to_byte(crc32,3,1);
+        data_buf[21] = word_to_byte(crc32,4,1);
+
+
+        /*Convert buffer to char to be sent through WIFI*/
+        //len to follow + command code + base address + app size in bytes
+        hex2char(data_buf,commandPacket_TxBuffer,10);
+        //name
+        commandPacket_TxBuffer[20] = data_buf[10];
+        commandPacket_TxBuffer[21] = data_buf[11];
+        commandPacket_TxBuffer[22] = data_buf[12];
+        commandPacket_TxBuffer[23] = data_buf[13];
+        commandPacket_TxBuffer[24] = data_buf[14];
+        commandPacket_TxBuffer[25] = data_buf[15];
+        commandPacket_TxBuffer[26] = data_buf[16];
+        commandPacket_TxBuffer[27] = data_buf[17];
+        //crc
+        hex2char(&data_buf[18],&commandPacket_TxBuffer[28],4);
+        /*Send data to server*/
+        HOST_voidSendCommand(commandPacket_TxBuffer,34);
+        /*Give bootloader time to receive command and process it*/
+        printf("\n   Waiting for bootloader to process request\n");
+        delay(5000);
+        while (replyFromBootloaderHex[0]!=0xA5 && replyFromBootloaderHex!=0x7f)
+        {
+            /*Get response from bootloader and through WIFI*/
+            HOST_voidReceiveCommand(replyFromBootloaderChar);
+            /*Convert 2 variables only from response from char to hex, which represent ack and size of packet*/
+            char2hex(replyFromBootloaderChar,replyFromBootloaderHex,2);
+            /*If we reached timeout threshold, break from loop, otherwise increase variable*/
+            if(timeout_counter==TIMEOUT)break;
+            timeout_counter++;
+        }
+        /*Save the size insize the variable which represents reply without ack size*/
+        bl_reply_without_ack = replyFromBootloaderHex[1];
+        /*Convert rest of array into hex*/
+        char2hex(&replyFromBootloaderChar[4],&replyFromBootloaderHex[2],bl_reply_without_ack);
+        //printf("Done receiving\n");
+
+        /*Pass hex array to process it as reply of bootloader*/
+        ret_value = read_bootloader_reply(COMMAND_BL_SAVE_APP_INFO, replyFromBootloaderHex);
+
+        break;
     default:
         printf("\n\n  Please input valid command code\n");
         return;

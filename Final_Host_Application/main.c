@@ -48,6 +48,7 @@ int main()
         printf("\n------------------------------------------");
         printf("\n   System Reset                   --> 15");
 		printf("\n   Existing Apps Details          --> 16");
+		printf("\n   Save App information           --> 17");
         printf("\n------------------------------------------");
         printf("\n   MENU_EXIT                      --> 0");
 
