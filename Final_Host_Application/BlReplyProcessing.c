@@ -81,7 +81,10 @@ int read_bootloader_reply(uint8_t command_code, uint8_t* Copy_u8DataBuffer)
             process_COMMAND_BL_MY_SYSTEM_RESET(len_to_follow);
             break;
         case COMMAND_BL_EXISTING_APPS:
-            process_COMMAND_BL_EXISTING_APPS(len_to_follow);
+            process_COMMAND_BL_EXISTING_APPS(len_to_follow, Copy_u8DataBuffer);
+            break;
+        case COMMAND_BL_SAVE_APP_INFO:
+            process_COMMAND_BL_SAVE_APP_INFO(len_to_follow, Copy_u8DataBuffer);
             break;
         default:
             printf("\n  Invalid command code\n");
@@ -274,7 +277,35 @@ void process_COMMAND_BL_MY_SYSTEM_RESET			(uint32_t len)
      //read_serial_port(&status,len);
      printf("\n\n   Done! Resetting system\n");
 }
-void process_COMMAND_BL_EXISTING_APPS			(uint32_t len)
-{
 
+void process_COMMAND_BL_EXISTING_APPS			(uint32_t len, uint8_t* Copy_u8DataBuffer)
+{
+    uint8_t  i,j;
+   // uint8_t  bl_reply[512]    = {0};
+    uint8_t  number_of_apps   = len/16;
+	uint32_t app_base_address = 0;
+	uint32_t app_size_in_bytes= 0;
+	uint8_t  app_name[8]      ={0};
+   // read_serial_port(bl_reply,len);
+    for(i=0;i<number_of_apps;i++)
+    {
+        app_base_address  = *((uint32_t*)(Copy_u8DataBuffer+2+(i*16)));
+        app_size_in_bytes = *((uint32_t*)(Copy_u8DataBuffer+2+(i*16)+4));
+        for(j=0;j<8;j++)app_name[j] =     Copy_u8DataBuffer[2+(i*16)+8+j];
+        if(i==0){
+        printf("\r\n--------  ---------  ----------------   ---------");
+        printf("\r\napp no.| |app name| |app base address|  |app size|");
+        printf("\r\n--------  ---------  ----------------   ---------");
+        }
+        printf("\r\n%d\t  %.8s   %#x\t         %d",i+1,app_name,app_base_address,app_size_in_bytes);
+
+    }
+
+}
+void process_COMMAND_BL_SAVE_APP_INFO			(uint32_t len, uint8_t* Copy_u8DataBuffer)
+{
+     uint8_t status=0;
+     //read_serial_port(&status,len);
+     status = Copy_u8DataBuffer[2];
+     printf("\n\n   Done!\n");
 }

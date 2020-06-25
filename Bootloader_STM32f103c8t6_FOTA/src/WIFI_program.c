@@ -663,7 +663,7 @@ u8 WIFI_u8EnterSSID(u8* Copy_u8SSID, u8* Copy_u8Password)
 	Local_u8ReceiveFlagForInput=1;
 	/*Terminate previous receiving operation*/
 	HUART_voidTerminateReceiving(HUART_USART1.BaseAddress);
-	delay_ms(100);
+	delay_ms(1000);
 
 	HUART_u8SendAsync(HUART_USART1, Local_u8PasswordPrompt, (sizeof(Local_u8PasswordPrompt)-1));
 	HUART_u8ReceiveAsync(HUART_USART1, LocalWIFI_u8Password, sizeof(LocalWIFI_u8Password));

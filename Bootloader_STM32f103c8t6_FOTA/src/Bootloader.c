@@ -53,7 +53,7 @@ u8  	bl_rx_buffer[BL_RX_LEN]      =  {0};
 #define BL_PROTECTION_STATUS		    0X5A    /*This command is used to read all the sector protection status.*/
 
 #define BL_SYSTEM_RESET					0X5D	/**/
-#define BL_EXISTING_APPS				0x5E	/*Get app info*/
+#define BL_EXISTING_APPS				0x5E	/**/
 #define BL_SAVE_APP_INFO				0x61	/*Set app info*/
 
 
@@ -73,7 +73,8 @@ u8   supported_commands[] = {
 							BL_GET_RDP_STATUS	    ,
 							BL_PROTECTION_STATUS    ,
 							BL_SYSTEM_RESET		    ,
-							BL_EXISTING_APPS
+							BL_EXISTING_APPS		,
+							BL_SAVE_APP_INFO
 							};
 
 
@@ -98,8 +99,9 @@ u8   supported_commands[] = {
 #define BL_GET_RDP_STATUS_REPLY_LEN		((u8)(BL_ACK_LEN+1))
 #define BL_PROTECTION_STATUS_REPLY_LEN	((u8)(BL_ACK_LEN+10))
 
-#define BL_SYSTEM_RESET_REPLY_LEN		((u8)(BL_ACK_LEN+0))
-#define BL_EXISTING_APPS_REPLY_LEN
+#define BL_SYSTEM_RESET_REPLY_LEN				((u8)(BL_ACK_LEN+0))
+#define BL_EXISTING_APPS_REPLY_LEN(NUM_APP)		((u8)(BL_ACK_LEN+(16*NUM_APP)))
+#define BL_SAVE_APP_INFO_REPLY_LEN				((u8)(BL_ACK_LEN+1))
 
 
 /*ACK and NACK bytes*/
@@ -146,6 +148,8 @@ void bootloader_handle_getrdp_cmd				(u8* bl_rx_buffer);
 void bootloader_handle_read_sectors_status_cmd	(u8* bl_rx_buffer);
 void bootloader_handle_system_reset_cmd			(u8* bl_rx_buffer);
 void bootloader_handle_existing_apps_cmd		(u8* bl_rx_buffer);
+void bootloader_handle_save_app_info_cmd		(u8* bl_rx_buffer);
+
 
 
 
@@ -234,11 +238,11 @@ void bootloader_voidUARTReadData (void)
 	delay_ms(1000);
 	WIFI_u8SendCommand(WIFI_COMMAND_SET_MODE_STATION);
 	delay_ms(1000);
-	WIFI_u8EnterSSID(Local_u8SSID, Local_u8Password);
+	//WIFI_u8EnterSSID(Local_u8SSID, Local_u8Password);
 //	WIFI_u8SendCommand(WIFI_COMMAND_LIST_AP);
 //	delay_ms(5000);
-	WIFI_u8ConnectToAccessPoint(Local_u8SSID,Local_u8Password);
-	//WIFI_u8ConnectToAccessPoint((u8*)"Hamdy",(u8*)"commandos123");
+	//WIFI_u8ConnectToAccessPoint(Local_u8SSID,Local_u8Password);
+	WIFI_u8ConnectToAccessPoint((u8*)"Hamdy",(u8*)"commandos123");
 	delay_ms(5000);
 	//HUART_u8SetRXCallBack(rxDone);
 	printmsg1("BL_DEBUG_MSG: WiFi initialization Done!\r\n");
@@ -1138,32 +1142,71 @@ void bootloader_handle_system_reset_cmd			(u8* bl_rx_buffer)
 		bootloader_send_nack();
 	}
 }
+
+
 void bootloader_handle_existing_apps_cmd		(u8* bl_rx_buffer)
 {
-	u32 application_info_block_start_address = FLASH_MEMORY_PAGE_19;
+	u8  Local_u8FinalReply[512]={0};		/*This local variable will hold the array that will be send over WIFI*/
+
+	u8  index;
+	//u32 application_info_block_start_address = FLASH_MEMORY_PAGE_19;
 	u8  number_of_apps = *((u8*)FLASH_MEMORY_PAGE_19);
-	u8  Local_u8FinalHostCRC[4];
+	//u8  Local_u8FinalHostCRC[4];
 
 	u8  command_packet = bl_rx_buffer[0]+1;                 /*Total length of command packet*/
-	u32 command_length_without_crc = command_packet-8;      /*Length to be sent to (bl_verify_crc) function*/
+	u32 command_length_without_crc = command_packet-4;      /*Length to be sent to (bl_verify_crc) function*/
 	u32 crc_host;
 
-	char2hex(&bl_rx_buffer[command_length_without_crc], Local_u8FinalHostCRC, 4);
-	crc_host= *((u32*)Local_u8FinalHostCRC);     /*Extract the CRC32 sent by host*/
+	//char2hex(&bl_rx_buffer[command_length_without_crc], Local_u8FinalHostCRC, 4);
+	//crc_host= *((u32*)Local_u8FinalHostCRC);     /*Extract the CRC32 sent by host*/
+	crc_host= *((u32*)(bl_rx_buffer+command_length_without_crc));         /*Extract the CRC32 sent by host*/
 
 	printmsg1("------------------------------------------------\r\n");
-	printmsg1("BL_DEBUG_MSG: bootloader_handle_en_read_protect_cmd \r\n");
+	printmsg1("BL_DEBUG_MSG: bootloader_handle_existing_apps_cmd \r\n");
 	// 1) verify the checksum
 	if(! bootloader_verify_crc(bl_rx_buffer, command_length_without_crc, crc_host))
 	{
 		//checksum is correct
 		printmsg1("BL_DEBUG_MSG: checksum success !! \r\n");
 		//processing
-		//Stating that a reply of zero bytes is going to be sent
-		bootloader_send_ack(0);
 
-		FLASH_OPT_Unlock();
-		FLASH_OPT_ReadProtection_Enable();
+		//Stating that a reply of zero bytes is going to be sent
+		bootloader_send_ack(number_of_apps*16);
+		for(index=0;index<number_of_apps;index++)
+		{
+			Global_u8ResponseArray[(index+2)]=(FLASH_MEMORY_PAGE_19+16+(index*16));//sending app base memory address
+			Global_u8ResponseArray[(index+3)]=(FLASH_MEMORY_PAGE_19+16+(index*16))>>8;//sending app base memory address
+			Global_u8ResponseArray[(index+4)]=(FLASH_MEMORY_PAGE_19+16+(index*16))>>16;//sending app base memory address
+			Global_u8ResponseArray[(index+5)]=(FLASH_MEMORY_PAGE_19+16+(index*16))>>24;//sending app base memory address
+
+
+			Global_u8ResponseArray[(index+6)]=(FLASH_MEMORY_PAGE_19+16+(index*16)+4);//sending app size in bytes
+			Global_u8ResponseArray[(index+7)]=(FLASH_MEMORY_PAGE_19+16+(index*16)+4)>>8;//sending app size in bytes
+			Global_u8ResponseArray[(index+8)]=(FLASH_MEMORY_PAGE_19+16+(index*16)+4)>>16;//sending app size in bytes
+			Global_u8ResponseArray[(index+9)]=(FLASH_MEMORY_PAGE_19+16+(index*16)+4)>>24;//sending app size in bytes
+
+
+			Global_u8ResponseArray[(index+10)]=(FLASH_MEMORY_PAGE_19+16+(index*16)+8);//sending app name
+			Global_u8ResponseArray[(index+11)]=(FLASH_MEMORY_PAGE_19+16+(index*16)+8)>>8;//sending app name
+			Global_u8ResponseArray[(index+12)]=(FLASH_MEMORY_PAGE_19+16+(index*16)+8)>>16;//sending app name
+			Global_u8ResponseArray[(index+13)]=(FLASH_MEMORY_PAGE_19+16+(index*16)+8)>>24;//sending app name
+			Global_u8ResponseArray[(index+14)]=(FLASH_MEMORY_PAGE_19+16+(index*16)+12);//sending app name
+			Global_u8ResponseArray[(index+15)]=(FLASH_MEMORY_PAGE_19+16+(index*16)+12)>>8;//sending app name
+			Global_u8ResponseArray[(index+16)]=(FLASH_MEMORY_PAGE_19+16+(index*16)+12)>>16;//sending app name
+			Global_u8ResponseArray[(index+17)]=(FLASH_MEMORY_PAGE_19+16+(index*16)+12)>>24;//sending app name
+
+
+
+//			HUART_u8SendSync(HUART_USART2,(u8*)(FLASH_MEMORY_PAGE_19+16+(index*16))  ,4,10);//sending app base memory address
+//			HUART_u8SendSync(HUART_USART2,(u8*)(FLASH_MEMORY_PAGE_19+16+(index*16)+4),4,10);//sending app size in bytes
+//			HUART_u8SendSync(HUART_USART2,(u8*)(FLASH_MEMORY_PAGE_19+16+(index*16)+8),8,10);//sending app name
+		}
+		/*Convert array to char to send them over WIFI*/
+		hex2char(Global_u8ResponseArray, Local_u8FinalReply, BL_EXISTING_APPS_REPLY_LEN(number_of_apps));
+		/*Send converted Bytes over WIFI*/
+		WIFI_u8SendCommandToServer(Local_u8FinalReply, BL_EXISTING_APPS_REPLY_LEN(number_of_apps)*2);
+
+
 	}
 	else
 	{
@@ -1171,6 +1214,92 @@ void bootloader_handle_existing_apps_cmd		(u8* bl_rx_buffer)
 		printmsg1("BL_DEBUG_MSG: checksum fail !! \r\n");
 		bootloader_send_nack();
 	}
+}
+
+void bootloader_handle_save_app_info_cmd		(u8* bl_rx_buffer)
+//void save_app_info(u8 app_num, u32 app_base_address, u32 app_size_in_bytes, u8* app_name)
+{
+	u8  index;
+	u8  status  =0;
+	//u8  number_of_apps = *((u8*)FLASH_MEMORY_PAGE_19); //0
+	u8  number_of_apps = 0;
+	u32 app_base_address=0;
+	u8  Local_u8FinalAppBaseAddress[4]={0};
+	u8  Local_u8FinalAppSizeInBytes[4]={0};
+	//u32 destination_address = FLASH_MEMORY_PAGE_19+16+(16*(number_of_apps-1));
+	u32 app_size_in_bytes=0;
+	u8  app_name[8]={0};
+	u8  Local_u8FinalHostCRC[4];
+
+
+	u8  command_packet = bl_rx_buffer[0]+1;                 /*Total length of command packet*/
+	u32 command_length_without_crc = command_packet-8;      /*Length to be sent to (bl_verify_crc) function*/
+	u32 crc_host;
+
+
+	char2hex(&bl_rx_buffer[command_length_without_crc], Local_u8FinalHostCRC, 4);
+	crc_host= *((u32*)Local_u8FinalHostCRC);     /*Extract the CRC32 sent by host*/
+
+	printmsg1("------------------------------------------------\r\n");
+	printmsg1("BL_DEBUG_MSG: bootloader_handle_save_app_info_cmd \r\n");
+	// 1) verify the checksum
+	if(! bootloader_verify_crc(bl_rx_buffer, command_length_without_crc, crc_host))
+	{
+		//checksum is correct
+		printmsg1("BL_DEBUG_MSG: checksum success !! \r\n");
+		//processing
+		number_of_apps = *((u8*)FLASH_MEMORY_PAGE_19);
+		if(number_of_apps==0xFF)number_of_apps =0;
+		number_of_apps++;
+		char2hex(&bl_rx_buffer[2], Local_u8FinalAppBaseAddress ,4);
+		char2hex(&bl_rx_buffer[10],Local_u8FinalAppSizeInBytes ,4);
+		app_base_address =*((u32*)Local_u8FinalAppBaseAddress);
+		app_size_in_bytes=*((u32*)Local_u8FinalAppSizeInBytes);
+
+		for(index=0;index<8;index++)
+			app_name[index]=bl_rx_buffer[18+index];
+		printmsg1("\nNumber of apps: %d"    ,number_of_apps);
+		printmsg1("\r\nApp name: %s"        ,app_name);
+		printmsg1("\r\nApp size: %d bytes"    ,app_size_in_bytes);
+		printmsg1("\r\nApp Base address: %#x\r\n"  ,app_base_address);
+
+		FLASH_Unlock();
+		status = FLASH_savePage(FLASH_MEMORY_PAGE_19,SAVE_FLASH);		/*save*/
+		status = FLASH_PageErase(FLASH_MEMORY_PAGE_19);					/*erase*/
+		FLASH_updatePage((u32*)&number_of_apps   ,1,0,SAVE_FLASH);		/*update number of apps			*/
+		FLASH_updatePage(&app_base_address     ,4,(16+(16*(number_of_apps-1))),SAVE_FLASH);		/*update app base memory address*/
+		FLASH_updatePage(&app_size_in_bytes    ,4,(20+(16*(number_of_apps-1))),SAVE_FLASH);		/*update app size in bytes      */
+		FLASH_updatePage((u32*)app_name        ,8,(24+(16*(number_of_apps-1))),SAVE_FLASH);		/*update app name               */
+		//FLASH_updatePage((u32*)app_name        ,4,(24+(16*(number_of_apps-1))),SAVE_FLASH);		/*update app name               */
+		//FLASH_updatePage((u32*)&app_name[4]    ,4,(28+(16*(number_of_apps-1))),SAVE_FLASH);		/*update app name               */
+		FLASH_reloadPage(FLASH_MEMORY_PAGE_19,SAVE_FLASH);              /*reload*/
+		FLASH_Lock();
+		//Stating that a reply of 10 bytes is going to be sent
+		bootloader_send_ack(1);
+		HUART_u8SendSync(HUART_USART2,&status,1,10);
+	}
+	else
+	{
+		//checksum is wrong send nack
+		printmsg1("BL_DEBUG_MSG: checksum fail !! \r\n");
+		bootloader_send_nack();
+	}
+
+
+
+
+	//status = FLASH_savePage(address,SAVE_FLASH);			  /*save*/
+	//status = FLASH_MultiplePageErase(address,1);        	  /*erase*/
+	//FLASH_updatePage(new,2,3,SAVE_FLASH);                   /*update*/
+	//FLASH_reloadPage(address,SAVE_FLASH);                   /*reload*/
+
+	//FLASH_WriteProgram((u8*)app_name, (u32*)destination_address, 8);
+	//destination_address += 8 ;
+	//FLASH_WriteWord((u32*)destination_address, app_base_address);
+	//destination_address += 4 ;
+	//FLASH_WriteWord((u32*)destination_address, app_size_in_bytes);
+    //
+	//FLASH_Lock();
 }
 
 /******************* Implementation Helper functions prototypes **********************************************/
@@ -1227,27 +1356,6 @@ u8 verify_address(u32 go_address)
 	else
 			return ADDR_INVALID;
 
-}
-
-void save_app_info(u8 app_num, u32 app_base_address, u32 app_size_in_bytes, u8* app_name)
-{
-	u32 destination_address = FLASH_MEMORY_PAGE_20+16+(16*app_num-1);
-
-	FLASH_Unlock();
-
-
-	//status = FLASH_savePage(address,SAVE_FLASH);			/*save*/
-	//status = FLASH_MultiplePageErase(address,1);        	/*erase*/
-	//FLASH_updatePage(new,2,3,SAVE_FLASH);                   /*update*/
-	//FLASH_reloadPage(address,SAVE_FLASH);                   /*reload*/
-
-	FLASH_WriteProgram((u8*)app_name, (u32*)destination_address, 8);
-	destination_address += 8 ;
-	FLASH_WriteWord((u32*)destination_address, app_base_address);
-	destination_address += 4 ;
-	FLASH_WriteWord((u32*)destination_address, app_size_in_bytes);
-
-	FLASH_Lock();
 }
 
 /* convert (inBuffer) which has (char) elements of double the size of the (outBuffer)

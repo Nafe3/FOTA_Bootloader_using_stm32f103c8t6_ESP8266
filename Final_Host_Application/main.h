@@ -30,7 +30,8 @@ void process_COMMAND_BL_GET_RDP_STATUS			(uint32_t len, uint8_t* Copy_u8DataBuff
 void process_COMMAND_BL_READ_SECTOR_P_STATUS	(uint32_t len, uint8_t* Copy_u8DataBuffer);
 
 void process_COMMAND_BL_MY_SYSTEM_RESET			(uint32_t len);
-void process_COMMAND_BL_EXISTING_APPS			(uint32_t len);
+void process_COMMAND_BL_EXISTING_APPS			(uint32_t len, uint8_t* Copy_u8DataBuffer);
+void process_COMMAND_BL_SAVE_APP_INFO			(uint32_t len, uint8_t* Copy_u8DataBuffer);
 
 int read_bootloader_reply						(uint8_t command_code, uint8_t* Copy_u8DataBuffer);
 //int check_flash_status						(void);
@@ -69,6 +70,7 @@ uint32_t 	calc_file_len	(void);
 
 #define COMMAND_BL_MY_SYSTEM_RESET          0x5D
 #define COMMAND_BL_EXISTING_APPS            0x5E
+#define COMMAND_BL_SAVE_APP_INFO			0x61
 
 //len details of the command
 #define COMMAND_BL_GET_VER_LEN				6
@@ -91,7 +93,8 @@ uint32_t 	calc_file_len	(void);
 #define COMMAND_BL_READ_SECTOR_P_STATUS_LEN	6      //10
 
 #define COMMAND_BL_MY_SYSTEM_RESET_LEN		6      //10
-#define COMMAND_BL_EXISTING_APPS_LEN		10
+#define COMMAND_BL_EXISTING_APPS_LEN		6
+#define COMMAND_BL_SAVE_APP_INFO_LEN        22//34//42
 
 /* Values to be used with WRP */
 #define FLASH_WRProt_AllPages          ((uint32_t)0xFFFFFFFF)
