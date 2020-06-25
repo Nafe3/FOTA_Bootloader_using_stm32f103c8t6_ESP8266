@@ -621,3 +621,81 @@ u8 WIFI_u8ReceiveCommand (u8* Copy_u8Buffer)
 	/*Return status*/
 	return Local_u8Status;
 }
+
+/*Description: This API will prompt user to enter user name and password for his desired WIFI
+ * Parameters: Pointer to variable that will hold username, pointer to variable that will hold password
+ * Return: Error Status*/
+u8 WIFI_u8EnterSSID(u8* Copy_u8SSID, u8* Copy_u8Password)
+{
+	/*This local variable will hold the message that will be printed to user to prompt him to type SSID*/
+	u8 Local_u8SSIDPrompt[]="\r\nENTER SSID: ";
+	/*This local variable will hold the message that will be printed to user to prompt him to type password*/
+	u8 Local_u8PasswordPrompt[]="\r\nENTER Password: ";
+	/*This variable will be a flag to receive SSID and password*/
+	volatile u8 Local_u8ReceiveFlagForInput=1;
+	/*This local variable should hold username of desired WIFI network
+	 * Note: By standard, SSID is limited to 32 characters including null terminator*/
+	u8 LocalWIFI_u8SSID[32]={0};
+	/*This local variable should hold password of desired WIFI network
+	 * Note: By standard, password is limited to 64 characters including null terminator*/
+	u8 LocalWIFI_u8Password[64]={0};
+	/*This will be a local iterator used for checking for data*/
+	u8 i=0;
+
+	/*Poll for the user to enter SSID of desired WIFI network*/
+	HUART_u8SendAsync(HUART_USART1, Local_u8SSIDPrompt, (sizeof(Local_u8SSIDPrompt)-1));
+	HUART_u8ReceiveAsync(HUART_USART1, LocalWIFI_u8SSID, sizeof(LocalWIFI_u8SSID));
+	while (Local_u8ReceiveFlagForInput==1)
+	{
+
+		/*We will keep polling for input data until receiving '\n', which is the end of user input.*/
+		for (i=0;i<sizeof(LocalWIFI_u8SSID);i++)
+		{
+			if (LocalWIFI_u8SSID[i]=='\n')
+			{
+				Local_u8ReceiveFlagForInput=0;
+				/*Replace '\n' with null terminator character*/
+				LocalWIFI_u8SSID[i]=0;
+			}
+		}
+	}
+	/*Reinit flag to poll for password*/
+	Local_u8ReceiveFlagForInput=1;
+	/*Terminate previous receiving operation*/
+	HUART_voidTerminateReceiving(HUART_USART1.BaseAddress);
+	delay_ms(100);
+
+	HUART_u8SendAsync(HUART_USART1, Local_u8PasswordPrompt, (sizeof(Local_u8PasswordPrompt)-1));
+	HUART_u8ReceiveAsync(HUART_USART1, LocalWIFI_u8Password, sizeof(LocalWIFI_u8Password));
+	while (Local_u8ReceiveFlagForInput==1)
+	{
+		/*Check that the first char is not \n, if so, then terminate receiving and start it over*/
+		if (LocalWIFI_u8Password[0]=='\n')
+		{
+			HUART_voidTerminateReceiving(HUART_USART1.BaseAddress);
+			memset(LocalWIFI_u8Password,0,64);
+			HUART_u8ReceiveAsync(HUART_USART1, LocalWIFI_u8Password, sizeof(LocalWIFI_u8Password));
+		}
+		/*We will keep polling for input data until receiving '\n', which is the end of user input.*/
+		for (i=0;i<sizeof(LocalWIFI_u8Password);i++)
+		{
+			if (LocalWIFI_u8Password[i]=='\n')
+			{
+				Local_u8ReceiveFlagForInput=0;
+				/*Replace '\n' with null terminator character*/
+				LocalWIFI_u8Password[i]=0;
+			}
+		}
+	}
+
+	/*Pass local variables to passed variables*/
+	for (i=0; i<sizeof(LocalWIFI_u8SSID);i++)
+	{
+		Copy_u8SSID[i]=LocalWIFI_u8SSID[i];
+	}
+	for (i=0; i<sizeof(LocalWIFI_u8Password);i++)
+	{
+		Copy_u8Password[i]=LocalWIFI_u8Password[i];
+	}
+	HUART_voidTerminateReceiving(HUART_USART1.BaseAddress);
+}

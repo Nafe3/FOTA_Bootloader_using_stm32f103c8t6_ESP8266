@@ -206,7 +206,15 @@ void bootloader_voidJumpToUserApp(void)
 /*Reads the command packet which comes from the host application*/
 void bootloader_voidUARTReadData (void)
 {
+	/*This local variable should hold username of desired WIFI network
+	 * Note: By standard, SSID is limited to 32 characters including null terminator*/
+	u8 Local_u8SSID[32]={0};
+	/*This local variable should hold password of desired WIFI network
+	 * Note: By standard, password is limited to 64 characters including null terminator*/
+	u8 Local_u8Password[64]={0};
+
 	printmsg1("BL_DEBUG_MSG: Button is pressed .. going to BL mode\r\n");
+
 
 
 	OnBoard_Led.port = PORTC;
@@ -226,9 +234,10 @@ void bootloader_voidUARTReadData (void)
 	delay_ms(1000);
 	WIFI_u8SendCommand(WIFI_COMMAND_SET_MODE_STATION);
 	delay_ms(1000);
-	WIFI_u8SendCommand(WIFI_COMMAND_LIST_AP);
-	delay_ms(5000);
-	WIFI_u8ConnectToAccessPoint((u8*)"TEdata61D609",(u8*)"03926003");
+	WIFI_u8EnterSSID(Local_u8SSID, Local_u8Password);
+//	WIFI_u8SendCommand(WIFI_COMMAND_LIST_AP);
+//	delay_ms(5000);
+	WIFI_u8ConnectToAccessPoint(Local_u8SSID,Local_u8Password);
 	//WIFI_u8ConnectToAccessPoint((u8*)"Hamdy",(u8*)"commandos123");
 	delay_ms(5000);
 	//HUART_u8SetRXCallBack(rxDone);

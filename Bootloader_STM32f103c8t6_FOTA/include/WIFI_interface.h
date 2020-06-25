@@ -69,6 +69,11 @@ extern u8 WIFI_u8ReceiveCommand (u8* Copy_u8Command);
  * Return: Error Status*/
 extern u8 WIFI_u8CountData(u32* Copy_u32DataSize);
 
+/*Description: This API will prompt user to enter user name and password for his desired WIFI
+ * Parameters: Pointer to variable that will hold username, pointer to variable that will hold password
+ * Return: Error Status*/
+extern u8 WIFI_u8EnterSSID(u8* Copy_u8Username, u8* Copy_u8Password);
+
 
 
 #endif
