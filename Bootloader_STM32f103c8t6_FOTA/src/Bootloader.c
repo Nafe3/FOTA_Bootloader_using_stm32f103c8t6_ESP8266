@@ -242,8 +242,8 @@ void bootloader_voidUARTReadData (void)
 //	WIFI_u8SendCommand(WIFI_COMMAND_LIST_AP);
 //	delay_ms(5000);
 	//WIFI_u8ConnectToAccessPoint(Local_u8SSID,Local_u8Password);
-	//WIFI_u8ConnectToAccessPoint((u8*)"Hamdy",(u8*)"commandos123");
-	WIFI_u8ConnectToAccessPoint((u8*)"TEdata61D609",(u8*)"03926003");
+	WIFI_u8ConnectToAccessPoint((u8*)"Hamdy",(u8*)"commandos123");
+	//WIFI_u8ConnectToAccessPoint((u8*)"TEdata61D609",(u8*)"03926003");
 	delay_ms(5000);
 	//HUART_u8SetRXCallBack(rxDone);
 	printmsg1("BL_DEBUG_MSG: WiFi initialization Done!\r\n");
@@ -339,7 +339,7 @@ void bootloader_voidUARTReadData (void)
 				bootloader_handle_existing_apps_cmd(bl_rx_buffer);
 				break;
 			case BL_SAVE_APP_INFO:
-				bootloader_handle_save_app_info_cmd(Local_u8Buffer);
+				bootloader_handle_save_app_info_cmd(bl_rx_buffer);
 				break;
 			default:
 				printmsg1("\nBL_DEBUG_MSG: Ready to receive command from HOST application ... \r\n");
@@ -1237,24 +1237,41 @@ void bootloader_handle_save_app_info_cmd		(u8* buff)
 	u8  app_name[8]={0};
 //	u8  Local_u8FinalHostCRC[4];
 
-
-
 	u8  command_packet = buff[0]+1;                 /*Total length of command packet*/
-	u32 command_length_without_crc = command_packet-8;      /*Length to be sent to (bl_verify_crc) function*/
+	u32 command_length_without_crc = command_packet-4;      /*Length to be sent to (bl_verify_crc) function*/
 	u32 crc_host;
 
 	u8 Local_u8ConversionBuffer[22]={0};
+	/*This variable will be used as iterator for filling the buffer*/
+	u8 Local_u8Iterator=0;
+	/*This local variable will hold the command that will be sent over wifi*/
+	u8 Local_u8FinalReply[6]={0};
 
-	char2hex(buff, Local_u8ConversionBuffer, 10);
-	Local_u8ConversionBuffer[10]=buff[20];
-	Local_u8ConversionBuffer[11]=buff[21];
-	Local_u8ConversionBuffer[12]=buff[22];
-	Local_u8ConversionBuffer[13]=buff[23];
-	Local_u8ConversionBuffer[14]=buff[24];
-	Local_u8ConversionBuffer[15]=buff[25];
-	Local_u8ConversionBuffer[16]=buff[26];
-	Local_u8ConversionBuffer[17]=buff[27];
-	char2hex(&buff[28],&Local_u8ConversionBuffer[18],4);
+	/*Fill up the first part of the buffer before the iterator*/
+	for (Local_u8Iterator=0; Local_u8Iterator<10;Local_u8Iterator++)
+	{
+		Local_u8ConversionBuffer[Local_u8Iterator]=bl_rx_buffer[Local_u8Iterator];
+	}
+	/*fill up the chars of the name using hex to char*/
+	hex2char(&bl_rx_buffer[10], &Local_u8ConversionBuffer[10], 4);
+	/*Fill up the rest of the buffer after the name*/
+	for (Local_u8Iterator=0; Local_u8Iterator<4;Local_u8Iterator++)
+	{
+		Local_u8ConversionBuffer[Local_u8Iterator+18]=bl_rx_buffer[Local_u8Iterator+14];
+	}
+
+
+	/*We will need to convert everything in the buffer except for the name because it is already in the right format*/
+	//char2hex(buff, Local_u8ConversionBuffer, 10);
+//	Local_u8ConversionBuffer[10]=buff[20];
+//	Local_u8ConversionBuffer[11]=buff[21];
+//	Local_u8ConversionBuffer[12]=buff[22];
+//	Local_u8ConversionBuffer[13]=buff[23];
+//	Local_u8ConversionBuffer[14]=buff[24];
+//	Local_u8ConversionBuffer[15]=buff[25];
+//	Local_u8ConversionBuffer[16]=buff[26];
+//	Local_u8ConversionBuffer[17]=buff[27];
+	//char2hex(&buff[28],&Local_u8ConversionBuffer[18],4);
 
 
 	//char2hex(&buff[command_length_without_crc], Local_u8FinalHostCRC, 4);
@@ -1265,7 +1282,7 @@ void bootloader_handle_save_app_info_cmd		(u8* buff)
 	printmsg1("------------------------------------------------\r\n");
 	printmsg1("BL_DEBUG_MSG: bootloader_handle_save_app_info_cmd \r\n");
 	// 1) verify the checksum
-	if(! bootloader_verify_crc(buff, command_length_without_crc, crc_host))
+	if(! bootloader_verify_crc(Local_u8ConversionBuffer, command_length_without_crc, crc_host))
 	{
 		//checksum is correct
 		printmsg1("BL_DEBUG_MSG: checksum success !! \r\n");
@@ -1301,7 +1318,11 @@ void bootloader_handle_save_app_info_cmd		(u8* buff)
 		FLASH_Lock();
 		//Stating that a reply of 10 bytes is going to be sent
 		bootloader_send_ack(1);
-		HUART_u8SendSync(HUART_USART2,&status,1,10);
+		/*Convert array to char to send them over WIFI*/
+		hex2char(Global_u8ResponseArray, Local_u8FinalReply, BL_SAVE_APP_INFO_REPLY_LEN);
+		/*Send converted Bytes over WIFI*/
+		WIFI_u8SendCommandToServer(Local_u8FinalReply, BL_SAVE_APP_INFO_REPLY_LEN*2);
+		//HUART_u8SendSync(HUART_USART2,&status,1,10);
 	}
 	else
 	{

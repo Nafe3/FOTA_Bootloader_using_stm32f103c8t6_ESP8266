@@ -1314,6 +1314,7 @@ case 16:
         for(index=0;index<8;index++)
         {
             data_buf[10+index]=app_name[index];
+            /*Convert 0 (which represents null) to ascii zero (0x30)*/
             if(data_buf[10+index]==0)data_buf[10+index]=0x30;
         }
 
@@ -1339,7 +1340,7 @@ case 16:
         //crc
         hex2char(&data_buf[18],&commandPacket_TxBuffer[28],4);
         /*Send data to server*/
-        HOST_voidSendCommand(commandPacket_TxBuffer,34);
+        HOST_voidSendCommand(commandPacket_TxBuffer,36);
         /*Give bootloader time to receive command and process it*/
         printf("\n   Waiting for bootloader to process request\n");
         delay(5000);
