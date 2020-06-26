@@ -210,6 +210,11 @@ void bootloader_voidJumpToUserApp(void)
 /*Reads the command packet which comes from the host application*/
 void bootloader_voidUARTReadData (void)
 {
+	/****************Modification by Mahmoud for WIFI**************/
+	/*This local variable will hold the data coming from site so that we can convert them later*/
+	u8 Local_u8Buffer[1100]={0};
+	/*******************End of modification******************/
+
 	/*This local variable should hold username of desired WIFI network
 	 * Note: By standard, SSID is limited to 32 characters including null terminator*/
 	u8 Local_u8SSID[32]={0};
@@ -242,8 +247,8 @@ void bootloader_voidUARTReadData (void)
 //	WIFI_u8SendCommand(WIFI_COMMAND_LIST_AP);
 //	delay_ms(5000);
 	//WIFI_u8ConnectToAccessPoint(Local_u8SSID,Local_u8Password);
-	WIFI_u8ConnectToAccessPoint((u8*)"Hamdy",(u8*)"commandos123");
-	//WIFI_u8ConnectToAccessPoint((u8*)"TEdata61D609",(u8*)"03926003");
+	//WIFI_u8ConnectToAccessPoint((u8*)"Hamdy",(u8*)"commandos123");
+	WIFI_u8ConnectToAccessPoint((u8*)"TEdata61D609",(u8*)"03926003");
 	delay_ms(5000);
 	//HUART_u8SetRXCallBack(rxDone);
 	printmsg1("BL_DEBUG_MSG: WiFi initialization Done!\r\n");
@@ -253,10 +258,7 @@ void bootloader_voidUARTReadData (void)
 	to convert and save in the receiving buffer*/
     u8 rcv_len;
 
-	/****************Modification by Mahmoud for WIFI**************/
-	/*This local variable will hold the data coming from site so that we can convert them later*/
-	u8 Local_u8Buffer[1100]={0};
-	/*******************End of modification******************/			 											   
+
 
 
 	while(1)
@@ -339,7 +341,7 @@ void bootloader_voidUARTReadData (void)
 				bootloader_handle_existing_apps_cmd(bl_rx_buffer);
 				break;
 			case BL_SAVE_APP_INFO:
-				bootloader_handle_save_app_info_cmd(bl_rx_buffer);
+				bootloader_handle_save_app_info_cmd(Local_u8Buffer);
 				break;
 			default:
 				printmsg1("\nBL_DEBUG_MSG: Ready to receive command from HOST application ... \r\n");
@@ -1180,26 +1182,49 @@ void bootloader_handle_existing_apps_cmd		(u8* bl_rx_buffer)
 		bootloader_send_ack(number_of_apps*16);
 		for(index=0;index<number_of_apps;index++)
 		{
-			Global_u8ResponseArray[(index+2)]=(FLASH_MEMORY_PAGE_22+16+(index*16));//sending app base memory address
-			Global_u8ResponseArray[(index+3)]=(FLASH_MEMORY_PAGE_22+16+(index*16))>>8;//sending app base memory address
-			Global_u8ResponseArray[(index+4)]=(FLASH_MEMORY_PAGE_22+16+(index*16))>>16;//sending app base memory address
-			Global_u8ResponseArray[(index+5)]=(FLASH_MEMORY_PAGE_22+16+(index*16))>>24;//sending app base memory address
+			if(index>0){
+		    Global_u8ResponseArray[((index+2) +(index*16-index))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16))       );//sending app base memory address
+		    Global_u8ResponseArray[((index+3) +(index*16-index))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)))>>8    ;//sending app base memory address
+		    Global_u8ResponseArray[((index+4) +(index*16-index))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)))>>16   ;//sending app base memory address
+		    Global_u8ResponseArray[((index+5) +(index*16-index))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)))>>24   ;//sending app base memory address
 
 
-			Global_u8ResponseArray[(index+6)]=(FLASH_MEMORY_PAGE_22+16+(index*16)+4);//sending app size in bytes
-			Global_u8ResponseArray[(index+7)]=(FLASH_MEMORY_PAGE_22+16+(index*16)+4)>>8;//sending app size in bytes
-			Global_u8ResponseArray[(index+8)]=(FLASH_MEMORY_PAGE_22+16+(index*16)+4)>>16;//sending app size in bytes
-			Global_u8ResponseArray[(index+9)]=(FLASH_MEMORY_PAGE_22+16+(index*16)+4)>>24;//sending app size in bytes
+		    Global_u8ResponseArray[((index+6) +(index*16-index))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+4)      );//sending app size in bytes
+		    Global_u8ResponseArray[((index+7) +(index*16-index))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+4))>>8   ;//sending app size in bytes
+		    Global_u8ResponseArray[((index+8) +(index*16-index))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+4))>>16  ;//sending app size in bytes
+		    Global_u8ResponseArray[((index+9) +(index*16-index))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+4))>>24  ;//sending app size in bytes
 
 
-			Global_u8ResponseArray[(index+10)]=(FLASH_MEMORY_PAGE_22+16+(index*16)+8);//sending app name
-			Global_u8ResponseArray[(index+11)]=(FLASH_MEMORY_PAGE_22+16+(index*16)+8)>>8;//sending app name
-			Global_u8ResponseArray[(index+12)]=(FLASH_MEMORY_PAGE_22+16+(index*16)+8)>>16;//sending app name
-			Global_u8ResponseArray[(index+13)]=(FLASH_MEMORY_PAGE_22+16+(index*16)+8)>>24;//sending app name
-			Global_u8ResponseArray[(index+14)]=(FLASH_MEMORY_PAGE_22+16+(index*16)+12);//sending app name
-			Global_u8ResponseArray[(index+15)]=(FLASH_MEMORY_PAGE_22+16+(index*16)+12)>>8;//sending app name
-			Global_u8ResponseArray[(index+16)]=(FLASH_MEMORY_PAGE_22+16+(index*16)+12)>>16;//sending app name
-			Global_u8ResponseArray[(index+17)]=(FLASH_MEMORY_PAGE_22+16+(index*16)+12)>>24;//sending app name
+		    Global_u8ResponseArray[((index+10)+(index*16-index))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+8)      );//sending app name
+		    Global_u8ResponseArray[((index+11)+(index*16-index))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+8))>>8  ;//sending app name
+		    Global_u8ResponseArray[((index+12)+(index*16-index))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+8))>>16 ;//sending app name
+		    Global_u8ResponseArray[((index+13)+(index*16-index))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+8))>>24 ;//sending app name
+		    Global_u8ResponseArray[((index+14)+(index*16-index))]=(u8)(*((u32*)FLASH_MEMORY_PAGE_22+16+(index*16)+12))      ;//sending app name
+		    Global_u8ResponseArray[((index+15)+(index*16-index))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+12))>>8 ;//sending app name
+		    Global_u8ResponseArray[((index+16)+(index*16-index))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+12))>>16;//sending app name
+		    Global_u8ResponseArray[((index+17)+(index*16-index))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+12))>>24;//sending app name
+
+			}
+			Global_u8ResponseArray[((index+2) +(index*16))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16))       );//sending app base memory address
+			Global_u8ResponseArray[((index+3) +(index*16))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)))>>8    ;//sending app base memory address
+			Global_u8ResponseArray[((index+4) +(index*16))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)))>>16   ;//sending app base memory address
+			Global_u8ResponseArray[((index+5) +(index*16))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)))>>24   ;//sending app base memory address
+
+
+			Global_u8ResponseArray[((index+6) +(index*16))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+4)      );//sending app size in bytes
+			Global_u8ResponseArray[((index+7) +(index*16))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+4))>>8   ;//sending app size in bytes
+			Global_u8ResponseArray[((index+8) +(index*16))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+4))>>16  ;//sending app size in bytes
+			Global_u8ResponseArray[((index+9) +(index*16))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+4))>>24  ;//sending app size in bytes
+
+
+			Global_u8ResponseArray[((index+10)+(index*16))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+8)      );//sending app name
+			Global_u8ResponseArray[((index+11)+(index*16))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+8))>>8  ;//sending app name
+			Global_u8ResponseArray[((index+12)+(index*16))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+8))>>16 ;//sending app name
+			Global_u8ResponseArray[((index+13)+(index*16))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+8))>>24 ;//sending app name
+			Global_u8ResponseArray[((index+14)+(index*16))]=(u8)(*((u32*)FLASH_MEMORY_PAGE_22+16+(index*16)+12))      ;//sending app name
+			Global_u8ResponseArray[((index+15)+(index*16))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+12))>>8 ;//sending app name
+			Global_u8ResponseArray[((index+16)+(index*16))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+12))>>16;//sending app name
+			Global_u8ResponseArray[((index+17)+(index*16))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+12))>>24;//sending app name
 
 
 
@@ -1237,7 +1262,7 @@ void bootloader_handle_save_app_info_cmd		(u8* buff)
 	u8  app_name[8]={0};
 //	u8  Local_u8FinalHostCRC[4];
 
-	u8  command_packet = buff[0]+1;                 /*Total length of command packet*/
+	u8  command_packet = 22;                 /*Total length of command packet*/
 	u32 command_length_without_crc = command_packet-4;      /*Length to be sent to (bl_verify_crc) function*/
 	u32 crc_host;
 
@@ -1247,31 +1272,18 @@ void bootloader_handle_save_app_info_cmd		(u8* buff)
 	/*This local variable will hold the command that will be sent over wifi*/
 	u8 Local_u8FinalReply[6]={0};
 
-	/*Fill up the first part of the buffer before the iterator*/
-	for (Local_u8Iterator=0; Local_u8Iterator<10;Local_u8Iterator++)
-	{
-		Local_u8ConversionBuffer[Local_u8Iterator]=bl_rx_buffer[Local_u8Iterator];
-	}
-	/*fill up the chars of the name using hex to char*/
-	hex2char(&bl_rx_buffer[10], &Local_u8ConversionBuffer[10], 4);
-	/*Fill up the rest of the buffer after the name*/
-	for (Local_u8Iterator=0; Local_u8Iterator<4;Local_u8Iterator++)
-	{
-		Local_u8ConversionBuffer[Local_u8Iterator+18]=bl_rx_buffer[Local_u8Iterator+14];
-	}
-
 
 	/*We will need to convert everything in the buffer except for the name because it is already in the right format*/
-	//char2hex(buff, Local_u8ConversionBuffer, 10);
-//	Local_u8ConversionBuffer[10]=buff[20];
-//	Local_u8ConversionBuffer[11]=buff[21];
-//	Local_u8ConversionBuffer[12]=buff[22];
-//	Local_u8ConversionBuffer[13]=buff[23];
-//	Local_u8ConversionBuffer[14]=buff[24];
-//	Local_u8ConversionBuffer[15]=buff[25];
-//	Local_u8ConversionBuffer[16]=buff[26];
-//	Local_u8ConversionBuffer[17]=buff[27];
-	//char2hex(&buff[28],&Local_u8ConversionBuffer[18],4);
+	char2hex(buff, Local_u8ConversionBuffer, 10);
+	Local_u8ConversionBuffer[10]=buff[20];
+	Local_u8ConversionBuffer[11]=buff[21];
+	Local_u8ConversionBuffer[12]=buff[22];
+	Local_u8ConversionBuffer[13]=buff[23];
+	Local_u8ConversionBuffer[14]=buff[24];
+	Local_u8ConversionBuffer[15]=buff[25];
+	Local_u8ConversionBuffer[16]=buff[26];
+	Local_u8ConversionBuffer[17]=buff[27];
+	char2hex(&buff[28],&Local_u8ConversionBuffer[18],4);
 
 
 	//char2hex(&buff[command_length_without_crc], Local_u8FinalHostCRC, 4);
@@ -1413,11 +1425,16 @@ u8 verify_address(u32 go_address)
 void char2hex(u8* inBuffer, u8* outBuffer, u16 NumOfBytesToBeConverted )
 {
 	u16 index;
+	u8  Local_u8inBuffer;
+	u8  Local_u8inBuffer1;
+
 	for(index=0;index<NumOfBytesToBeConverted;index++)
 	{
-		if(inBuffer[index*2]   > 0x60)inBuffer[index*2  ]+=9;
-		if(inBuffer[index*2+1] > 0x60)inBuffer[index*2+1]+=9;
-		outBuffer[index]  = ( (inBuffer[index*2]<<4) | (inBuffer[index*2+1]&0x0F) );
+		Local_u8inBuffer =inBuffer[index*2];
+		Local_u8inBuffer1=inBuffer[index*2+1];
+		if(Local_u8inBuffer   > 0x60)Local_u8inBuffer  +=9;
+		if(Local_u8inBuffer1  > 0x60)Local_u8inBuffer1 +=9;
+		outBuffer[index]  = ( (Local_u8inBuffer<<4) | (Local_u8inBuffer1&0x0F) );
 	}
 }
 
