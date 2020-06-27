@@ -1154,7 +1154,7 @@ void bootloader_handle_existing_apps_cmd		(u8* bl_rx_buffer)
 {
 	u8  Local_u8FinalReply[512]={0};		/*This local variable will hold the array that will be send over WIFI*/
 
-	u8  index;
+	u8  i,j;
 	//u32 application_info_block_start_address = FLASH_MEMORY_PAGE_19;
 	u8  number_of_apps = *((u8*)FLASH_MEMORY_PAGE_22);
 	//u8  Local_u8FinalHostCRC[4];
@@ -1180,62 +1180,44 @@ void bootloader_handle_existing_apps_cmd		(u8* bl_rx_buffer)
 		number_of_apps = *((u8*)FLASH_MEMORY_PAGE_22);
 		if(number_of_apps==0xFF)number_of_apps =0;
 		bootloader_send_ack(number_of_apps*16);
-		for(index=0;index<number_of_apps;index++)
+		for(i=0;i<number_of_apps;i++)
 		{
-			if(index>0){
-		    Global_u8ResponseArray[((index+2) +(index*16-index))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16))       );//sending app base memory address
-		    Global_u8ResponseArray[((index+3) +(index*16-index))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)))>>8    ;//sending app base memory address
-		    Global_u8ResponseArray[((index+4) +(index*16-index))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)))>>16   ;//sending app base memory address
-		    Global_u8ResponseArray[((index+5) +(index*16-index))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)))>>24   ;//sending app base memory address
-
-
-		    Global_u8ResponseArray[((index+6) +(index*16-index))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+4)      );//sending app size in bytes
-		    Global_u8ResponseArray[((index+7) +(index*16-index))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+4))>>8   ;//sending app size in bytes
-		    Global_u8ResponseArray[((index+8) +(index*16-index))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+4))>>16  ;//sending app size in bytes
-		    Global_u8ResponseArray[((index+9) +(index*16-index))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+4))>>24  ;//sending app size in bytes
-
-
-		    Global_u8ResponseArray[((index+10)+(index*16-index))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+8)      );//sending app name
-		    Global_u8ResponseArray[((index+11)+(index*16-index))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+8))>>8  ;//sending app name
-		    Global_u8ResponseArray[((index+12)+(index*16-index))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+8))>>16 ;//sending app name
-		    Global_u8ResponseArray[((index+13)+(index*16-index))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+8))>>24 ;//sending app name
-		    Global_u8ResponseArray[((index+14)+(index*16-index))]=(u8)(*((u32*)FLASH_MEMORY_PAGE_22+16+(index*16)+12))      ;//sending app name
-		    Global_u8ResponseArray[((index+15)+(index*16-index))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+12))>>8 ;//sending app name
-		    Global_u8ResponseArray[((index+16)+(index*16-index))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+12))>>16;//sending app name
-		    Global_u8ResponseArray[((index+17)+(index*16-index))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+12))>>24;//sending app name
-
+			for(j=0;j<16;j++)
+			{
+				Global_u8ResponseArray [2+(i*16)+j] = *((u8*)(FLASH_MEMORY_PAGE_22+16+(i*16))+j);
 			}
-			Global_u8ResponseArray[((index+2) +(index*16))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16))       );//sending app base memory address
-			Global_u8ResponseArray[((index+3) +(index*16))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)))>>8    ;//sending app base memory address
-			Global_u8ResponseArray[((index+4) +(index*16))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)))>>16   ;//sending app base memory address
-			Global_u8ResponseArray[((index+5) +(index*16))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)))>>24   ;//sending app base memory address
+//			Global_u8ResponseArray[i+2]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(i*16))       );//sending app base memory address
+//			Global_u8ResponseArray[i+3]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(i*16)))>>8    ;//sending app base memory address
+//			Global_u8ResponseArray[i+4]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(i*16)))>>16   ;//sending app base memory address
+//			Global_u8ResponseArray[i+5]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(i*16)))>>24   ;//sending app base memory address
+//
+//
+//			Global_u8ResponseArray[i+6]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(i*16)+4)      );//sending app size in bytes
+//			Global_u8ResponseArray[i+7]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(i*16)+4))>>8   ;//sending app size in bytes
+//			Global_u8ResponseArray[i+8]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(i*16)+4))>>16  ;//sending app size in bytes
+//			Global_u8ResponseArray[i+9]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(i*16)+4))>>24  ;//sending app size in bytes
+//
+//
+//			Global_u8ResponseArray[i+10]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(i*16)+8)      );//sending app name
+//			Global_u8ResponseArray[i+11]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(i*16)+8))>>8  ;//sending app name
+//			Global_u8ResponseArray[i+12]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(i*16)+8))>>16 ;//sending app name
+//			Global_u8ResponseArray[i+13]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(i*16)+8))>>24 ;//sending app name
+//			Global_u8ResponseArray[i+14]=(u8)(*((u32*)FLASH_MEMORY_PAGE_22+16+(i*16)+12))      ;//sending app name
+//			Global_u8ResponseArray[i+15]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(i*16)+12))>>8 ;//sending app name
+//			Global_u8ResponseArray[i+16]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(i*16)+12))>>16;//sending app name
+//			Global_u8ResponseArray[i+17]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(i*16)+12))>>24;//sending app name
 
-
-			Global_u8ResponseArray[((index+6) +(index*16))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+4)      );//sending app size in bytes
-			Global_u8ResponseArray[((index+7) +(index*16))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+4))>>8   ;//sending app size in bytes
-			Global_u8ResponseArray[((index+8) +(index*16))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+4))>>16  ;//sending app size in bytes
-			Global_u8ResponseArray[((index+9) +(index*16))]= *((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+4))>>24  ;//sending app size in bytes
-
-
-			Global_u8ResponseArray[((index+10)+(index*16))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+8)      );//sending app name
-			Global_u8ResponseArray[((index+11)+(index*16))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+8))>>8  ;//sending app name
-			Global_u8ResponseArray[((index+12)+(index*16))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+8))>>16 ;//sending app name
-			Global_u8ResponseArray[((index+13)+(index*16))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+8))>>24 ;//sending app name
-			Global_u8ResponseArray[((index+14)+(index*16))]=(u8)(*((u32*)FLASH_MEMORY_PAGE_22+16+(index*16)+12))      ;//sending app name
-			Global_u8ResponseArray[((index+15)+(index*16))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+12))>>8 ;//sending app name
-			Global_u8ResponseArray[((index+16)+(index*16))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+12))>>16;//sending app name
-			Global_u8ResponseArray[((index+17)+(index*16))]=*((u32*)(FLASH_MEMORY_PAGE_22+16+(index*16)+12))>>24;//sending app name
-
-
-
-//			HUART_u8SendSync(HUART_USART2,(u8*)(FLASH_MEMORY_PAGE_19+16+(index*16))  ,4,10);//sending app base memory address
-//			HUART_u8SendSync(HUART_USART2,(u8*)(FLASH_MEMORY_PAGE_19+16+(index*16)+4),4,10);//sending app size in bytes
-//			HUART_u8SendSync(HUART_USART2,(u8*)(FLASH_MEMORY_PAGE_19+16+(index*16)+8),8,10);//sending app name
+//			HUART_u8SendSync(HUART_USART2,(u8*)(FLASH_MEMORY_PAGE_19+16+(i*16))  ,4,10);//sending app base memory address
+//			HUART_u8SendSync(HUART_USART2,(u8*)(FLASH_MEMORY_PAGE_19+16+(i*16)+4),4,10);//sending app size in bytes
+//			HUART_u8SendSync(HUART_USART2,(u8*)(FLASH_MEMORY_PAGE_19+16+(i*16)+8),8,10);//sending app name
 		}
 		/*Convert array to char to send them over WIFI*/
 		hex2char(Global_u8ResponseArray, Local_u8FinalReply, BL_EXISTING_APPS_REPLY_LEN(number_of_apps));
+		//hex2char(Global_u8ResponseArray, Local_u8FinalReply, 2);
+		//for(i=0;i<(16*number_of_apps);i++)Local_u8FinalReply [4+i] = Global_u8ResponseArray [2+i];
 		/*Send converted Bytes over WIFI*/
 		WIFI_u8SendCommandToServer(Local_u8FinalReply, BL_EXISTING_APPS_REPLY_LEN(number_of_apps)*2);
+		//WIFI_u8SendCommandToServer(Local_u8FinalReply, (4+(16*number_of_apps)));
 
 
 	}

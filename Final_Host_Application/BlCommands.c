@@ -167,11 +167,15 @@ while (clock() < start_time + milli_seconds) ;
 void   char2hex(uint8_t* inBuffer, uint8_t* outBuffer, uint16_t NumOfBytesToBeConverted )
 {
 	uint16_t index;
+	uint8_t  Local_u8inBuffer;
+	uint8_t  Local_u8inBuffer1;
 	for(index=0;index<NumOfBytesToBeConverted;index++)
 	{
-		if(inBuffer[index*2]   > 0x60)inBuffer[index*2  ]+=9;
-		if(inBuffer[index*2+1] > 0x60)inBuffer[index*2+1]+=9;
-		outBuffer[index]  = ( (inBuffer[index*2]<<4) | (inBuffer[index*2+1]&0x0F) );
+		Local_u8inBuffer =inBuffer[index*2];
+		Local_u8inBuffer1=inBuffer[index*2+1];
+		if(Local_u8inBuffer   > 0x60)Local_u8inBuffer  +=9;
+		if(Local_u8inBuffer1  > 0x60)Local_u8inBuffer1 +=9;
+		outBuffer[index]  = ( (Local_u8inBuffer<<4) | (Local_u8inBuffer1&0x0F) );
 	}
 }
 
@@ -1280,6 +1284,10 @@ case 16:
         bl_reply_without_ack = replyFromBootloaderHex[1];
         /*Convert rest of array into hex*/
         char2hex(&replyFromBootloaderChar[4],&replyFromBootloaderHex[2],bl_reply_without_ack);
+//        for(uint16_t j=0;j<bl_reply_without_ack;j++)
+//        {
+//            replyFromBootloaderHex[2+j] = replyFromBootloaderChar [4+j];
+//        }
         //printf("Done receiving\n");
 
         /*Pass hex array to process it as reply of bootloader*/
