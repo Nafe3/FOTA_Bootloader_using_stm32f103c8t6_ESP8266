@@ -41,8 +41,10 @@ int main()
         printf("\n------------------------------------------");
         printf("\n   Enable  Read Protection        --> 9");
         printf("\n   Disable Read Protection        --> 10");
+        printf("\n------------------------------------------");
         printf("\n   Enable  Write Protection       --> 11");
         printf("\n   Disable Write Protection       --> 12");
+        printf("\n------------------------------------------");
         printf("\n   Get Read Protection Status     --> 13");
 		printf("\n   Get Write Protection Status    --> 14");
         printf("\n------------------------------------------");
