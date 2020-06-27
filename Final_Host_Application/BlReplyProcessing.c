@@ -86,8 +86,8 @@ int read_bootloader_reply(uint8_t command_code, uint8_t* Copy_u8DataBuffer)
         case COMMAND_BL_SAVE_APP_INFO:
             process_COMMAND_BL_SAVE_APP_INFO(len_to_follow, Copy_u8DataBuffer);
             break;
-        default:
-            printf("\n  Invalid command code\n");
+        //default:
+            //printf("\n  Invalid command code\n");
 
         }
 

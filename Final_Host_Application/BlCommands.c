@@ -712,7 +712,9 @@ void decode_menu_command_code(uint32_t command_code)
         HOST_voidSendCommand(commandPacket_TxBuffer,mem_write_cmd_total_len*2);
         /*Give bootloader time to receive command and process it*/
         printf("\n   Waiting for bootloader to process request\n");
-        delay(5000);
+        delay(15000);
+        HOST_voidSendCommand("EMPTY",5);
+        delay(45000);
 
         while (replyFromBootloaderHex[0]!=0xA5 && replyFromBootloaderHex[0]!=0x7f)
         {
