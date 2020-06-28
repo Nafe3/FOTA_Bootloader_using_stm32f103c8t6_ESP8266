@@ -6,7 +6,7 @@ Developing a custom bootloader with Flashing over the air feature using Wi-Fi mo
 
 2. Group members names:
     Mahmoud Hamdy
-    Mohamed Nafea
+	Mohamed Nafea
 
 3. Github Repo: https://github.com/Nafe3/FOTA_Bootloader_using_stm32f103c8t6_ESP8266
 
